@@ -1,7 +1,7 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'Satyam Pandey',
+  title: 'Ticket Booking Website',
   description: 'Movie theater seat booking application',
 };
 

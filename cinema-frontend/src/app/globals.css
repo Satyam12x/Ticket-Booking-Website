@@ -243,6 +243,7 @@ input{
   background-color: #038121;
 }
 
+
 @media only screen and (max-width: 768px) {
   .theater-container {
     padding: 1.25rem;

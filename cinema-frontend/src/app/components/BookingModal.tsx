@@ -73,14 +73,14 @@ export default function BookingModal({ seatId, price, quantity, onClose, booking
         </div>
         <button
           type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 submit-btn"
         >
           Confirm Booking
         </button>
         <button
           type="button"
           onClick={onClose}
-          className="ml-2 bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+          className="ml-2 bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 cancel-btn"
         >
           Cancel
         </button>
