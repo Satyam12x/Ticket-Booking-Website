@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es2022", // or a suitable ES version for your environment
+    "module": "commonjs", // or "esnext" if using ES Modules
+    "rootDir": "./src", // Your source code directory
+    "outDir": "./dist", // Output directory for compiled JavaScript
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"], // Include all files in the src directory
+  "exclude": ["node_modules"] // Exclude node_modules
+}
