@@ -2,23 +2,23 @@
   "version": 2,
   "builds": [
     {
-      "src": "frontend/**/*",
+      "src": "cinema-frontend/**/*",
       "use": "@vercel/next",
       "config": { "zeroConfig": true }
     },
     {
-      "src": "backend/src/index.ts",
+      "src": "cinema-backend/src/index.ts",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/backend/src/index.ts"
+      "dest": "/cinema-backend/src/index.ts"
     },
     {
       "src": "/(.*)",
-      "dest": "/frontend"
+      "dest": "/cinema-frontend"
     }
   ]
 }
