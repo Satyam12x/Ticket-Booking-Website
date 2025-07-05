@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { FaSpinner } from "react-icons/fa";
+import { FaSpinner, FaTimes } from "react-icons/fa";
 
 interface BookingModalProps {
   seatId: string;
@@ -86,21 +86,11 @@ export default function BookingModal({
       bookingDate: formData.bookingDate,
     };
 
-    console.log('Booking request payload:', payload);
-
     try {
       const response = await axios.post("http://localhost:5000/api/seats/book", payload);
-      console.log('Booking response:', response.data);
       onClose();
       window.location.reload();
     } catch (error: any) {
-      console.error("Booking failed:", {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-        headers: error.response?.headers,
-        requestBody: payload,
-      });
       setErrors((prev) => ({
         ...prev,
         server:
@@ -113,78 +103,78 @@ export default function BookingModal({
   };
 
   return (
-    <div className="modal">
-      <h2 className="text-2xl font-bold mb-4 text-navy">Book Seat {seatId}</h2>
-      <p className="mb-2">
-        Row: {seatId[0]}, Seat: {seatId.slice(1)}
-      </p>
-      <p className="mb-2">Price: ₹{price}</p>
-      <p className="mb-2">Quantity: {quantity}</p>
-      <p className="mb-2">Total: ₹{price * quantity}</p>
-      <p className="mb-4">Date: {formData.bookingDate}</p>
-      {errors.server && <p className="error-text mb-4">{errors.server}</p>}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4 input-group">
-          <label className="input-label">Name</label>
-          <input
-            type="text"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className={`input-field ${errors.name ? "input-error" : ""}`}
-            required
-            placeholder="Enter your name"
-          />
-          {errors.name && <p className="error-text">{errors.name}</p>}
-        </div>
-        <div className="mb-4 input-group">
-          <label className="input-label">Email</label>
-          <input
-            type="email"
-            value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
-            className={`input-field ${errors.email ? "input-error" : ""}`}
-            required
-            placeholder="Enter your email"
-          />
-          {errors.email && <p className="error-text">{errors.email}</p>}
-        </div>
-        <div className="mb-4 input-group">
-          <label className="input-label">Phone</label>
-          <input
-            type="tel"
-            value={formData.phone}
-            onChange={(e) =>
-              setFormData({ ...formData, phone: e.target.value })
-            }
-            className={`input-field ${errors.phone ? "input-error" : ""}`}
-            required
-            placeholder="Enter your phone number"
-          />
-          {errors.phone && <p className="error-text">{errors.phone}</p>}
-        </div>
-        <div className="button-group">
-          <button
-            type="submit"
-            className="submit-btn"
-            disabled={
-              isSubmitting || !!errors.name || !!errors.email || !!errors.phone
-            }
-          >
-            {isSubmitting ? (
-              <>
-                <FaSpinner className="spinner-btn" /> Booking...
-              </>
-            ) : (
-              "Confirm Booking"
-            )}
-          </button>
-          <button type="button" onClick={onClose} className="cancel-btn">
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
+    <>
+      <div className="modal-overlay" onClick={onClose}></div>
+      <div className="alert-modal">
+        <button onClick={onClose} className="modal-close" aria-label="Close modal">
+          <FaTimes size={16} />
+        </button>
+        <h3>Book Seat {seatId}</h3>
+        <p style={{ marginBottom: '8px', color: '#6b7280' }}>
+          Row: {seatId[0]}, Seat: {seatId.slice(1)}
+        </p>
+        <p style={{ marginBottom: '8px', color: '#6b7280' }}>Price: ₹{price}</p>
+        <p style={{ marginBottom: '8px', color: '#6b7280' }}>Quantity: {quantity}</p>
+        <p style={{ marginBottom: '8px', color: '#6b7280' }}>Total: ₹{price * quantity}</p>
+        <p style={{ marginBottom: '15px', color: '#6b7280' }}>Date: {formData.bookingDate}</p>
+        {errors.server && <p className="error-text">{errors.server}</p>}
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className={`input-field ${errors.name ? "input-error" : ""}`}
+              required
+              placeholder="Enter your name"
+            />
+            <span className="input-label">Name</span>
+            {errors.name && <p className="error-text">{errors.name}</p>}
+          </div>
+          <div className="input-group">
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className={`input-field ${errors.email ? "input-error" : ""}`}
+              required
+              placeholder="Enter your email"
+            />
+            <span className="input-label">Email</span>
+            {errors.email && <p className="error-text">{errors.email}</p>}
+          </div>
+          <div className="input-group">
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              className={`input-field ${errors.phone ? "input-error" : ""}`}
+              required
+              placeholder="Enter your phone number"
+            />
+            <span className="input-label">Phone</span>
+            {errors.phone && <p className="error-text">{errors.phone}</p>}
+          </div>
+          <div className="button-group">
+            <button
+              type="submit"
+              className="submit-btn"
+              disabled={isSubmitting || !!errors.name || !!errors.email || !!errors.phone}
+            >
+              {isSubmitting ? (
+                <>
+                  <FaSpinner className="spinner-btn" /> Booking...
+                </>
+              ) : (
+                "Confirm Booking"
+              )}
+            </button>
+            <button type="button" onClick={onClose} className="cancel-btn">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </>
   );
 }

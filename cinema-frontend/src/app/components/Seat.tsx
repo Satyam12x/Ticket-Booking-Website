@@ -1,50 +1,34 @@
-import { useState } from "react";
-import { FaChair } from "react-icons/fa";
+import { FaTicketAlt } from "react-icons/fa";
 
-interface SeatProps {
-  seat: {
-    seatId: string;
-    status: "available" | "booked";
-    price: number;
-    row: number; // Fixed to match backend
-    column: string; // Fixed to match backend
-    bookedBy?: { name: string; email: string; phone: string };
-  };
-  onSelect: (seatId: string) => void;
-  isColumnSix: boolean;
+interface SeatData {
+  _id: string;
+  seatId: string;
+  row: number;
+  column: string;
+  price: number;
+  status: string;
+  bookedBy: { name: string; email: string; phone: string } | null;
 }
 
-export default function Seat({ seat, onSelect, isColumnSix }: SeatProps) {
-  const [isHovered, setIsHovered] = useState(false);
+interface SeatProps {
+  seat: SeatData;
+  onClick: () => void;
+}
 
+export default function Seat({ seat, onClick }: SeatProps) {
   return (
-    <div
-      className={`seat ${
-        seat.status === "available" ? "seat-available" : "seat-booked"
-      } ${seat.status === "available" ? "seat-selected" : ""} ${
-        isColumnSix ? "ml-gap" : ""
-      }`}
-      onClick={() => seat.status === "available" && onSelect(seat.seatId)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      role="button"
-      aria-label={`Seat ${seat.seatId}, ${
-        seat.status === "available" ? "available" : "booked"
-      }`}
-      tabIndex={seat.status === "available" ? 0 : -1}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" && seat.status === "available")
-          onSelect(seat.seatId);
-      }}
+    <button
+      onClick={onClick}
+      className={`seat ${seat.status === "available" ? "seat-available" : "seat-booked"}`}
+      disabled={seat.status !== "available"}
+      title={
+        seat.status === "booked" && seat.bookedBy
+          ? `Booked by ${seat.bookedBy.name}`
+          : `Seat ${seat.seatId} - ₹${seat.price}`
+      }
     >
-      <FaChair className="chair-icon" />
+      <FaTicketAlt className="chair-icon" />
       <span className="seat-id">{seat.seatId}</span>
-      {isHovered && seat.status === "booked" && seat.bookedBy && (
-        <div className="seat-tooltip">
-          <p>Name: {seat.bookedBy.name}</p>
-          <p>Phone: {seat.bookedBy.phone}</p>
-        </div>
-      )}
-    </div>
+    </button>
   );
 }
