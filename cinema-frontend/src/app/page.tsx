@@ -1,16 +1,17 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import Seat from './components/Seat';
-import BookingModal from './components/BookingModal';
-import './globals.css'; // Ensure CSS loads
+import { useEffect, useState } from "react";
+import axios from "axios";
+import Seat from "./components/Seat";
+import BookingModal from "./components/BookingModal";
+import "./globals.css";
+import { FaSpinner } from "react-icons/fa";
 
 interface SeatData {
   seatId: string;
   row: string;
   column: number;
-  status: 'available' | 'booked';
+  status: "available" | "booked";
   price: number;
   bookedBy?: { name: string; email: string; phone: string };
 }
@@ -21,24 +22,34 @@ export default function Home() {
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [showBookingModal, setShowBookingModal] = useState(false);
 
   useEffect(() => {
     const fetchSeats = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:5000/api/seats?date=${selectedDate}`);
-        console.log('Fetched seats:', response.data);
+        const response = await axios.get(
+          `http://localhost:5000/api/seats?date=${selectedDate}`
+        );
+        console.log("Fetched seats:", response.data);
         if (response.data.length === 0) {
-          setError('No seats found in the database.');
+          setError("No seats found in the database.");
         } else {
-          setSeats(response.data.sort((a: SeatData, b: SeatData) => a.seatId.localeCompare(b.seatId)));
+          setSeats(
+            response.data.sort((a: SeatData, b: SeatData) =>
+              a.seatId.localeCompare(b.seatId)
+            )
+          );
           setError(null);
         }
       } catch (error: any) {
-        console.error('Failed to fetch seats:', error);
-        setError('Failed to load seats. Ensure the backend is running at http://localhost:5000.');
+        console.error("Failed to fetch seats:", error);
+        setError(
+          "Failed to load seats. Ensure the backend is running at http://localhost:5000."
+        );
       } finally {
         setLoading(false);
       }
@@ -56,60 +67,58 @@ export default function Home() {
     setShowBookingModal(true);
   };
 
-  const rows = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const rows = ["A", "B", "C", "D", "E", "F"];
   const columns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
-    <main className="min-h-screen bg-gray-100 py-12">
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-200 py-12">
       <div className="theater-container">
         <h1>Book Your Show</h1>
 
-        <div className="flex justify-center mb-6">
-          <div>
-            <label className="block mb-2 text-navy font-semibold">Select Date</label>
+        <div className="flex justify-center mb-8">
+          <div className="input-group">
+            <label className="input-label">Select Date</label>
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               className="date-picker"
-              min={new Date().toISOString().split('T')[0]}
+              min={new Date().toISOString().split("T")[0]}
               aria-label="Select booking date"
+              placeholder="Select date"
             />
           </div>
         </div>
 
         <div className="legend">
           <div className="legend-item">
-            <div className="legend-box  avail">
-              {/* <i className="fas fa-chair"></i> */}
+            <div className="legend-box avail">
+              <i className="fas fa-chair"></i>
             </div>
             <span>Available</span>
           </div>
           <div className="legend-item">
-            <div className="legend-box  booked">
-              {/* <i className="fas fa-chair"></i> */}
+            <div className="legend-box booked">
+              <i className="fas fa-chair"></i>
             </div>
             <span>Booked</span>
           </div>
-          {/* <div className="legend-item">
-            <div className="legend-box bg-blue-600 border border-blue-700">
-              <i className="fas fa-check"></i>
-            </div>
-            <span>Selected</span>
-          </div> */}
         </div>
 
         <div className="flex justify-center mb-8">
           <h3>Standard Seats (₹ 300)</h3>
         </div>
 
+        <div className="stage">SCREEN</div>
+
         {loading && (
-          <div className="text-center text-navy my-6">Loading seats...</div>
+          <div className="text-center text-navy my-6">
+            <FaSpinner className="spinner" />
+            Loading seats...
+          </div>
         )}
 
-        {error && (
-          <div className="text-red-500 text-center my-6">{error}</div>
-        )}
+        {error && <div className="text-red-500 text-center my-6">{error}</div>}
 
         {!loading && !error && seats.length === 0 && (
           <div className="text-center text-navy my-6">
@@ -117,14 +126,15 @@ export default function Home() {
           </div>
         )}
 
-        {/* <div className="screen">Screen</div> */}
-
         <div className="seat-grid-container">
           <div className="seat-grid">
-            <div className='column-row'>
-            {columns.map((col) => (
-              <div key={col} className="column-label">{col}</div>
-            ))}</div>
+            <div className="column-row">
+              {columns.map((col) => (
+                <div key={col} className="column-label">
+                  {col}
+                </div>
+              ))}
+            </div>
             {rows.map((row) => (
               <div key={row} className="seat-row">
                 <div className="row-label">{row}</div>
@@ -136,14 +146,18 @@ export default function Home() {
                       key={seatId}
                       seat={seat}
                       onSelect={handleSeatSelect}
+                      isColumnSix={col === 6}
                     />
                   ) : (
                     <div
                       key={seatId}
-                      className="seat seat-available"
+                      className={`seat seat-available ${
+                        col === 6 ? "ml-gap" : ""
+                      }`}
                       aria-hidden="true"
                     >
-                      {seatId}
+                      <i className="fas fa-chair chair-icon"></i>
+                      <span className="seat-id">{seatId}</span>
                     </div>
                   );
                 })}
@@ -154,27 +168,29 @@ export default function Home() {
 
         {selectedSeat && (
           <div className="dynamic-modal">
-            <h3 className="text-lg font-semibold text-navy mb-2">Seat Details</h3>
-            <p className="mb-1">Row: {selectedSeat[0]}</p>
-            <p className="mb-1">Seat: {selectedSeat.slice(1)}</p>
-            <p className="mb-1">Price: ₹ 300</p>
-            <div className="mb-2">
-              <label className="block mb-1 text-navy">Quantity (1-5)</label>
+            <h3 className="text-lg font-semibold text-navy mb-3">
+              Seat Details
+            </h3>
+            <p className="mb-2">Row: {selectedSeat[0]}</p>
+            <p className="mb-2">Seat: {selectedSeat.slice(1)}</p>
+            <p className="mb-2">Price: ₹ 300</p>
+            <div className="mb-3 input-group">
+              <label className="input-label">Quantity (1-5)</label>
               <input
                 type="number"
                 min="1"
                 max="5"
                 value={selectedQuantity}
                 onChange={(e) => setSelectedQuantity(Number(e.target.value))}
-                className="w-full p-2 border rounded"
+                className="input-field"
                 aria-label="Select quantity"
+                placeholder="Enter quantity"
               />
             </div>
-            <p className="mb-2 font-semibold">Total: ₹{ 300 * selectedQuantity}</p>
-            <button
-              onClick={handleProceedToBook}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center justify-center gap-2"
-            >
+            <p className="mb-3 font-semibold">
+              Total: ₹{300 * selectedQuantity}
+            </p>
+            <button onClick={handleProceedToBook} className="proceed-btn">
               <i className="fas fa-ticket-alt"></i> Proceed to Book
             </button>
           </div>
@@ -183,7 +199,7 @@ export default function Home() {
         {showBookingModal && selectedSeat && (
           <BookingModal
             seatId={selectedSeat}
-            price={12}
+            price={300}
             quantity={selectedQuantity}
             bookingDate={selectedDate}
             onClose={() => {
