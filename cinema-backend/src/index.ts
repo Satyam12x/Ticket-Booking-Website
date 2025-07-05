@@ -14,11 +14,19 @@ app.use(express.json());
 interface IEvent {
   name: string;
   date: string;
+  time: string;
+  description: string;
+  venue: string;
+  password: string;
 }
 
 const eventSchema = new Schema<IEvent>({
   name: { type: String, required: true },
   date: { type: String, required: true, unique: true },
+  time: { type: String, required: true },
+  description: { type: String, required: true },
+  venue: { type: String, required: true },
+  password: { type: String, required: true },
 });
 
 const Event = mongoose.model<IEvent>('Event', eventSchema);
@@ -210,11 +218,8 @@ const sendBookingConfirmation = async (
 
     await transporter.sendMail(mailOptions);
   } catch (error) {
-    console.error('Email sending error:', {
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-    });
-    // Continue booking even if email fails
+    console.error('Email sending error:', error);
+    throw new Error('Failed to send booking confirmation email');
   }
 };
 
@@ -277,11 +282,27 @@ const getEvents = async (req: Request, res: Response): Promise<void> => {
 
 const createEvent = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, date, password } = req.body;
-    if (!name || !date || !password) {
-      res.status(400).json({ error: 'Name, date, and password are required' });
+    const { name, date, time, description, venue, password } = req.body;
+    if (!name || !date || !time || !description || !venue || !password) {
+      res.status(400).json({ error: 'Name, date, time, description, venue, and password are required' });
       return;
     }
+
+    // Validate date format (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(date)) {
+      res.status(400).json({ error: 'Invalid date format. Use YYYY-MM-DD' });
+      return;
+    }
+
+    // Validate time format (HH:MM)
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    if (!timeRegex.test(time)) {
+      res.status(400).json({ error: 'Invalid time format. Use HH:MM' });
+      return;
+    }
+
+    // Check password
     if (password !== process.env.ADMIN_PASSWORD) {
       res.status(401).json({ error: 'Invalid password' });
       return;
@@ -293,7 +314,7 @@ const createEvent = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const event = new Event({ name, date });
+    const event = new Event({ name, date, time, description, venue, password });
     await event.save();
     res.status(201).json({ message: 'Event created successfully', event });
   } catch (error) {
@@ -310,14 +331,15 @@ const deleteEvent = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ error: 'Password is required' });
       return;
     }
-    if (password !== process.env.ADMIN_PASSWORD) {
-      res.status(401).json({ error: 'Invalid password' });
-      return;
-    }
 
     const event = await Event.findById(id);
     if (!event) {
       res.status(404).json({ error: 'Event not found' });
+      return;
+    }
+
+    if (password !== event.password) {
+      res.status(401).json({ error: 'Invalid password' });
       return;
     }
 
@@ -340,7 +362,6 @@ const getSeats = async (req: Request, res: Response): Promise<void> => {
   try {
     const { date } = req.query;
     if (!date) {
-      console.error('Get seats: Missing date parameter');
       res.status(400).json({ error: 'Date is required' });
       return;
     }
@@ -348,7 +369,6 @@ const getSeats = async (req: Request, res: Response): Promise<void> => {
     // Verify event exists for the date
     const event = await Event.findOne({ date: date.toString() });
     if (!event) {
-      console.error('Get seats: No event found for date:', date);
       res.status(400).json({ error: 'No event scheduled for this date' });
       return;
     }
@@ -364,7 +384,6 @@ const getSeats = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (seats.length === 0) {
-      console.log('Get seats: No seats found, initializing...');
       await initializeSeats();
       const newSeats = await Seat.find();
       const newSeatsWithStatus = newSeats.map((seat) => ({
@@ -385,60 +404,18 @@ const getSeats = async (req: Request, res: Response): Promise<void> => {
 
 const bookSeat = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { seatId, name, email, phone, bookingDate } = req.body;
-
-    // Log request body for debugging
-    console.log('Book seat request:', { seatId, name, email, phone, bookingDate });
+    const { seatId, name, email, phone, bookingDate, quantity } = req.body;
 
     // Validate input
     if (!seatId || !name || !email || !phone || !bookingDate) {
-      console.error('Book seat: Missing required fields:', { seatId, name, email, phone, bookingDate });
+      console.error('Missing required fields:', { seatId, name, email, phone, bookingDate });
       res.status(400).json({ error: 'seatId, name, email, phone, and bookingDate are required' });
-      return;
-    }
-
-    // Validate bookingDate format (YYYY-MM-DD)
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(bookingDate)) {
-      console.error('Book seat: Invalid bookingDate format:', bookingDate);
-      res.status(400).json({ error: 'bookingDate must be in YYYY-MM-DD format' });
-      return;
-    }
-
-    // Verify event exists for the date
-    const event = await Event.findOne({ date: bookingDate });
-    if (!event) {
-      console.error('Book seat: No event found for date:', bookingDate);
-      res.status(400).json({ error: 'No event scheduled for this date' });
-      return;
-    }
-
-    // Validate seatId format (e.g., A1 to F10)
-    const seatIdRegex = /^[A-F][1-9]|10$/;
-    if (!seatIdRegex.test(seatId)) {
-      console.error('Book seat: Invalid seatId format:', seatId);
-      res.status(400).json({ error: 'Invalid seatId format (e.g., A1, F10)' });
-      return;
-    }
-
-    const seat = await Seat.findOne({ seatId });
-    if (!seat) {
-      console.error('Book seat: Seat not found:', seatId);
-      res.status(404).json({ error: 'Seat not found' });
-      return;
-    }
-
-    const existingBooking = seat.bookings.find((b) => b.date === bookingDate);
-    if (existingBooking) {
-      console.error('Book seat: Seat already booked:', { seatId, bookingDate });
-      res.status(400).json({ error: 'Seat is already booked for this date' });
       return;
     }
 
     // Validate email format
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
-      console.error('Book seat: Invalid email format:', email);
       res.status(400).json({ error: 'Invalid email format' });
       return;
     }
@@ -446,8 +423,29 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
     // Validate phone format
     const phoneRegex = /^(\+?\d{1,3}[-.\s]?)?\d{10}$/;
     if (!phoneRegex.test(phone)) {
-      console.error('Book seat: Invalid phone format:', phone);
-      res.status(400).json({ error: 'Phone number must be 10 digits (e.g., +911234567890 or 1234567890)' });
+      res.status(400).json({ error: 'Invalid phone number format. Use 10 digits or +[country code][10 digits]' });
+      return;
+    }
+
+    // Verify event exists for the date
+    const event = await Event.findOne({ date: bookingDate });
+    if (!event) {
+      console.error('No event found for date:', bookingDate);
+      res.status(400).json({ error: 'No event scheduled for this date' });
+      return;
+    }
+
+    const seat = await Seat.findOne({ seatId });
+    if (!seat) {
+      console.error('Seat not found:', seatId);
+      res.status(404).json({ error: 'Seat not found' });
+      return;
+    }
+
+    const existingBooking = seat.bookings.find((b) => b.date === bookingDate);
+    if (existingBooking) {
+      console.error('Seat already booked:', { seatId, bookingDate });
+      res.status(400).json({ error: 'Seat is already booked for this date' });
       return;
     }
 
@@ -458,13 +456,7 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
     });
     await seat.save();
 
-    // Attempt to send email, but don't fail booking if it errors
-    try {
-      await sendBookingConfirmation(email, seatId, name, bookingDate);
-    } catch (emailError) {
-      console.warn('Book seat: Email sending failed, but booking saved:', emailError);
-    }
-
+    await sendBookingConfirmation(email, seatId, name, bookingDate);
     res.json({ message: 'Seat booked successfully', seat });
   } catch (error: any) {
     console.error('Book seat error:', {
@@ -472,7 +464,7 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
       stack: error.stack,
       requestBody: req.body,
     });
-    res.status(500).json({ error: `Failed to book seat: ${error.message}` });
+    res.status(500).json({ error: 'Failed to book seat' });
   }
 };
 

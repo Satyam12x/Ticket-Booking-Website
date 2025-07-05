@@ -1,4 +1,3 @@
-/* Keep your provided globals.css */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -15,18 +14,18 @@ body {
 .theater-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 3rem;
+  padding: 2rem;
 }
 
 h1 {
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: 800;
   color: #1f2a44;
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
   letter-spacing: -0.02em;
   text-transform: uppercase;
-  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 h3 {
@@ -34,21 +33,21 @@ h3 {
   font-weight: 700;
   color: #1f2a44;
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .stage {
   background: linear-gradient(to bottom, #4b5e7a, #2d3b55);
   color: #ffffff;
   text-align: center;
-  padding: 1.5rem;
-  margin: 2rem auto;
-  border-radius: 12px;
-  font-size: 1.75rem;
+  padding: 1rem;
+  margin: 1.5rem auto;
+  border-radius: 10px;
+  font-size: 1.5rem;
   font-weight: bold;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-  width: 80%;
-  max-width: 800px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 700px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -56,46 +55,50 @@ h3 {
 .seat-grid-container {
   display: flex;
   justify-content: center;
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
 }
 
 .seat-grid {
   display: grid;
-  grid-template-rows: repeat(7, 80px);
+  grid-template-rows: repeat(6, 60px);
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .seat-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .column-row {
   display: flex;
-  margin-left: 50px;
-  gap: 12px;
+  margin-left: 40px;
+  gap: 10px;
 }
 
 .column-label {
-  font-size: 1.5rem;
-  width: 60px;
+  font-size: 1.25rem;
+  width: 50px;
   text-align: center;
   color: #1f2a44;
   font-weight: 700;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
+.column-label:nth-child(6) {
+  margin-left: 45px;
+}
+
 .ml-gap {
-  margin-left: 50px;
+  margin-left: 40px;
 }
 
 .seat {
-  width: 60px;
-  height: 60px;
-  border-radius: 10px;
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -103,9 +106,10 @@ h3 {
   position: relative;
   cursor: pointer;
   font-weight: 600;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15),
-    inset 0 2px 4px rgba(255, 255, 255, 0.2);
-  transition: transform 0.3s ease, background-color 0.3s ease;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15),
+    inset 0 1px 3px rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s ease, background-color 0.3s ease,
+    box-shadow 0. genommen3s ease;
   perspective: 1000px;
 }
 
@@ -116,7 +120,8 @@ h3 {
 }
 
 .seat-available:hover {
-  transform: rotateY(10deg) scale(1.15);
+  transform: scale(1.2) rotateY(15deg);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), 0 0 8px rgba(52, 199, 89, 0.5);
 }
 
 .seat-booked {
@@ -130,19 +135,20 @@ h3 {
   background: linear-gradient(to bottom, #10b981, #059669);
   color: #ffffff;
   border: 2px solid #047857;
-  transform: rotateY(5deg) scale(1.1);
+  transform: scale(1.1) rotateY(10deg);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .chair-icon {
-  font-size: 1.5rem;
-  margin-bottom: 4px;
+  font-size: 1.25rem;
+  margin-bottom: 3px;
 }
 
 .seat-id {
   position: absolute;
-  bottom: 4px;
-  right: 4px;
-  font-size: 0.75rem;
+  bottom: 3px;
+  right: 3px;
+  font-size: 0.7rem;
   font-weight: 600;
   color: #ffffff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -152,18 +158,18 @@ h3 {
   position: absolute;
   background: #1f2a44;
   color: #ffffff;
-  padding: 1rem;
-  top: -100px;
-  border-radius: 8px;
-  font-size: 0.875rem;
+  padding: 0.75rem;
+  top: -80px;
+  border-radius: 6px;
+  font-size: 0.8rem;
   z-index: 100;
-  width: 180px;
+  width: 160px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  gap: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   animation: fadeIn 0.3s ease;
 }
 
@@ -173,120 +179,138 @@ h3 {
   justify-content: center;
   color: #1f2a44;
   font-weight: bold;
-  font-size: 1.5rem;
-  width: 40px;
+  font-size: 1.25rem;
+  width: 30px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .legend {
   display: flex;
   justify-content: center;
-  gap: 3rem;
-  margin: 2.5rem 0;
+  gap: 2rem;
+  margin: 2rem 0;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1rem;
+  font-size: 0.9rem;
 }
 
 .legend-box {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 8px;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   border: 2px solid #1f2a44;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .date-picker {
-  padding: 0.75rem;
+  padding: 0.6rem;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #ffffff;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 3px 6px rgba(0, 0, 0, 0.1);
   color: #1f2a44;
-  width: 220px;
-  font-size: 1rem;
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  width: 100%;
+  max-width: 200px;
+  font-size: 0.9rem;
+  transition: box-shadow 0.3s ease, transform 0.2s ease, border-color 0.3s ease;
+}
+
+.date-picker:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 6px rgba(37, 99, 235, 0.3);
+  transform: translateY(-2px);
 }
 
 .date-picker:focus {
   outline: none;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1),
-    0 0 0 4px rgba(37, 99, 235, 0.3);
+    0 0 0 3px rgba(37, 99, 235, 0.4);
   transform: translateY(-2px);
 }
 
 .input-group {
   position: relative;
-  margin-bottom: 1.5rem;
-  margin-top: 10px;
+  margin-bottom: 1.25rem;
+  margin-top: 8px;
 }
 
 .input-label {
   position: absolute;
-  top: -0.5rem;
-  left: 1rem;
+  top: -0.4rem;
+  left: 0.8rem;
   background: #ffffff;
-  padding: 0 0.5rem;
+  padding: 0 0.4rem;
   color: #1f2a44;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 500;
   transition: all 0.3s ease;
   z-index: 1;
 }
 
 .input-field {
-  padding: 0.75rem;
+  padding: 0.6rem;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #ffffff;
   width: 100%;
-  font-size: 1rem;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  font-size: 0.9rem;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 3px 6px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease, transform 0.2s ease, border-color 0.3s ease;
+}
+
+.input-field:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 6px rgba(37, 99, 235, 0.3);
+  transform: translateY(-2px);
 }
 
 .input-field:focus {
   outline: none;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1),
-    0 0 0 4px rgba(37, 99, 235, 0.3);
+    0 0 0 3px rgba(37, 99, 235, 0.4);
   transform: translateY(-2px);
 }
 
 .input-field:placeholder-shown + .input-label {
-  top: 0.75rem;
-  left: 1rem;
-  font-size: 1rem;
+  top: 0.6rem;
+  left: 0.8rem;
+  font-size: 0.9rem;
   color: #6b7280;
 }
 
 .input-error {
   border: 2px solid #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.3);
 }
 
 .error-text {
   color: #ef4444;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
   animation: fadeIn 0.3s ease;
+  display: none;
+}
+
+.error-text.active {
+  display: block;
 }
 
 .dynamic-modal {
   position: fixed;
-  bottom: 2.5rem;
-  right: 2.5rem;
+  bottom: 2rem;
+  right: 2rem;
   background: #ffffff;
-  padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2),
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2),
     inset 0 2px 4px rgba(255, 255, 255, 0.2);
-  width: 350px;
+  width: 320px;
   z-index: 50;
   animation: slideIn 0.3s ease;
 }
@@ -294,24 +318,25 @@ h3 {
 .proceed-btn {
   background: linear-gradient(to right, #2563eb, #1e40af);
   color: #ffffff;
-  padding: 0.75rem 1.5rem;
-  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   border: none;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.3s ease, transform 0.2s ease,
+    background-color 0.3s ease;
 }
 
 .proceed-btn:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), 0 0 6px rgba(37, 99, 235, 0.4);
+  transform: scale(1.05) rotate(2deg);
 }
 
 .modal {
@@ -319,39 +344,81 @@ h3 {
   top: 0;
   right: 0;
   height: 100%;
-  width: 400px;
+  width: 100%;
+  max-width: 360px;
   background: #ffffff;
-  box-shadow: -6px 0 12px rgba(0, 0, 0, 0.15);
-  padding: 3rem;
+  box-shadow: -4px 0 10px rgba(0, 0, 0, 0.15);
+  padding: 2rem;
   transform: translateX(0);
   transition: transform 0.3s ease;
   z-index: 50;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   animation: slideInRight 0.3s ease;
+}
+
+.alert-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 400px;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #1f2a44;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  color: #000;
 }
 
 .submit-btn {
   background: linear-gradient(to right, #2563eb, #1e40af);
   color: #ffffff;
-  padding: 0.75rem 1.5rem;
-  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
   border: none;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  gap: 8px;
+  transition: box-shadow 0.3s ease, transform 0.2s ease,
+    background-color 0.3s ease;
 }
 
 .submit-btn:hover:not(:disabled) {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), 0 0 6px rgba(37, 99, 235, 0.4);
+  transform: scale(1.05) rotate(2deg);
 }
 
 .submit-btn:disabled {
@@ -363,24 +430,25 @@ h3 {
 .cancel-btn {
   background: linear-gradient(to right, #dc2626, #b91c1c);
   color: #ffffff;
-  padding: 0.75rem 1.5rem;
-  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
   border: none;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.3s ease, transform 0.2s ease,
+    background-color 0.3s ease;
 }
 
 .cancel-btn:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), 0 0 6px rgba(220, 38, 38, 0.4);
+  transform: scale(1.05) rotate(-2deg);
 }
 
 .button-group {
   display: flex;
-  gap: 1rem;
+  gap: 0.8rem;
 }
 
 .booked {
@@ -395,67 +463,16 @@ h3 {
 
 .spinner {
   animation: spin 1s linear infinite;
-  font-size: 1.75rem;
-  margin-right: 10px;
+  font-size: 1.5rem;
+  margin-right: 8px;
 }
 
 .spinner-btn {
   animation: spin 1s linear infinite;
-  font-size: 1.25rem;
-  margin-right: 10px;
+  font-size: 1rem;
+  margin-right: 8px;
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateY(50px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.text-navy {
-  color: #1f2a44;
-}
-
-.text-red-500 {
-  color: #ef4444;
-}
-
-.column-label:nth-child(6){
-  margin-left: 45px;
-}
-
-/* New styles for dashboard and door */
 .card {
   background: #ffffff;
   border-radius: 12px;
@@ -504,120 +521,214 @@ h3 {
   width: 40px;
 }
 
-.alert-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #ffffff;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  width: 100%;
-  max-width: 400px;
-  z-index: 1000;
-  animation: fadeIn 0.3s ease;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-}
-
-.modal-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  border: none;
-  color: #1f2a44;
-  font-size: 1.25rem;
-  cursor: pointer;
-}
-
-.modal-close:hover {
-  color: #000;
-}
-
 .btn-small {
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
 }
 
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.text-navy {
+  color: #1f2a44;
+}
+
+.text-red-500 {
+  color: #ef4444;
+}
+
 @media only screen and (max-width: 768px) {
   .theater-container {
-    padding: 1.5rem;
+    padding: 1rem;
   }
   h1 {
-    font-size: 2.25rem;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
   }
   h3 {
     font-size: 1.25rem;
+    margin-bottom: 1rem;
   }
   .stage {
     font-size: 1.25rem;
-    padding: 1rem;
-    width: 90%;
+    padding: 0.8rem;
+    width: 100%;
   }
   .seat-grid {
+    grid-template-rows: repeat(6, 50px);
     gap: 8px;
   }
   .seat {
-    width: 45px;
-    height: 45px;
+    width: 40px;
+    height: 40px;
   }
   .chair-icon {
-    font-size: 1.25rem;
+    font-size: 1rem;
     margin-bottom: 2px;
   }
   .seat-id {
-    font-size: 0.625rem;
+    font-size: 0.6rem;
     bottom: 2px;
     right: 2px;
   }
   .row-label {
-    width: 30px;
+    width: 25px;
     font-size: 1rem;
   }
+  .column-row {
+    margin-left: 30px;
+    gap: 8px;
+  }
   .column-label {
-    width: 45px;
+    width: 40px;
     font-size: 1rem;
   }
   .ml-gap {
     margin-left: 30px;
   }
   .date-picker {
-    width: 100%;
+    max-width: 100%;
+    padding: 0.5rem;
+    font-size: 0.8rem;
   }
   .dynamic-modal {
     width: calc(100% - 2rem);
-    bottom: 1.5rem;
-    right: 1.5rem;
-    padding: 1.5rem;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 1rem;
   }
   .modal {
-    width: 100%;
-    max-width: 320px;
-    padding: 2rem;
+    max-width: 100%;
+    padding: 1.5rem;
   }
   .alert-modal {
     width: calc(100% - 2rem);
     padding: 1.5rem;
   }
   .legend {
-    gap: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    font-size: 0.8rem;
   }
   .legend-box {
-    width: 2rem;
-    height: 2rem;
-    font-size: 1.25rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 1rem;
   }
   .button-group {
     flex-direction: column;
+  }
+  .proceed-btn,
+  .submit-btn,
+  .cancel-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .theater-container {
+    padding: 0.5rem;
+  }
+  h1 {
+    font-size: 1.5rem;
+  }
+  h3 {
+    font-size: 1rem;
+  }
+  .stage {
+    font-size: 1rem;
+    padding: 0.5rem;
+  }
+  .seat-grid {
+    grid-template-rows: repeat(6, 40px);
+    gap: 6px;
+  }
+  .seat {
+    width: 32px;
+    height: 32px;
+  }
+  .chair-icon {
+    font-size: 0.9rem;
+  }
+  .seat-id {
+    font-size: 0.5rem;
+  }
+  .row-label {
+    width: 20px;
+    font-size: 0.8rem;
+  }
+  .column-row {
+    margin-left: 20px;
+    gap: 6px;
+  }
+  .column-label {
+    width: 32px;
+    font-size: 0.8rem;
+  }
+  .ml-gap {
+    margin-left: 20px;
+  }
+  .dynamic-modal {
+    width: calc(100% - 1rem);
+    padding: 0.8rem;
+  }
+  .modal {
+    padding: 1rem;
+  }
+  .alert-modal {
+    width: calc(100% - 1rem);
+    padding: 1rem;
+  }
+  .input-field,
+  .date-picker {
+    font-size: 0.75rem;
+    padding: 0.4rem;
+  }
+  .input-label {
+    font-size: 0.7rem;
+    top: -0.3rem;
+    left: 0.6rem;
+  }
+  .input-field:placeholder-shown + .input-label {
+    top: 0.5rem;
+    font-size: 0.75rem;
   }
 }

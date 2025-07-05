@@ -111,7 +111,7 @@ export default function AdminPage() {
       <div className="card">
         <h3>Create New Event</h3>
         {error && <p className="error-text">{error}</p>}
-        <form style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <form style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }} onSubmit={handleCreateEvent}>
           <div className="input-group">
             <input
               type="text"
