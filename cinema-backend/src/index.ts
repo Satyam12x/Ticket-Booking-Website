@@ -95,124 +95,205 @@ const sendBookingConfirmation = async (
       subject: 'Your Seat Booking Confirmation',
       html: `
         <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Professor Sahab Ticket</title>
+        <style>
+          body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            background-color: #111;
+            color: #fff;
+          }
+          .ticket {
+            max-width: 600px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(to right, #000, #222);
+          }
+          .left-section {
+            padding: 30px;
+          }
+          .right-section {
+            background-color: #f8b219;
+            color: #000;
+            padding: 20px;
+            text-align: center;
+          }
+          .subheading {
+            font-size: 14px;
+            color: #ddd;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+          }
+          .title {
+            font-size: 32px;
+            color: #f8b219;
+            margin: 10px 0;
+            font-weight: bold;
+          }
+          .subtitle {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: white;
+          }
+          .timing,
+          .dates,
+          .venue {
+            font-size: 16px;
+            margin: 8px 0;
+            line-height: 1.5;
+            color: white;
+          }
+          .qr-pay {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+          }
+          .scan-text {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+          }
+          .qr-code {
+            width: 100px;
+            height: 100px;
+            background: #fff;
+            padding: 5px;
+            border-radius: 8px;
+          }
+          .price {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+          }
+          .instructions-box h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #000;
+          }
+          .instructions-box ul {
+            list-style: none;
+            padding: 0;
+            font-size: 14px;
+            text-align: left;
+          }
+          .instructions-box ul li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 20px;
+          }
+          .instructions-box ul li::before {
+            content: '•';
+            color: #000;
+            position: absolute;
+            left: 0;
+          }
+          .admit {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #000;
+          }
+          .download-btn {
+            display: inline-block;
+            background: linear-gradient(to right, #2563eb, #1e40af);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease;
+          }
+          .download-btn:hover {
+            transform: translateY(-2px);
+          }
+          p {
+            color: white;
+          }
+          @media only screen and (max-width: 600px) {
             body {
-              margin: 0;
-              padding: 0;
-              font-family: Arial, sans-serif;
-              background-color: #F5F6F5;
-              color: #1F2A44;
+              padding: 10px;
             }
-            .container {
-              max-width: 600px;
-              margin: 20px auto;
-              background-color: #FFFFFF;
-              border-radius: 8px;
-              overflow: hidden;
-              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            .ticket {
+              flex-direction: column;
             }
-            .header {
-              background-color: #1F2A44;
+            .left-section, .right-section {
               padding: 20px;
-              text-align: center;
             }
-            .header img {
-              max-width: 150px;
-              height: auto;
-            }
-            .content {
-              padding: 30px;
-            }
-            h1 {
-              color: #1F2A44;
+            .title {
               font-size: 24px;
-              margin-bottom: 20px;
             }
-            p {
-              font-size: 16px;
-              line-height: 1.5;
-              margin: 10px 0;
+            .subtitle {
+              font-size: 18px;
             }
-            .details {
-              background-color: #F5F6F5;
-              padding: 15px;
-              border-radius: 6px;
-              margin: 20px 0;
-            }
-            .details p {
-              margin: 5px 0;
-            }
-            .button {
-              display: inline-block;
-              padding: 12px 24px;
-              background-color: #1F2A44;
-              color: #FFFFFF !important;
-              text-decoration: none;
-              border-radius: 4px;
-              font-size: 16px;
-              margin: 20px 0;
-            }
-            .footer {
-              background-color: #1F2A44;
-              color: #FFFFFF;
-              padding: 20px;
-              text-align: center;
+            .timing, .dates, .venue {
               font-size: 14px;
             }
-            .footer a {
-              color: #FFFFFF;
-              text-decoration: underline;
+            .qr-code {
+              width: 80px;
+              height: 80px;
             }
-            @media only screen and (max-width: 600px) {
-              .container {
-                margin: 10px;
-              }
-              .header img {
-                max-width: 120px;
-              }
-              h1 {
-                font-size: 20px;
-              }
-              p {
-                font-size: 14px;
-              }
-              .button {
-                padding: 10px 20px;
-                font-size: 14px;
-              }
+            .instructions-box h3 {
+              font-size: 14px;
             }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <img src="https://via.placeholder.com/150x50?text=Logo" alt="Company Logo">
-            </div>
-            <div class="content">
-              <h1>Your Booking Confirmation</h1>
-              <p>Dear ${name},</p>
-              <p>Thank you for choosing our seat booking service. We are pleased to confirm your booking for the following details:</p>
-              <div class="details">
-                <p><strong>Seat:</strong> ${seatId}</p>
-                <p><strong>Date:</strong> ${bookingDate}</p>
-                <p><strong>Total Price:</strong> ₹${price}</p>
-              </div>
-              <p>We look forward to welcoming you. If you have any questions or need further assistance, please don't hesitate to contact us.</p>
-              <a href="https://example.com" class="button">View Your Booking</a>
-            </div>
-            <div class="footer">
-              <p><strong>Seat Booking Co.</strong></p>
-              <p>123 Event Street, City, Country</p>
-              <p>Email: support@seatbookingco.com | Phone: +1-234-567-8900</p>
-              <p><a href="https://example.com">www.seatbookingco.com</a></p>
-            </div>
+            .instructions-box ul {
+              font-size: 12px;
+            }
+            .admit {
+              font-size: 16px;
+            }
+            .download-btn {
+              padding: 10px 20px;
+              font-size: 14px;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="ticket">
+          <div class="left-section">
+            <h4 class="subheading">MUKESH BHATI ACTING SCHOOL & CULTURAL WING PRESENTS</h4>
+            <h1 class="title">PROFESSOR SAHAB</h1>
+            <h2 class="subtitle">A COMEDY PLAY</h2>
+            <p class="timing">07 PM ONWARDS</p>
+            <p>Dear ${name},</p>
+            <p><strong>Seat:</strong> ${seatId}</p>
+            <p><strong>Date:</strong> ${bookingDate}</p>
+            <p class="venue">
+              Venue: Mukesh Bhati Acting School, E1/74, Milan Road, <br>
+              near YMCA University, Sector-11, Faridabad
+            </p>
+            <a href="http://localhost:3000/ticket?seatId=${seatId}&bookingDate=${bookingDate}&name=${encodeURIComponent(
+              name
+            )}" class="download-btn">Download Ticket</a>
           </div>
-        </body>
-        </html>
+          <div class="right-section">
+            <div class="instructions-box">
+              <h3>INSTRUCTIONS</h3>
+              <ul>
+                <li>Please be seated at least 20 minutes before the performance.</li>
+                <li>Keep your phones on silent mode.</li>
+                <li>Please occupy your allotted seat.</li>
+                <li>Photography & Recording strictly prohibited during the performance.</li>
+                <li>Eatables are not allowed inside.</li>
+              </ul>
+            </div>
+            <div class="admit">ADMIT ONE</div>
+          </div>
+        </div>
+      </body>
+      </html>
       `,
     };
 
