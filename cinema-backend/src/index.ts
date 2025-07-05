@@ -10,6 +10,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Event Schema and Model
+interface IEvent {
+  name: string;
+  date: string;
+}
+
+const eventSchema = new Schema<IEvent>({
+  name: { type: String, required: true },
+  date: { type: String, required: true, unique: true },
+});
+
+const Event = mongoose.model<IEvent>('Event', eventSchema);
+
 // Seat Schema and Model
 interface IBooking {
   date: string;
@@ -56,148 +69,158 @@ const sendBookingConfirmation = async (
   name: string,
   bookingDate: string
 ): Promise<void> => {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: email,
-    subject: 'Your Seat Booking Confirmation',
-    html: `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-          body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #F5F6F5;
-            color: #1F2A44;
-          }
-          .container {
-            max-width: 600px;
-            margin: 20px auto;
-            background-color: #FFFFFF;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          }
-          .header {
-            background-color: #1F2A44;
-            padding: 20px;
-            text-align: center;
-          }
-          .header img {
-            max-width: 150px;
-            height: auto;
-          }
-          .content {
-            padding: 30px;
-          }
-          h1 {
-            color: #1F2A44;
-            font-size: 24px;
-            margin-bottom: 20px;
-          }
-          p {
-            font-size: 16px;
-            line-height: 1.5;
-            margin: 10px 0;
-          }
-          .details {
-            background-color: #F5F6F5;
-            padding: 15px;
-            border-radius: 6px;
-            margin: 20px 0;
-          }
-          .details p {
-            margin: 5px 0;
-          }
-          .button {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: #1F2A44;
-            color: #FFFFFF !important;
-            text-decoration: none;
-            border-radius: 4px;
-            font-size: 16px;
-            margin: 20px 0;
-          }
-          .footer {
-            background-color: #1F2A44;
-            color: #FFFFFF;
-            padding: 20px;
-            text-align: center;
-            font-size: 14px;
-          }
-          .footer a {
-            color: #FFFFFF;
-            text-decoration: underline;
-          }
-          @media only screen and (max-width: 600px) {
+    const seat = await Seat.findOne({ seatId });
+    const price = seat ? seat.price : 300;
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Your Seat Booking Confirmation',
+      html: `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body {
+              margin: 0;
+              padding: 0;
+              font-family: Arial, sans-serif;
+              background-color: #F5F6F5;
+              color: #1F2A44;
+            }
             .container {
-              margin: 10px;
+              max-width: 600px;
+              margin: 20px auto;
+              background-color: #FFFFFF;
+              border-radius: 8px;
+              overflow: hidden;
+              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+              background-color: #1F2A44;
+              padding: 20px;
+              text-align: center;
             }
             .header img {
-              max-width: 120px;
+              max-width: 150px;
+              height: auto;
+            }
+            .content {
+              padding: 30px;
             }
             h1 {
-              font-size: 20px;
+              color: #1F2A44;
+              font-size: 24px;
+              margin-bottom: 20px;
             }
             p {
-              font-size: 14px;
+              font-size: 16px;
+              line-height: 1.5;
+              margin: 10px 0;
+            }
+            .details {
+              background-color: #F5F6F5;
+              padding: 15px;
+              border-radius: 6px;
+              margin: 20px 0;
+            }
+            .details p {
+              margin: 5px 0;
             }
             .button {
-              padding: 10px 20px;
+              display: inline-block;
+              padding: 12px 24px;
+              background-color: #1F2A44;
+              color: #FFFFFF !important;
+              text-decoration: none;
+              border-radius: 4px;
+              font-size: 16px;
+              margin: 20px 0;
+            }
+            .footer {
+              background-color: #1F2A44;
+              color: #FFFFFF;
+              padding: 20px;
+              text-align: center;
               font-size: 14px;
             }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <img src="https://via.placeholder.com/150x50?text=Logo" alt="Company Logo">
-          </div>
-          <div class="content">
-            <h1>Your Booking Confirmation</h1>
-            <p>Dear ${name},</p>
-            <p>Thank you for choosing our seat booking service. We are pleased to confirm your booking for the following details:</p>
-            <div class="details">
-              <p><strong>Seat:</strong> ${seatId}</p>
-              <p><strong>Date:</strong> ${bookingDate}</p>
-              <p><strong>Total Price:</strong> ₹${ 300}</p>
+            .footer a {
+              color: #FFFFFF;
+              text-decoration: underline;
+            }
+            @media only screen and (max-width: 600px) {
+              .container {
+                margin: 10px;
+              }
+              .header img {
+                max-width: 120px;
+              }
+              h1 {
+                font-size: 20px;
+              }
+              p {
+                font-size: 14px;
+              }
+              .button {
+                padding: 10px 20px;
+                font-size: 14px;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <img src="https://via.placeholder.com/150x50?text=Logo" alt="Company Logo">
             </div>
-            <p>We look forward to welcoming you. If you have any questions or need further assistance, please don't hesitate to contact us.</p>
-            <a href="https://example.com" class="button">View Your Booking</a>
+            <div class="content">
+              <h1>Your Booking Confirmation</h1>
+              <p>Dear ${name},</p>
+              <p>Thank you for choosing our seat booking service. We are pleased to confirm your booking for the following details:</p>
+              <div class="details">
+                <p><strong>Seat:</strong> ${seatId}</p>
+                <p><strong>Date:</strong> ${bookingDate}</p>
+                <p><strong>Total Price:</strong> ₹${price}</p>
+              </div>
+              <p>We look forward to welcoming you. If you have any questions or need further assistance, please don't hesitate to contact us.</p>
+              <a href="https://example.com" class="button">View Your Booking</a>
+            </div>
+            <div class="footer">
+              <p><strong>Seat Booking Co.</strong></p>
+              <p>123 Event Street, City, Country</p>
+              <p>Email: support@seatbookingco.com | Phone: +1-234-567-8900</p>
+              <p><a href="https://example.com">www.seatbookingco.com</a></p>
+            </div>
           </div>
-          <div class="footer">
-            <p><strong>Seat Booking Co.</strong></p>
-            <p>123 Event Street, City, Country</p>
-            <p>Email: support@seatbookingco.com | Phone: +1-234-567-8900</p>
-            <p><a href="https://example.com">www.seatbookingco.com</a></p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `,
-  };
+        </body>
+        </html>
+      `,
+    };
 
-  await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error('Email sending error:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    // Continue booking even if email fails
+  }
 };
 
 // Initialize Seats Function
 const initializeSeats = async (): Promise<void> => {
   try {
-    await Seat.deleteMany({ $or: [{ id: { $exists: true } }, { category: { $exists: true } }] });
     const existingSeats = await Seat.countDocuments();
     if (existingSeats > 0) {
       console.log('Seats already initialized, skipping initialization.');
@@ -226,6 +249,7 @@ const initializeSeats = async (): Promise<void> => {
     console.log('Seats initialized successfully');
   } catch (error) {
     console.error('Failed to initialize seats:', error);
+    throw error;
   }
 };
 
@@ -235,18 +259,103 @@ const initializeSeatsEndpoint = async (req: Request, res: Response): Promise<voi
     await initializeSeats();
     res.status(201).json({ message: 'Seats initialized successfully' });
   } catch (error) {
+    console.error('Initialize seats error:', error);
     res.status(500).json({ error: 'Failed to initialize seats' });
+  }
+};
+
+const getEvents = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const events = await Event.find({ date: { $gte: today } }).sort({ date: 1 });
+    res.json(events);
+  } catch (error) {
+    console.error('Get events error:', error);
+    res.status(500).json({ error: 'Failed to fetch events' });
+  }
+};
+
+const createEvent = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { name, date, password } = req.body;
+    if (!name || !date || !password) {
+      res.status(400).json({ error: 'Name, date, and password are required' });
+      return;
+    }
+    if (password !== process.env.ADMIN_PASSWORD) {
+      res.status(401).json({ error: 'Invalid password' });
+      return;
+    }
+
+    const existingEvent = await Event.findOne({ date });
+    if (existingEvent) {
+      res.status(400).json({ error: 'An event already exists for this date' });
+      return;
+    }
+
+    const event = new Event({ name, date });
+    await event.save();
+    res.status(201).json({ message: 'Event created successfully', event });
+  } catch (error) {
+    console.error('Create event error:', error);
+    res.status(500).json({ error: 'Failed to create event' });
+  }
+};
+
+const deleteEvent = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { password } = req.body;
+    if (!password) {
+      res.status(400).json({ error: 'Password is required' });
+      return;
+    }
+    if (password !== process.env.ADMIN_PASSWORD) {
+      res.status(401).json({ error: 'Invalid password' });
+      return;
+    }
+
+    const event = await Event.findById(id);
+    if (!event) {
+      res.status(404).json({ error: 'Event not found' });
+      return;
+    }
+
+    // Check if there are bookings for this event
+    const seatsWithBookings = await Seat.find({ 'bookings.date': event.date });
+    if (seatsWithBookings.length > 0) {
+      res.status(400).json({ error: 'Cannot delete event with existing bookings' });
+      return;
+    }
+
+    await Event.findByIdAndDelete(id);
+    res.json({ message: 'Event deleted successfully' });
+  } catch (error) {
+    console.error('Delete event error:', error);
+    res.status(500).json({ error: 'Failed to delete event' });
   }
 };
 
 const getSeats = async (req: Request, res: Response): Promise<void> => {
   try {
     const { date } = req.query;
-    const targetDate = date ? date.toString() : new Date().toISOString().split('T')[0];
-    const seats = await Seat.find();
+    if (!date) {
+      console.error('Get seats: Missing date parameter');
+      res.status(400).json({ error: 'Date is required' });
+      return;
+    }
 
+    // Verify event exists for the date
+    const event = await Event.findOne({ date: date.toString() });
+    if (!event) {
+      console.error('Get seats: No event found for date:', date);
+      res.status(400).json({ error: 'No event scheduled for this date' });
+      return;
+    }
+
+    const seats = await Seat.find();
     const seatsWithStatus = seats.map((seat) => {
-      const booking = seat.bookings.find((b) => b.date === targetDate);
+      const booking = seat.bookings.find((b) => b.date === date);
       return {
         ...seat.toObject(),
         status: booking ? 'booked' : 'available',
@@ -255,6 +364,7 @@ const getSeats = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (seats.length === 0) {
+      console.log('Get seats: No seats found, initializing...');
       await initializeSeats();
       const newSeats = await Seat.find();
       const newSeatsWithStatus = newSeats.map((seat) => ({
@@ -268,6 +378,7 @@ const getSeats = async (req: Request, res: Response): Promise<void> => {
 
     res.json(seatsWithStatus);
   } catch (error) {
+    console.error('Get seats error:', error);
     res.status(500).json({ error: 'Failed to fetch seats' });
   }
 };
@@ -275,20 +386,68 @@ const getSeats = async (req: Request, res: Response): Promise<void> => {
 const bookSeat = async (req: Request, res: Response): Promise<void> => {
   try {
     const { seatId, name, email, phone, bookingDate } = req.body;
-    if (!bookingDate) {
-      res.status(400).json({ error: 'Booking date is required' });
+
+    // Log request body for debugging
+    console.log('Book seat request:', { seatId, name, email, phone, bookingDate });
+
+    // Validate input
+    if (!seatId || !name || !email || !phone || !bookingDate) {
+      console.error('Book seat: Missing required fields:', { seatId, name, email, phone, bookingDate });
+      res.status(400).json({ error: 'seatId, name, email, phone, and bookingDate are required' });
+      return;
+    }
+
+    // Validate bookingDate format (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(bookingDate)) {
+      console.error('Book seat: Invalid bookingDate format:', bookingDate);
+      res.status(400).json({ error: 'bookingDate must be in YYYY-MM-DD format' });
+      return;
+    }
+
+    // Verify event exists for the date
+    const event = await Event.findOne({ date: bookingDate });
+    if (!event) {
+      console.error('Book seat: No event found for date:', bookingDate);
+      res.status(400).json({ error: 'No event scheduled for this date' });
+      return;
+    }
+
+    // Validate seatId format (e.g., A1 to F10)
+    const seatIdRegex = /^[A-F][1-9]|10$/;
+    if (!seatIdRegex.test(seatId)) {
+      console.error('Book seat: Invalid seatId format:', seatId);
+      res.status(400).json({ error: 'Invalid seatId format (e.g., A1, F10)' });
       return;
     }
 
     const seat = await Seat.findOne({ seatId });
     if (!seat) {
+      console.error('Book seat: Seat not found:', seatId);
       res.status(404).json({ error: 'Seat not found' });
       return;
     }
 
     const existingBooking = seat.bookings.find((b) => b.date === bookingDate);
     if (existingBooking) {
+      console.error('Book seat: Seat already booked:', { seatId, bookingDate });
       res.status(400).json({ error: 'Seat is already booked for this date' });
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      console.error('Book seat: Invalid email format:', email);
+      res.status(400).json({ error: 'Invalid email format' });
+      return;
+    }
+
+    // Validate phone format
+    const phoneRegex = /^(\+?\d{1,3}[-.\s]?)?\d{10}$/;
+    if (!phoneRegex.test(phone)) {
+      console.error('Book seat: Invalid phone format:', phone);
+      res.status(400).json({ error: 'Phone number must be 10 digits (e.g., +911234567890 or 1234567890)' });
       return;
     }
 
@@ -299,15 +458,29 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
     });
     await seat.save();
 
-    await sendBookingConfirmation(email, seatId, name, bookingDate);
+    // Attempt to send email, but don't fail booking if it errors
+    try {
+      await sendBookingConfirmation(email, seatId, name, bookingDate);
+    } catch (emailError) {
+      console.warn('Book seat: Email sending failed, but booking saved:', emailError);
+    }
+
     res.json({ message: 'Seat booked successfully', seat });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to book seat' });
+  } catch (error: any) {
+    console.error('Book seat error:', {
+      message: error.message,
+      stack: error.stack,
+      requestBody: req.body,
+    });
+    res.status(500).json({ error: `Failed to book seat: ${error.message}` });
   }
 };
 
 // Routes
 app.post('/api/seats/initialize', initializeSeatsEndpoint);
+app.get('/api/events', getEvents);
+app.post('/api/events', createEvent);
+app.delete('/api/events/:id', deleteEvent);
 app.get('/api/seats', getSeats);
 app.post('/api/seats/book', bookSeat);
 

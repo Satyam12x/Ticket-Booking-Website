@@ -6,6 +6,8 @@ interface SeatProps {
     seatId: string;
     status: "available" | "booked";
     price: number;
+    row: number; // Fixed to match backend
+    column: string; // Fixed to match backend
     bookedBy?: { name: string; email: string; phone: string };
   };
   onSelect: (seatId: string) => void;

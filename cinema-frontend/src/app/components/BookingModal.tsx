@@ -77,16 +77,20 @@ export default function BookingModal({
 
     setIsSubmitting(true);
     setErrors((prev) => ({ ...prev, server: "" }));
+
+    const payload = {
+      seatId,
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      bookingDate: formData.bookingDate,
+    };
+
+    console.log('Booking request payload:', payload);
+
     try {
-      await axios.post("http://localhost:5000/api/seats/book", {
-        seatId,
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        bookingDate: formData.bookingDate,
-        quantity: formData.quantity,
-        price,
-      });
+      const response = await axios.post("http://localhost:5000/api/seats/book", payload);
+      console.log('Booking response:', response.data);
       onClose();
       window.location.reload();
     } catch (error: any) {
@@ -95,11 +99,12 @@ export default function BookingModal({
         status: error.response?.status,
         data: error.response?.data,
         headers: error.response?.headers,
+        requestBody: payload,
       });
       setErrors((prev) => ({
         ...prev,
         server:
-          error.response?.data?.message ||
+          error.response?.data?.error ||
           "Booking failed. Please check your input or try again later.",
       }));
     } finally {
