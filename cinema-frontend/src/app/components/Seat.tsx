@@ -1,10 +1,10 @@
-import { FaTicketAlt } from "react-icons/fa";
+import { FaCouch } from "react-icons/fa";
 
 interface SeatData {
   _id: string;
   seatId: string;
-  row: number;
-  column: string;
+  row: string;
+  column: number;
   price: number;
   status: string;
   bookedBy: { name: string; email: string; phone: string } | null;
@@ -13,13 +13,16 @@ interface SeatData {
 interface SeatProps {
   seat: SeatData;
   onClick: () => void;
+  isColumnSix: boolean;
 }
 
-export default function Seat({ seat, onClick }: SeatProps) {
+export default function Seat({ seat, onClick, isColumnSix }: SeatProps) {
   return (
     <button
       onClick={onClick}
-      className={`seat ${seat.status === "available" ? "seat-available" : "seat-booked"}`}
+      className={`seat ${seat.status === "available" ? "seat-available" : "seat-booked"} ${
+        isColumnSix ? "ml-gap" : ""
+      }`}
       disabled={seat.status !== "available"}
       title={
         seat.status === "booked" && seat.bookedBy
@@ -27,7 +30,7 @@ export default function Seat({ seat, onClick }: SeatProps) {
           : `Seat ${seat.seatId} - ₹${seat.price}`
       }
     >
-      <FaTicketAlt className="chair-icon" />
+      <FaCouch className="chair-icon" />
       <span className="seat-id">{seat.seatId}</span>
     </button>
   );

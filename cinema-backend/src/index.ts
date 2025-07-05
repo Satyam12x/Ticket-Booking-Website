@@ -44,16 +44,16 @@ interface IBooking {
 
 interface ISeat {
   seatId: string;
-  row: number;
-  column: string;
+  row: string;
+  column: number;
   price: number;
   bookings: IBooking[];
 }
 
 const seatSchema = new Schema<ISeat>({
   seatId: { type: String, required: true, unique: true },
-  row: { type: Number, required: true },
-  column: { type: String, required: true },
+  row: { type: String, required: true },
+  column: { type: Number, required: true },
   price: { type: Number, required: true },
   bookings: [
     {
@@ -232,13 +232,13 @@ const initializeSeats = async (): Promise<void> => {
       return;
     }
 
-    const columns = ['A', 'B', 'C', 'D', 'E', 'F'];
-    const rows = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const rows = ['A', 'B', 'C', 'D', 'E', 'F'];
+    const columns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     const seats = [];
 
     for (let row of rows) {
       for (let col of columns) {
-        const seatId = `${col}${row}`;
+        const seatId = `${row}${col}`;
         seats.push({
           seatId,
           row,
@@ -283,7 +283,11 @@ const getEvents = async (req: Request, res: Response): Promise<void> => {
 const createEvent = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, date, time, description, venue, password } = req.body;
+    console.log('Create event request received:', { name, date, time, description, venue, password });
+
+    // Validate required fields
     if (!name || !date || !time || !description || !venue || !password) {
+      console.error('Missing required fields:', { name, date, time, description, venue, password });
       res.status(400).json({ error: 'Name, date, time, description, venue, and password are required' });
       return;
     }
@@ -291,6 +295,7 @@ const createEvent = async (req: Request, res: Response): Promise<void> => {
     // Validate date format (YYYY-MM-DD)
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(date)) {
+      console.error('Invalid date format:', date);
       res.status(400).json({ error: 'Invalid date format. Use YYYY-MM-DD' });
       return;
     }
@@ -298,28 +303,44 @@ const createEvent = async (req: Request, res: Response): Promise<void> => {
     // Validate time format (HH:MM)
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
     if (!timeRegex.test(time)) {
+      console.error('Invalid time format:', time);
       res.status(400).json({ error: 'Invalid time format. Use HH:MM' });
       return;
     }
 
-    // Check password
+    // Validate password
+    if (!process.env.ADMIN_PASSWORD) {
+      console.error('ADMIN_PASSWORD environment variable not set');
+      res.status(500).json({ error: 'Server configuration error: ADMIN_PASSWORD not set' });
+      return;
+    }
     if (password !== process.env.ADMIN_PASSWORD) {
+      console.error('Invalid password provided');
       res.status(401).json({ error: 'Invalid password' });
       return;
     }
 
+    // Check for existing event on the same date
     const existingEvent = await Event.findOne({ date });
     if (existingEvent) {
+      console.error('Event already exists for date:', date);
       res.status(400).json({ error: 'An event already exists for this date' });
       return;
     }
 
+    // Create and save the event
     const event = new Event({ name, date, time, description, venue, password });
     await event.save();
+    console.log('Event saved successfully:', event);
+
     res.status(201).json({ message: 'Event created successfully', event });
-  } catch (error) {
-    console.error('Create event error:', error);
-    res.status(500).json({ error: 'Failed to create event' });
+  } catch (error: any) {
+    console.error('Create event error:', {
+      message: error.message,
+      stack: error.stack,
+      requestBody: req.body,
+    });
+    res.status(500).json({ error: 'Failed to create event: ' + error.message });
   }
 };
 

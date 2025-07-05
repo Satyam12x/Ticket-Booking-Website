@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Seat from "./components/Seat";
 import BookingModal from "./components/BookingModal";
-import { FaTicketAlt } from "react-icons/fa";
+import {  FaCouch } from "react-icons/fa";
+
 
 interface Event {
   _id: string;
@@ -17,8 +18,8 @@ interface Event {
 interface SeatData {
   _id: string;
   seatId: string;
-  row: number;
-  column: string;
+  row: string;
+  column: number;
   price: number;
   status: string;
   bookedBy: { name: string; email: string; phone: string } | null;
@@ -71,7 +72,8 @@ export default function Home() {
   };
 
   const selectedEventDetails = events.find((event) => event.date === selectedEvent);
-  const columns = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const rows = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const columns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
     <div className="theater-container">
@@ -99,7 +101,7 @@ export default function Home() {
             <p style={{ color: '#6b7280', marginBottom: '5px' }}>Date: {selectedEventDetails.date}</p>
             <p style={{ color: '#6b7280', marginBottom: '5px' }}>Time: {selectedEventDetails.time}</p>
             <p style={{ color: '#6b7280', marginBottom: '5px' }}>Venue: {selectedEventDetails.venue}</p>
-            <p style={{ color: '#6b7280' }}>Description: {selectedEventDetails.description}</p>
+            <p style={{ color: '#6b7280' }}>Description:   {selectedEventDetails.description}</p>
           </div>
         )}
       </div>
@@ -116,26 +118,39 @@ export default function Home() {
                 ))}
               </div>
               <div className="seat-grid">
-                {Array.from({ length: 10 }, (_, row) => (
-                  <div key={row + 1} className="seat-row">
-                    <div className="row-label">{row + 1}</div>
-                    {columns.map((col) => {
-                      const seat = seats.find((s) => s.seatId === `${col}${row + 1}`);
-                      return seat ? (
-                        <Seat
-                          key={seat.seatId}
-                          seat={seat}
-                          onClick={() => handleSeatClick(seat)}
-                        />
-                      ) : null;
-                    })}
-                  </div>
-                ))}
-              </div>
+  {rows.map((row) => (
+    <div key={row} className="seat-row">
+      <div className="row-label">{row}</div>
+      {columns.map((col) => {
+        const seatId = `${row}${col}`;
+        const seat = seats.find((s) => s.seatId === seatId);
+        return seat ? (
+          <Seat
+            key={seat.seatId}
+            seat={seat}
+            onClick={() => handleSeatClick(seat)}
+            isColumnSix={col === 6}
+          />
+        ) : (
+          <div
+            key={seatId}
+            className={`seat seat-available ${
+                          col === 6 ? "ml-gap" : ""
+                        }`}
+            aria-hidden="true"
+          >
+            {/* <FaCouch className="chair-icon" /> */}
+            <span className="seat-id">{seatId}</span>
+          </div>
+        );
+      })}
+    </div>
+  ))}
+</div>
             </div>
           </div>
           <div style={{ textAlign: 'right', marginTop: '15px' }}>
-            <button
+            {/* <button
               onClick={() => {
                 const availableSeat = seats.find((seat) => seat.status === "available");
                 if (availableSeat) handleSeatClick(availableSeat);
@@ -143,8 +158,8 @@ export default function Home() {
               className="proceed-btn btn-small"
               disabled={!seats.some((seat) => seat.status === "available")}
             >
-              <FaTicketAlt style={{ marginRight: '10px' }} /> Book Seat
-            </button>
+              <FaCouch style={{ marginRight: '10px' }} /> Book Seat
+            </button> */}
           </div>
         </div>
       )}

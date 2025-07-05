@@ -5,28 +5,40 @@ import { FaTimes } from "react-icons/fa";
 interface DeleteEventModalProps {
   eventId: string;
   onClose: () => void;
-  onDeleteSuccess: () => void;
+  onDelete: (password: string) => void;
 }
 
 export default function DeleteEventModal({
   eventId,
   onClose,
-  onDeleteSuccess,
+  onDelete,
 }: DeleteEventModalProps) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const validatePassword = (value: string) => {
+    if (!value) return "Password is required";
+    if (value.length < 6) return "Password must be at least 6 characters";
+    return "";
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setIsSubmitting(true);
 
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setError(passwordError);
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       await axios.delete(`http://localhost:5000/api/events/${eventId}`, {
         data: { password },
       });
-      onDeleteSuccess();
+      onDelete(password);
       onClose();
     } catch (error: any) {
       setError(
@@ -40,7 +52,7 @@ export default function DeleteEventModal({
   return (
     <>
       <div className="modal-overlay" onClick={onClose}></div>
-      <div className="alert-modal">
+      <div className="modal show">
         <button onClick={onClose} className="modal-close" aria-label="Close modal">
           <FaTimes size={16} />
         </button>
@@ -48,24 +60,27 @@ export default function DeleteEventModal({
         <p style={{ color: '#6b7280', marginBottom: '15px' }}>
           Enter the admin password to delete this event.
         </p>
-        {error && <p className="error-text">{error}</p>}
+        {error && <p className="error-text active">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="input-group">
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="input-field"
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError(validatePassword(e.target.value));
+              }}
+              className={`input-field ${error ? "input-error" : ""}`}
               required
               placeholder="Enter admin password"
             />
-            <span className="input-label">Password</span>
+            {/* <span className="input-label">Password</span> */}
           </div>
           <div className="button-group">
             <button
               type="submit"
               className="submit-btn"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !!error}
             >
               {isSubmitting ? "Deleting..." : "Delete Event"}
             </button>
