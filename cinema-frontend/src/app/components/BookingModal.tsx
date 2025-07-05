@@ -100,7 +100,7 @@ export default function BookingModal({
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
-    // Real-time validation
+
     const newErrors = { ...errors };
     if (name === "name") {
       newErrors.name =
