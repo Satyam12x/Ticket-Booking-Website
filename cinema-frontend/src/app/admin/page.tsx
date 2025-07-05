@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Seat from "../components/Seat";
 import DeleteEventModal from "../components/DeleteEventModal";
+import BookingModal from "../components/BookingModal";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
 interface Event {
@@ -27,6 +28,8 @@ interface SeatData {
 export default function AdminPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [seats, setSeats] = useState<SeatData[]>([]);
+  const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<string>("");
   const [newEvent, setNewEvent] = useState({
     name: "",
@@ -78,6 +81,13 @@ export default function AdminPage() {
       fetchSeats(selectedEvent);
     }
   }, [selectedEvent]);
+
+  const handleSeatClick = (seat: SeatData) => {
+    if (seat.status === "available") {
+      setSelectedSeat(seat.seatId);
+      setIsBookingModalOpen(true);
+    }
+  };
 
   const validateForm = () => {
     const newErrors = {
@@ -382,7 +392,7 @@ export default function AdminPage() {
                         <Seat
                           key={seat.seatId}
                           seat={seat}
-                          onClick={() => {}}
+                          onClick={() => handleSeatClick(seat)}
                           isColumnSix={col === 6}
                         />
                       ) : (
@@ -405,6 +415,15 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+      {isBookingModalOpen && selectedSeat && (
+              <BookingModal
+                seatId={selectedSeat}
+                price={300}
+                quantity={1}
+                onClose={() => setIsBookingModalOpen(false)}
+                bookingDate={selectedEvent}
+              />
+            )}
       {isDeleteModalOpen && eventToDelete && (
         <DeleteEventModal
           eventId={eventToDelete}
