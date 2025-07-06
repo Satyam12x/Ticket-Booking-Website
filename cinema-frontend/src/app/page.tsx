@@ -163,6 +163,7 @@ export default function Home() {
             </div>
           </div>
           <div style={{ textAlign: "right", marginTop: "15px" }}>
+            {/* commented a button */}
             {/* <button
               onClick={() => {
                 const availableSeat = seats.find((seat) => seat.status === "available");
