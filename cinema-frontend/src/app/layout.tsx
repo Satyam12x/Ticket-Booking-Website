@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Ticket Booking Website",
-  description: "Movie theater seat booking application",
+  title: "Host Your Event - Book Events, Tickets",
+  description: "Host Your Events With An Advanced Featured Platform, Users Can Directly Book Tickets For Their Platform",
 };
 
 export default function RootLayout({
