@@ -2,9 +2,9 @@
   "version": 2,
   "builds": [
     {
-      "src": "cinema-frontend/**/*",
-      "use": "@vercel/next",
-      "config": { "zeroConfig": true }
+      "src": "cinema-frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "out" }
     },
     {
       "src": "cinema-backend/src/index.ts",
@@ -12,13 +12,7 @@
     }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/cinema-backend/src/index.ts"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/cinema-frontend"
-    }
+    { "src": "/api/(.*)", "dest": "/cinema-backend/src/index.ts" },
+    { "src": "/(.*)", "dest": "/cinema-frontend/$1" }
   ]
 }
