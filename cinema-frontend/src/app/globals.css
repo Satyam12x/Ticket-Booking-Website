@@ -165,12 +165,89 @@ body {
   background-repeat: no-repeat;
 }
 
-.admin-layout {
-  display: flex;
-  gap: 20px;
-  max-width: 1200px;
+.event-select-container {
+  max-width: 480px;
+  padding: 20px 0;
+}
+
+.event-select {
+  width: 100%;
+  height: 56px;
+  padding: 15px;
+  border: 1px solid #e4dddd;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #171212;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  outline: none;
+  background-image: url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724px%27 height=%2724px%27 fill=%27rgb(130,104,106)%27 viewBox=%270 0 256 256%27%3e%3cpath d=%27M181.66,170.34a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-48-48a8,8,0,0,1,11.32-11.32L128,212.69l42.34-42.35A8,8,0,0,1,181.66,170.34Zm-96-84.68L128,43.31l42.34,42.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,85.66Z%27%3e%3c/path%3e%3c/svg%3e');
+  background-position: right 15px center;
+  background-repeat: no-repeat;
+  background-size: 24px;
+  appearance: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  /* position: relative;
+  left: -20px; */
+}
+
+.event-select:focus {
+  border-color: #e4dddd;
+  box-shadow: 0 0 6px rgba(228, 221, 221, 0.4);
+  transform: scale(1.01);
+}
+
+.event-details-container {
+  max-width: 960px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 20px 16px;
+}
+
+.event-details-header {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #171212;
+  margin-bottom: 12px;
+}
+
+.event-details-subtitle {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #82686a;
+  margin-bottom: 16px;
+}
+
+.event-details-grid {
+  display: grid;
+  grid-template-columns: 20% 1fr;
+  /* gap: 2px; */
+  padding: 16px;
+}
+
+.event-details-row {
+  display: contents;
+}
+
+.event-details-row > * {
+  padding: 10px;
+  border-top: 1px solid #0e0b0b;
+}
+
+.event-details-label {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #82686a;
+}
+
+.event-details-value {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #171212;
 }
 
 .event-form-container {
@@ -308,6 +385,16 @@ body {
   justify-content: center;
 }
 
+.admin-layout{
+  display: flex;
+  /* align-items: center; */
+  gap: 20px;
+  justify-content: space-between;
+}
+.event-list-container{
+  height: fit-content;
+}
+
 .event-name {
   color: #0e151b;
   font-size: 16px;
@@ -359,10 +446,6 @@ body {
   max-width: 960px;
   margin: 20px auto;
   padding: 20px;
-}
-
-.event-details {
-  margin-bottom: 20px;
 }
 
 .event-detail-text {
@@ -766,6 +849,7 @@ h3 {
   color: #000;
 }
 
+
 .submit-btn {
   background: #0c7ff2;
   color: #ffffff;
@@ -997,6 +1081,39 @@ h3 {
     width: 48px;
     height: 48px;
   }
+  .event-select-container {
+    padding: 8px 12px;
+  }
+  .event-select {
+    height: 48px;
+    padding: 12px;
+    font-size: 14px;
+    background-size: 20px;
+    background-position: right 12px center;
+  }
+  .event-details-container {
+    padding: 16px 12px;
+  }
+  .event-details-header {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .event-details-subtitle {
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+  .event-details-grid {
+    grid-template-columns: 30% 1fr;
+    gap: 16px;
+    padding: 12px;
+  }
+  .event-details-row > * {
+    padding: 16px 0;
+  }
+  .event-details-label,
+  .event-details-value {
+    font-size: 13px;
+  }
   h1 {
     font-size: 2rem;
     margin-bottom: 1.5rem;
@@ -1162,6 +1279,39 @@ h3 {
   .event-image {
     width: 40px;
     height: 40px;
+  }
+  .event-select-container {
+    padding: 6px 8px;
+  }
+  .event-select {
+    height: 40px;
+    padding: 10px;
+    font-size: 12px;
+    background-size: 18px;
+    background-position: right 10px center;
+  }
+  .event-details-container {
+    padding: 12px 8px;
+  }
+  .event-details-header {
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+  .event-details-subtitle {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+  .event-details-grid {
+    grid-template-columns: 40% 1fr;
+    gap: 12px;
+    padding: 8px;
+  }
+  .event-details-row > * {
+    padding: 12px 0;
+  }
+  .event-details-label,
+  .event-details-value {
+    font-size: 12px;
   }
   h1 {
     font-size: 1.5rem;
