@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { FaTimes } from "react-icons/fa";
 
 interface BookingModalProps {
@@ -8,6 +8,7 @@ interface BookingModalProps {
   quantity: number;
   onClose: () => void;
   bookingDate: string;
+  onBookingSuccess: () => void;
 }
 
 export default function BookingModal({
@@ -16,6 +17,7 @@ export default function BookingModal({
   quantity,
   onClose,
   bookingDate,
+  onBookingSuccess,
 }: BookingModalProps) {
   const [formData, setFormData] = useState({
     name: "",
@@ -86,11 +88,17 @@ export default function BookingModal({
         bookingDate,
         quantity,
       });
+      onBookingSuccess();
       onClose();
-    } catch (error: any) {
-      setSubmitError(
-        error.response?.data?.error || "Failed to book seat. Please try again."
-      );
+    } catch (error: unknown) {
+      // Check if error is an AxiosError
+      if (axios.isAxiosError(error)) {
+        setSubmitError(
+          error.response?.data?.error || "Failed to book seat. Please try again."
+        );
+      } else {
+        setSubmitError("Failed to book seat. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -99,7 +107,6 @@ export default function BookingModal({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-
 
     const newErrors = { ...errors };
     if (name === "name") {
@@ -143,7 +150,6 @@ export default function BookingModal({
               placeholder="Enter your name"
               required
             />
-            {/* <span className="input-label">Name</span> */}
             {errors.name && <p className="error-text active">{errors.name}</p>}
           </div>
           <div className="input-group">
@@ -156,7 +162,6 @@ export default function BookingModal({
               placeholder="Enter your email"
               required
             />
-            {/* <span className="input-label">Email</span> */}
             {errors.email && <p className="error-text active">{errors.email}</p>}
           </div>
           <div className="input-group">
@@ -169,7 +174,6 @@ export default function BookingModal({
               placeholder="Enter your phone number"
               required
             />
-            {/* <span className="input-label">Phone</span> */}
             {errors.phone && <p className="error-text active">{errors.phone}</p>}
           </div>
           <div className="button-group">

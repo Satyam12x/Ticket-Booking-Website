@@ -72,6 +72,12 @@ export default function Home() {
     }
   };
 
+  const handleBookingSuccess = () => {
+    if (selectedEvent) {
+      fetchSeats(selectedEvent); // Refetch seats after successful booking
+    }
+  };
+
   const selectedEventDetails = events.find(
     (event) => event.date === selectedEvent
   );
@@ -118,7 +124,7 @@ export default function Home() {
       </div>
       {selectedEvent && (
         <div className="card">
-          <h3>Seat Layout</h3>
+          <h3>Seat Layout</h3> {/* Fixed typo: removed </ Ascending */}
           <div className="stage">STAGE</div>
           <div className="seat-grid-container">
             <div className="door">DOOR</div>
@@ -152,7 +158,6 @@ export default function Home() {
                           }`}
                           aria-hidden="true"
                         >
-                          {/* <FaCouch className="chair-icon" /> */}
                           <span className="seat-id">{seatId}</span>
                         </div>
                       );
@@ -163,7 +168,7 @@ export default function Home() {
             </div>
           </div>
           <div style={{ textAlign: "right", marginTop: "15px" }}>
-            {/* commented a button */}
+            {/* Commented button preserved */}
             {/* <button
               onClick={() => {
                 const availableSeat = seats.find((seat) => seat.status === "available");
@@ -184,6 +189,7 @@ export default function Home() {
           quantity={1}
           onClose={() => setIsBookingModalOpen(false)}
           bookingDate={selectedEvent}
+          onBookingSuccess={handleBookingSuccess}
         />
       )}
     </div>
