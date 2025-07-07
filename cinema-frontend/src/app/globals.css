@@ -5,7 +5,7 @@
 }
 
 body {
-  background: linear-gradient(to bottom, #e6e9f0, #c6d3e6);
+  background: white;
   color: #0d141c;
   font-family: "Plus Jakarta Sans", "Noto Sans", "Inter", "Arial", sans-serif;
   overflow-x: hidden;
@@ -23,11 +23,12 @@ body {
   left: 0;
   right: 0;
   z-index: 1000;
+  height: 80px;
 }
 
 .header-content {
   max-width: 1200px;
-  margin: 0 auto;
+  margin-left: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -52,11 +53,10 @@ body {
 }
 
 .logo-text {
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 700;
   line-height: 1.2;
-  letter-spacing: -0.015em;
-  text-transform: uppercase;
+
 }
 
 .nav-container {
@@ -564,41 +564,43 @@ h3 {
   position: relative;
   cursor: pointer;
   font-weight: 600;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15),
-    inset 0 1px 3px rgba(255, 255, 255, 0.2);
+  background-color: white !important;
+  /* box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15),
+    inset 0 1px 3px rgba(255, 255, 255, 0.2); */
   transition: transform 0.3s ease, background-color 0.3s ease,
     box-shadow 0.3s ease;
   perspective: 1000px;
+  border: none !important;
 }
 
 .seat-available {
-  background: linear-gradient(to bottom, #34c759, #2aa647);
-  color: #ffffff;
-  border: 2px solid #059669;
+  /* background: #8F460A; */
+  color: #8F460A;
+  /* border: 2px solid #ca6e23; */
 }
 
-.seat-available:hover {
+/* .seat-available:hover {
   transform: scale(1.2) rotateY(15deg);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), 0 0 8px rgba(52, 199, 89, 0.5);
-}
+} */
 
 .seat-booked {
-  background: linear-gradient(to bottom, #ef4444, #c92c2c);
-  color: #ffffff;
-  border: 2px solid #b91c1c;
+  background: #B7B7B7;
+  color: #2f2d2d;
+  /* border: 2px solid #6b6767; */
   cursor: not-allowed;
 }
 
 .seat-selected {
-  background: linear-gradient(to bottom, #10b981, #059669);
+  background: #5c3311;
   color: #ffffff;
-  border: 2px solid #047857;
+  /* border: 2px solid #ca6e23; */
   transform: scale(1.1) rotateY(10deg);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .chair-icon {
-  font-size: 1.25rem;
+  font-size: 2.5rem;
   margin-bottom: 3px;
 }
 
@@ -914,8 +916,8 @@ h3 {
 }
 
 .avail {
-  background: linear-gradient(to bottom, #34c759, #2aa647);
-  border: 2px solid #059669;
+  background: #8F460A;
+  border: 2px solid #ca6e23;
 }
 
 .spinner {

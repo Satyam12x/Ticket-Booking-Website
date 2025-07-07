@@ -1,0 +1,415 @@
+/* app/seat-layout/SeatLayout.css */
+/* @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=Port+Lligat+Slab&display=swap');
+.seat-layout-container {
+    max-width: 1200px;
+    margin: 80px auto 0;
+    padding: 2rem;
+    /* font-family: "Plus Jakarta Sans", "Noto Sans", "Inter", "Arial", sans-serif; */
+    font-family: 'Port Lligat Slab', serif;
+    background: #ffffff;
+    border-radius: 12px;
+    /* position: relative; */
+}
+
+.seat-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    /* position: relative; */
+}
+
+.back-btn {
+    position: fixed;
+    left: 58px;
+    top: 100px;
+    background: #8F460A;
+    color: #ffffff;
+    padding: 10px;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.back-btn:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.seat-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1f2a44;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.seat-subtitle {
+    font-size: 1rem;
+    color: #4f7496;
+    margin-bottom: 1rem;
+}
+
+.event-select-container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 12px 0;
+}
+
+/* Reusing booking-select from BookingLayout.css for consistency */
+.booking-select {
+    width: 100%;
+    height: 56px;
+    padding: 15px;
+    border: 1px solid #e4dddd;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #171212;
+    font-size: 16px;
+    background-image: url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724px%27 height=%2724px%27 fill=%27rgb(130,104,106)%27 viewBox=%270 0 256 256%27%3e%3cpath d=%27M181.66,170.34a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-48-48a8,8,0,0,1,11.32-11.32L128,212.69l42.34-42.35A8,8,0,0,1,181.66,170.34Zm-96-84.68L128,43.31l42.34,42.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,85.66Z%27%3e%3c/path%3e%3c/svg%3e');
+    background-position: right 15px center;
+    background-repeat: no-repeat;
+    background-size: 24px;
+    appearance: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.booking-select:focus {
+    border-color: #0c7ff2;
+    box-shadow: 0 0 6px rgba(12, 127, 242, 0.4);
+    transform: scale(1.01);
+}
+
+.seat-card {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    position: relative;
+    background: #ffffff;
+}
+
+.stage-background {
+    width: 100%;
+    position: absolute;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-radius: 50%/100%;
+    background: linear-gradient(to bottom, rgb(240 , 189, 189), white);
+    border-top: 2px solid rgb(224, 85, 85);
+    z-index: -1;
+}
+
+.stage-curve {
+    background: linear-gradient(to bottom, rgb(240, 189, 189), white);
+    position: relative;
+    color: #000000;
+    width: 80%;
+    height: 130px;
+    /* border-top-radius: 50%/100% ; */
+    text-align: center;
+    padding: 1rem;
+    margin: 12px auto;
+    border-top-left-radius:48%;
+    border-top-right-radius: 48%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    letter-spacing: 4px;
+    font-weight: 100;
+    text-transform: uppercase;
+    z-index: 10;
+}
+
+.door-label {
+    background: #8F460A;
+    color: #ffffff;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    padding: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    position: absolute;
+    left: 0px;
+    top: 50%;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.column-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    margin-left: 40px;
+    gap: 10px;
+}
+
+.column-label {
+    width: 50px;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2a44;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.column-label:nth-child(6) {
+    margin-left: 40px;
+}
+
+.seat-grid {
+    display: grid;
+    grid-template-rows: repeat(6, 60px);
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.seat-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.row-label {
+    width: 30px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2a44;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.seat-placeholder {
+    width: 50px;
+    height: 50px;
+    background: #e4dddd;
+    border-radius: 8px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.seat-line{
+    width: 100%;
+    height: 2px;
+    background-color: #8F460A;
+    margin-top: 30px;
+}
+
+.seat-legend {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    color: #1f2a44;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.legend-box {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.legend-box.avail {
+    background: #8F460A;
+    /* border: 2px solid #ca6e23; */
+    border: none !important;
+}
+
+.legend-box.booked {
+    background: #B7B7B7;
+    border: 2px solid #6b6767;
+}
+
+.legend-box.seat-selected {
+    background: linear-gradient(to right, #2563eb, #1e40af);
+    border: 2px solid #1e40af;
+}
+
+.spinner {
+    text-align: center;
+    font-size: 1.5rem;
+    color: #0c7ff2;
+    animation: spin 1s linear infinite;
+    margin: 2rem auto;
+}
+
+.error-text {
+    color: #ef4444;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+@media only screen and (max-width: 768px) {
+    .seat-layout-container {
+        padding: 1rem;
+        margin-top: 60px;
+    }
+
+    .seat-title {
+        font-size: 2rem;
+    }
+
+    .seat-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .event-select-container {
+        padding: 8px 12px;
+    }
+
+    .booking-select {
+        height: 48px;
+        padding: 12px;
+        font-size: 14px;
+        background-size: 20px;
+        background-position: right 12px center;
+    }
+
+    .seat-card {
+        padding: 1.5rem;
+    }
+
+    .stage-curve {
+        font-size: 1.25rem;
+        padding: 0.8rem;
+    }
+
+    .door-label {
+        font-size: 1rem;
+        top: 100px;
+        padding: 0.8rem;
+    }
+
+    .seat-grid {
+        grid-template-rows: repeat(6, 50px);
+        gap: 8px;
+    }
+
+    .seat-row {
+        gap: 8px;
+    }
+
+    .row-label {
+        width: 25px;
+        font-size: 1rem;
+    }
+
+    .column-row {
+        margin-left: 30px;
+        gap: 8px;
+    }
+
+    .column-label {
+        width: 40px;
+        font-size: 1rem;
+    }
+
+    .column-label:nth-child(6) {
+        margin-left: 30px;
+    }
+
+    .seat-placeholder {
+        width: 40px;
+        height: 40px;
+    }
+
+    .seat-legend {
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .legend-item {
+        font-size: 0.8rem;
+    }
+
+    .legend-box {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+}
+
+@media only screen and (max-width: 480px) {
+    .seat-layout-container {
+        padding: 0.5rem;
+    }
+
+    .seat-title {
+        font-size: 1.5rem;
+    }
+
+    .seat-subtitle {
+        font-size: 0.8rem;
+    }
+
+    .booking-select {
+        height: 40px;
+        padding: 10px;
+        font-size: 12px;
+        background-size: 18px;
+        background-position: right 10px center;
+    }
+
+    .seat-card {
+        padding: 1rem;
+    }
+
+    .stage-curve {
+        font-size: 1rem;
+        padding: 0.5rem;
+    }
+
+    .door-label {
+        font-size: 0.8rem;
+        top: 80px;
+        padding: 0.5rem;
+    }
+
+    .seat-grid {
+        grid-template-rows: repeat(6, 40px);
+        gap: 6px;
+    }
+
+    .seat-row {
+        gap: 6px;
+    }
+
+    .row-label {
+        width: 20px;
+        font-size: 0.8rem;
+    }
+
+    .column-row {
+        margin-left: 20px;
+        gap: 6px;
+    }
+
+    .column-label {
+        width: 32px;
+        font-size: 0.8rem;
+    }
+
+    .column-label:nth-child(6) {
+        margin-left: 20px;
+    }
+
+    .seat-placeholder {
+        width: 32px;
+        height: 32px;
+    }
+}

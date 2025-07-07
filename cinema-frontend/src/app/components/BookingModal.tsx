@@ -1,5 +1,6 @@
+// components/BookingModal.tsx
 import { useState } from "react";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { FaTimes } from "react-icons/fa";
 
 interface BookingModalProps {
@@ -91,7 +92,6 @@ export default function BookingModal({
       onBookingSuccess();
       onClose();
     } catch (error: unknown) {
-      // Check if error is an AxiosError
       if (axios.isAxiosError(error)) {
         setSubmitError(
           error.response?.data?.error || "Failed to book seat. Please try again."
@@ -112,17 +112,17 @@ export default function BookingModal({
     if (name === "name") {
       newErrors.name =
         !value.trim() ? "Name is required" :
-        value.length < 2 ? "Name must be at least 2 characters" : "";
+          value.length < 2 ? "Name must be at least 2 characters" : "";
     } else if (name === "email") {
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       newErrors.email =
         !value ? "Email is required" :
-        !emailRegex.test(value) ? "Invalid email format" : "";
+          !emailRegex.test(value) ? "Invalid email format" : "";
     } else if (name === "phone") {
       const phoneRegex = /^(\+?\d{1,3}[-.\s]?)?\d{10}$/;
       newErrors.phone =
         !value ? "Phone number is required" :
-        !phoneRegex.test(value) ? "Invalid phone number format (10 digits or +[country code][10 digits])" : "";
+          !phoneRegex.test(value) ? "Invalid phone number format (10 digits or +[country code][10 digits])" : "";
     }
     setErrors(newErrors);
   };
@@ -134,8 +134,8 @@ export default function BookingModal({
         <button onClick={onClose} className="modal-close" aria-label="Close modal">
           <FaTimes size={16} />
         </button>
-        <h3>Book Seat {seatId}</h3>
-        <p style={{ color: '#6b7280', marginBottom: '15px' }}>
+        <h3 className="seat-title">Book Seat {seatId}</h3>
+        <p style={{ color: '#4f7496', marginBottom: '15px' }}>
           Price: ₹{price} | Date: {bookingDate}
         </p>
         {submitError && <p className="error-text active">{submitError}</p>}
@@ -179,10 +179,16 @@ export default function BookingModal({
           <div className="button-group">
             <button
               type="submit"
-              className="submit-btn"
+              className={`book-button ${isSubmitting || Object.values(errors).some((e) => e) ? "disabled" : ""}`}
               disabled={isSubmitting || Object.values(errors).some((e) => e)}
             >
-              {isSubmitting ? "Booking..." : "Confirm Booking"}
+              {isSubmitting ? (
+                <>
+                  <span className="spinner-btn">⏳</span> Booking...
+                </>
+              ) : (
+                "Confirm Booking"
+              )}
             </button>
             <button
               type="button"
