@@ -1,4 +1,3 @@
-// app/seat-layout/page.tsx
 "use client";
 import "../components/SeatLayout.css";
 import { FaChevronLeft } from "react-icons/fa";
@@ -16,6 +15,7 @@ interface Event {
     time: string;
     venue: string;
     description: string;
+    totalSeats: number;
 }
 
 interface SeatData {
@@ -27,9 +27,6 @@ interface SeatData {
     status: string;
     bookedBy: { name: string; email: string; phone: string } | null;
 }
-
-const rows = ["A", "B", "C", "D", "E", "F"];
-const columns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 export default function SeatLayout() {
     const searchParams = useSearchParams();
@@ -77,12 +74,12 @@ export default function SeatLayout() {
         }
     };
 
-    // const handleEventChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    //     const eventId = e.target.value;
-    //     setSelectedEvent(eventId);
-    //     const event = events.find((evt) => evt._id === eventId);
-    //     if (event) fetchSeats(event.date);
-    // };
+    const handleEventChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const eventId = e.target.value;
+        setSelectedEvent(eventId);
+        const event = events.find((evt) => evt._id === eventId);
+        if (event) fetchSeats(event.date);
+    };
 
     const handleSeatClick = (seat: SeatData) => {
         if (seat.status === "available") {
@@ -98,8 +95,17 @@ export default function SeatLayout() {
         setIsBookingModalOpen(false);
     };
 
+    const selectedEventDetails = events.find((event) => event._id === selectedEvent);
+    const columns = Array.from({ length: 10 }, (_, i) => i + 1);
+    const rows = selectedEventDetails
+        ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").slice(
+            0,
+            Math.ceil(selectedEventDetails.totalSeats / 10)
+        )
+        : [];
+
     return (
-        <div className="seat-layout-container">
+        <div className="seat-layout-container" style={{ "--num-rows": rows.length } as React.CSSProperties}>
             <header className="seat-header">
                 <Link href="/" className="back-btn" aria-label="Go back to booking page">
                     <FaChevronLeft size={18} />
@@ -112,7 +118,7 @@ export default function SeatLayout() {
                     <select
                         value={selectedEvent}
                         onChange={handleEventChange}
-                        className="booking-select" // Use booking-select for consistency
+                        className="booking-select"
                         aria-label="Select an event"
                         disabled={isLoading}
                     >
@@ -138,8 +144,6 @@ export default function SeatLayout() {
             <div className="seat-card">
                 <div className="stage-curve">
                     <div className="stage-text">STAGE</div>
-                    <div className="stage-background"></div>
-
                 </div>
                 <div className="door-label">DOOR</div>
 
@@ -153,21 +157,28 @@ export default function SeatLayout() {
                     {rows.map((row) => (
                         <div key={row} className="seat-row">
                             <div className="row-label">{row}</div>
-                            {columns.map((col) => {
-                                const seatId = `${row}${col}`;
-                                const seat = seats.find((s) => s.seatId === seatId);
-                                return seat ? (
-                                    <Seat
-                                        key={seat.seatId}
-                                        seat={seat}
-                                        onClick={() => handleSeatClick(seat)}
-                                        isColumnSix={col === 6}
-                                        isSelected={seat.seatId === selectedSeat}
-                                    />
-                                ) : (
-                                    <div key={seatId} className="seat-placeholder" aria-hidden="true" />
-                                );
-                            })}
+                            {columns
+                                .slice(
+                                    0,
+                                    row === rows[rows.length - 1]
+                                        ? selectedEventDetails!.totalSeats % 10 || 10
+                                        : 10
+                                )
+                                .map((col) => {
+                                    const seatId = `${row}${col}`;
+                                    const seat = seats.find((s) => s.seatId === seatId);
+                                    return seat ? (
+                                        <Seat
+                                            key={seat.seatId}
+                                            seat={seat}
+                                            onClick={() => handleSeatClick(seat)}
+                                            isColumnSix={col === 6}
+                                            isSelected={seat.seatId === selectedSeat}
+                                        />
+                                    ) : (
+                                        <div key={seatId} className="seat-placeholder" aria-hidden="true" />
+                                    );
+                                })}
                         </div>
                     ))}
                 </div>
@@ -182,10 +193,10 @@ export default function SeatLayout() {
                         <div className="legend-box booked" />
                         <span>Booked</span>
                     </div>
-                    {/* <div className="legend-item">
+                    <div className="legend-item">
                         <div className="legend-box seat-selected" />
                         <span>Selected</span>
-                    </div> */}
+                    </div>
                 </div>
             </div>
 

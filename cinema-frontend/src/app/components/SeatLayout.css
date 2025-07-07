@@ -1,21 +1,17 @@
-/* app/seat-layout/SeatLayout.css */
-/* @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&display=swap'); */
 @import url('https://fonts.googleapis.com/css2?family=Port+Lligat+Slab&display=swap');
+
 .seat-layout-container {
     max-width: 1200px;
     margin: 80px auto 0;
     padding: 2rem;
-    /* font-family: "Plus Jakarta Sans", "Noto Sans", "Inter", "Arial", sans-serif; */
     font-family: 'Port Lligat Slab', serif;
     background: #ffffff;
     border-radius: 12px;
-    /* position: relative; */
 }
 
 .seat-header {
     text-align: center;
     margin-bottom: 2rem;
-    /* position: relative; */
 }
 
 .back-btn {
@@ -62,7 +58,6 @@
     padding: 12px 0;
 }
 
-/* Reusing booking-select from BookingLayout.css for consistency */
 .booking-select {
     width: 100%;
     height: 56px;
@@ -96,29 +91,16 @@
     background: #ffffff;
 }
 
-.stage-background {
-    width: 100%;
-    position: absolute;
-    height: 100%;
-    top: 0;
-    left: 0;
-    border-radius: 50%/100%;
-    background: linear-gradient(to bottom, rgb(240 , 189, 189), white);
-    border-top: 2px solid rgb(224, 85, 85);
-    z-index: -1;
-}
-
 .stage-curve {
     background: linear-gradient(to bottom, rgb(240, 189, 189), white);
     position: relative;
     color: #000000;
     width: 80%;
     height: 130px;
-    /* border-top-radius: 50%/100% ; */
     text-align: center;
     padding: 1rem;
     margin: 12px auto;
-    border-top-left-radius:48%;
+    border-top-left-radius: 48%;
     border-top-right-radius: 48%;
     display: flex;
     align-items: center;
@@ -130,6 +112,13 @@
     z-index: 10;
 }
 
+.stage-text {
+    font-size: 2rem;
+    font-weight: 100;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+}
+
 .door-label {
     background: #8F460A;
     color: #ffffff;
@@ -138,8 +127,9 @@
     padding: 1rem;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     position: absolute;
-    left: 0px;
+    left: 0;
     top: 50%;
+    transform: translateY(-50%);
     font-size: 1rem;
     font-weight: 700;
 }
@@ -167,7 +157,7 @@
 
 .seat-grid {
     display: grid;
-    grid-template-rows: repeat(6, 60px);
+    grid-template-rows: repeat(var(--num-rows, 6), 60px);
     align-items: center;
     justify-content: center;
     gap: 10px;
@@ -195,11 +185,12 @@
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.seat-line{
-    width: 100%;
+.seat-line {
+    width: calc(30px + 10 * 50px + 9 * 10px + 40px); /* row-label + 10 seats * seat-width + 9 gaps + column-row margin-left */
     height: 2px;
     background-color: #8F460A;
-    margin-top: 30px;
+    margin: 30px auto 0;
+    max-width: 100%;
 }
 
 .seat-legend {
@@ -226,8 +217,7 @@
 
 .legend-box.avail {
     background: #8F460A;
-    /* border: 2px solid #ca6e23; */
-    border: none !important;
+    border: none;
 }
 
 .legend-box.booked {
@@ -288,16 +278,21 @@
     .stage-curve {
         font-size: 1.25rem;
         padding: 0.8rem;
+        height: 100px;
+    }
+
+    .stage-text {
+        font-size: 1.25rem;
     }
 
     .door-label {
         font-size: 1rem;
-        top: 100px;
+        top: 50%;
         padding: 0.8rem;
     }
 
     .seat-grid {
-        grid-template-rows: repeat(6, 50px);
+        grid-template-rows: repeat(var(--num-rows, 6), 50px);
         gap: 8px;
     }
 
@@ -327,6 +322,11 @@
     .seat-placeholder {
         width: 40px;
         height: 40px;
+    }
+
+    .seat-line {
+        width: calc(25px + 10 * 40px + 9 * 8px + 30px);
+        margin: 20px auto 0;
     }
 
     .seat-legend {
@@ -372,16 +372,20 @@
     .stage-curve {
         font-size: 1rem;
         padding: 0.5rem;
+        height: 80px;
+    }
+
+    .stage-text {
+        font-size: 1rem;
     }
 
     .door-label {
         font-size: 0.8rem;
-        top: 80px;
         padding: 0.5rem;
     }
 
     .seat-grid {
-        grid-template-rows: repeat(6, 40px);
+        grid-template-rows: repeat(var(--num-rows, 6), 40px);
         gap: 6px;
     }
 
@@ -411,5 +415,10 @@
     .seat-placeholder {
         width: 32px;
         height: 32px;
+    }
+
+    .seat-line {
+        width: calc(20px + 10 * 32px + 9 * 6px + 20px);
+        margin: 15px auto 0;
     }
 }
