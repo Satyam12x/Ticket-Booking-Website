@@ -178,7 +178,7 @@ export default function Home() {
                           col === 6 ? "ml-gap" : ""
                         }`}
                         aria-hidden="true"
-                      >
+                      ><FaCouch className="chair-icon" />
                         <span className="seat-id">{seatId}</span>
                       </div>
                     );
