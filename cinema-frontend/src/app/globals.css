@@ -15,7 +15,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #e7edf4;
+  border-bottom: 1px solid #e8edf3;
   padding: 12px 40px;
   background: #ffffff;
   position: fixed;
@@ -38,7 +38,7 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
-  color: #0d141c;
+  color: #0e151b;
 }
 
 .logo-icon {
@@ -73,7 +73,7 @@ body {
 }
 
 .nav-link {
-  color: #0d141c;
+  color: #0e151b;
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -86,8 +86,8 @@ body {
 }
 
 .notification-btn {
-  background: #e7edf4;
-  color: #0d141c;
+  background: #e8edf3;
+  color: #0e151b;
   border: none;
   border-radius: 8px;
   height: 40px;
@@ -134,7 +134,7 @@ body {
   top: 100%;
   right: 0;
   background: #ffffff;
-  color: #0d141c;
+  color: #0e151b;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   width: 250px;
@@ -149,7 +149,7 @@ body {
   font-size: 14px;
   margin-bottom: 8px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #e7edf4;
+  border-bottom: 1px solid #e8edf3;
 }
 
 .notification-item:last-child {
@@ -165,18 +165,28 @@ body {
   background-repeat: no-repeat;
 }
 
-.event-form-container {
-  max-width: 512px;
+.admin-layout {
+  display: flex;
+  gap: 20px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+}
+
+.event-form-container {
   flex: 1;
+  max-width: 50%;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .form-title {
   font-size: 32px;
   font-weight: 700;
   line-height: 1.2;
-  color: #0d141c;
+  color: #0e151b;
   margin-bottom: 16px;
   text-align: left;
 }
@@ -200,7 +210,7 @@ body {
   font-size: 16px;
   font-weight: 500;
   line-height: 1.5;
-  color: #0d141c;
+  color: #0e151b;
   margin-bottom: 8px;
 }
 
@@ -210,8 +220,8 @@ body {
   padding: 15px;
   border: 2px solid #cedbe8;
   border-radius: 8px;
-  background: #f8fafc;
-  color: #0d141c;
+  background: #f8fafb;
+  color: #0e151b;
   font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
@@ -228,7 +238,7 @@ body {
 }
 
 .form-input::placeholder {
-  color: #49739c;
+  color: #4f7496;
 }
 
 .form-input[type="date"],
@@ -252,41 +262,71 @@ body {
 }
 
 .event-list-container {
-  max-width: 960px;
-  margin: 20px auto;
+  flex: 1;
+  max-width: 50%;
   padding: 20px;
-}
-
-.event-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
-}
-
-.event-card {
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 16px;
+  background: #f8fafb;
+  border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.event-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+.event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.event-card-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #0d141c;
-  margin-bottom: 8px;
+.event-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #f8fafb;
+  padding: 8px 16px;
+  min-height: 72px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.event-card-text {
+.event-item:hover {
+  background: #e8edf3;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.event-image {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.event-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.event-name {
+  color: #0e151b;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-datetime {
+  color: #4f7496;
   font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 8px;
+  font-weight: 400;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .book-tickets-btn {
@@ -298,7 +338,6 @@ body {
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  width: 100%;
   text-align: center;
   transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
 }
@@ -311,7 +350,7 @@ body {
 
 .no-events {
   font-size: 16px;
-  color: #6b7280;
+  color: #4f7496;
   text-align: center;
   padding: 16px;
 }
@@ -328,7 +367,7 @@ body {
 
 .event-detail-text {
   font-size: 14px;
-  color: #6b7280;
+  color: #4f7496;
   margin-bottom: 8px;
 }
 
@@ -885,6 +924,13 @@ h3 {
 }
 
 @media only screen and (max-width: 768px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+  .event-form-container,
+  .event-list-container {
+    max-width: 100%;
+  }
   .theater-container {
     padding: 1rem;
   }
@@ -902,23 +948,20 @@ h3 {
   }
   .event-form-container {
     padding: 16px;
-    max-width: 100%;
   }
   .event-list-container {
     padding: 16px;
-    max-width: 100%;
   }
   .event-seats-container {
     padding: 16px;
-    max-width: 100%;
   }
   .form-title {
     font-size: 24px;
   }
-  .event-card-title {
-    font-size: 16px;
+  .event-name {
+    font-size: 14px;
   }
-  .event-card-text,
+  .event-datetime,
   .event-detail-text {
     font-size: 13px;
   }
@@ -946,8 +989,13 @@ h3 {
     font-size: 12px;
     min-width: 80px;
   }
-  .event-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  .event-item {
+    padding: 8px 12px;
+    min-height: 60px;
+  }
+  .event-image {
+    width: 48px;
+    height: 48px;
   }
   h1 {
     font-size: 2rem;
@@ -1076,10 +1124,10 @@ h3 {
   .form-title {
     font-size: 20px;
   }
-  .event-card-title {
-    font-size: 14px;
+  .event-name {
+    font-size: 13px;
   }
-  .event-card-text,
+  .event-datetime,
   .event-detail-text {
     font-size: 12px;
   }
@@ -1107,8 +1155,13 @@ h3 {
     font-size: 11px;
     min-width: 72px;
   }
-  .event-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  .event-item {
+    padding: 6px 8px;
+    min-height: 56px;
+  }
+  .event-image {
+    width: 40px;
+    height: 40px;
   }
   h1 {
     font-size: 1.5rem;

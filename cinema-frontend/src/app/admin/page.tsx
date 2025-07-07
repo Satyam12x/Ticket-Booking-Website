@@ -237,7 +237,7 @@ export default function Admin() {
       <h1 className="text-5xl">Admin Dashboard</h1>
       {error && <p className="error-text">{error}</p>}
       {view === "create" && (
-        <>
+        <div className="admin-layout">
           <div className="event-form-container">
             <h2 className="form-title">Create Event</h2>
             <form onSubmit={handleSubmit} className="event-form">
@@ -325,17 +325,28 @@ export default function Admin() {
           </div>
           <div className="event-list-container">
             <h2 className="form-title">Scheduled Events</h2>
-            <div className="event-grid">
+            <div className="event-list">
               {events.length === 0 ? (
                 <p className="no-events">No events scheduled</p>
               ) : (
                 events.map((event) => (
-                  <div key={event._id} className="event-card">
-                    <h3 className="event-card-title">{event.name}</h3>
-                    <p className="event-card-text">Date: {event.date}</p>
-                    <p className="event-card-text">Time: {event.time}</p>
-                    <p className="event-card-text">Venue: {event.venue}</p>
-                    <p className="event-card-text">Description: {event.description}</p>
+                  <div key={event._id} className="event-item">
+                    <div
+                      className="event-image"
+                      style={{ backgroundImage: `url("https://cdna.artstation.com/p/assets/images/images/026/941/604/large/kaustubh-chaudhary-doremon-pink.jpg?1590151532")` }}
+                    ></div>
+                    <div className="event-info">
+                      <p className="event-name">{event.name}</p>
+                      <p className="event-datetime">
+                        {new Date(event.date).toLocaleDateString("en-US", {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                        {" · "}
+                        {event.time}
+                      </p>
+                    </div>
                     <button
                       className="book-tickets-btn"
                       onClick={() => handleBookTickets(event.date)}
@@ -347,7 +358,7 @@ export default function Admin() {
               )}
             </div>
           </div>
-        </>
+        </div>
       )}
       {view === "seats" && selectedEventDetails && (
         <div className="event-seats-container">

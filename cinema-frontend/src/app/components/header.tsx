@@ -1,45 +1,14 @@
 "use client";
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState } from "react";
 import { FaBell } from "react-icons/fa";
-import Link from "next/link";
-
-interface Event {
-  _id: string;
-  name: string;
-  date: string;
-  time: string;
-  description: string;
-  venue: string;
-}
 
 export default function Header() {
-  const [newEvents, setNewEvents] = useState<Event[]>([]);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-
-  useEffect(() => {
-    const lastChecked = localStorage.getItem("lastEventCheck")
-      ? new Date(localStorage.getItem("lastEventCheck")!)
-      : new Date();
-
-    const fetchNewEvents = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/events");
-        const events = response.data;
-        const recentEvents = events.filter(
-          (event: Event) => new Date(event.date) > lastChecked
-        );
-        setNewEvents(recentEvents);
-        localStorage.setItem("lastEventCheck", new Date().toISOString());
-      } catch (err) {
-        console.error("Failed to fetch events for notifications:", err);
-      }
-    };
-
-    fetchNewEvents();
-    const interval = setInterval(fetchNewEvents, 60000); // Check every minute
-    return () => clearInterval(interval);
-  }, []);
+  const notifications = [
+    "New booking for The Music Festival",
+    "Event The Comedy Show is sold out",
+    "New user registered",
+  ];
 
   return (
     <header className="header">
@@ -57,37 +26,33 @@ export default function Header() {
         </div>
         <div className="nav-container">
           <nav className="nav">
-            <Link href="/" className="nav-link">Home</Link>
-            <Link href="/admin" className="nav-link">Admin</Link>
+            <a href="/" className="nav-link">Home</a>
+            <a href="/explore" className="nav-link">Explore</a>
+            <a href="/create" className="nav-link">Create</a>
+            <a href="/my-events" className="nav-link">My Events</a>
           </nav>
           <button
             className="notification-btn"
             onClick={() => setIsNotificationOpen(!isNotificationOpen)}
           >
             <FaBell className="notification-icon" />
-            {newEvents.length > 0 && (
-              <span className="notification-badge">{newEvents.length}</span>
+            {notifications.length > 0 && (
+              <span className="notification-badge">{notifications.length}</span>
             )}
           </button>
-          <div
-            className="profile-picture"
-            style={{
-              backgroundImage: `url("https://via.placeholder.com/40")`,
-            }}
-          ></div>
           {isNotificationOpen && (
             <div className="notification-dropdown">
-              {newEvents.length === 0 ? (
-                <p className="notification-item">No new events</p>
-              ) : (
-                newEvents.map((event) => (
-                  <p key={event._id} className="notification-item">
-                    New Event: {event.name} on {event.date} at {event.time}
-                  </p>
-                ))
-              )}
+              {notifications.map((notification, index) => (
+                <div key={index} className="notification-item">
+                  {notification}
+                </div>
+              ))}
             </div>
           )}
+          <div
+            className="profile-picture"
+            style={{ backgroundImage: `url("https://via.placeholder.com/40")` }}
+          ></div>
         </div>
       </div>
     </header>
