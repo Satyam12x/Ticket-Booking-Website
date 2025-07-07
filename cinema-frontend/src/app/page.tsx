@@ -80,7 +80,7 @@ export default function Home() {
 
   return (
     <div className="theater-container">
-      <h1>Book Your Seats</h1>
+      <h1 className="text-5xl">Book Your Seats</h1>
       {error && <p className="error-text">{error}</p>}
       <div className="card">
         <div className="input-group">

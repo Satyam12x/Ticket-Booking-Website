@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@radix-ui/react-popover": "^1.1.14",
+    "autoprefixer": "^10.4.21",
     "axios": "^1.10.0",
     "clsx": "^2.1.1",
     "components": "^0.1.0",
@@ -20,7 +21,8 @@
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
     "react-toastify": "^11.0.5",
-    "shadcn": "^2.7.0"
+    "shadcn": "^2.7.0",
+    "tailwind": "^4.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
