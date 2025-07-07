@@ -1,57 +1,123 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { FaBell } from "react-icons/fa";
+import axios from "axios";
+
+interface Event {
+  _id: string;
+  name: string;
+  date: string;
+  time: string;
+  venue: string;
+  description: string;
+  totalSeats: number;
+}
 
 export default function Header() {
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const notifications = [
-    "New booking for The Music Festival",
-    "Event The Comedy Show is sold out",
-    "New user registered",
-  ];
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Event[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/events/recent");
+        setNotifications(response.data);
+      } catch (error) {
+        console.error("Failed to fetch notifications:", error);
+      }
+    };
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const handleViewDetails = (eventId: string) => {
+    router.push(`/?eventId=${eventId}`);
+    setIsDropdownOpen(false);
+  };
 
   return (
     <header className="header">
       <div className="header-content">
         <div className="logo-container">
           <div className="logo-icon">
-            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
-                d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z"
-                fill="currentColor"
-              ></path>
+                d="M12 2L2 7L12 12L22 7L12 2Z"
+                fill="#0C7FF2"
+              />
+              <path
+                d="M2 17L12 22L22 17"
+                stroke="#0C7FF2"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M2 12L12 17L22 12"
+                stroke="#0C7FF2"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </div>
-          <h2 className="logo-text">MBAS</h2>
+          <span className="logo-text">SeatSync</span>
         </div>
         <div className="nav-container">
           <nav className="nav">
             <a href="/" className="nav-link">Home</a>
-            <a href="/explore" className="nav-link">Explore</a>
-            <a href="/create" className="nav-link">Create</a>
-            <a href="/my-events" className="nav-link">My Events</a>
+            <a href="/admin" className="nav-link">Admin</a>
+            <a href="/about" className="nav-link">About</a>
           </nav>
-          <button
-            className="notification-btn"
-            onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-          >
-            <FaBell className="notification-icon" />
-            {notifications.length > 0 && (
-              <span className="notification-badge">{notifications.length}</span>
+          <div className="notification-container">
+            <button className="notification-btn" onClick={toggleDropdown}>
+              <FaBell className="notification-icon" />
+              {notifications.length > 0 && (
+                <span className="notification-badge">{notifications.length}</span>
+              )}
+            </button>
+            {isDropdownOpen && (
+              <div className="notification-dropdown">
+                {notifications.length === 0 ? (
+                  <p className="notification-item">No new events</p>
+                ) : (
+                  notifications.map((event) => (
+                    <div key={event._id} className="notification-item">
+                      <p>New event: {event.name}</p>
+                      <p>
+                        {new Date(event.date).toLocaleDateString("en-US", {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                        {" · "}
+                        {event.time}
+                      </p>
+                      <button
+                        className="book-tickets-btn btn-small"
+                        onClick={() => handleViewDetails(event._id)}
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
             )}
-          </button>
-          {isNotificationOpen && (
-            <div className="notification-dropdown">
-              {notifications.map((notification, index) => (
-                <div key={index} className="notification-item">
-                  {notification}
-                </div>
-              ))}
-            </div>
-          )}
+          </div>
           <div
             className="profile-picture"
-            style={{ backgroundImage: `url("https://via.placeholder.com/40")` }}
+            style={{
+              backgroundImage: `url("https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80")`,
+            }}
           ></div>
         </div>
       </div>

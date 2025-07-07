@@ -18,6 +18,7 @@ interface IEvent {
   venue: string;
   password: string;
   totalSeats: number;
+  createdAt: Date;
 }
 
 const eventSchema = new Schema<IEvent>({
@@ -28,6 +29,7 @@ const eventSchema = new Schema<IEvent>({
   venue: { type: String, required: true },
   password: { type: String, required: true },
   totalSeats: { type: Number, required: true, min: 1 },
+  createdAt: { type: Date, default: Date.now },
 });
 
 const Event = mongoose.model<IEvent>('Event', eventSchema);
@@ -274,8 +276,8 @@ const sendBookingConfirmation = async (
               near YMCA University, Sector-11, Faridabad
             </p>
             <a href="http://localhost:3000/ticket?seatId=${seatId}&bookingDate=${bookingDate}&name=${encodeURIComponent(
-              name
-            )}" class="download-btn">Download Ticket</a>
+        name
+      )}" class="download-btn">Download Ticket</a>
           </div>
           <div class="right-section">
             <div class="instructions-box">
@@ -364,6 +366,20 @@ const getEvents = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error('Get events error:', error);
     res.status(500).json({ error: 'Failed to fetch events' });
+  }
+};
+
+const getRecentEvents = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const events = await Event.find({
+      createdAt: { $gte: sevenDaysAgo },
+    }).sort({ createdAt: -1 });
+    res.json(events);
+  } catch (error) {
+    console.error('Get recent events error:', error);
+    res.status(500).json({ error: 'Failed to fetch recent events' });
   }
 };
 
@@ -539,7 +555,7 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const seat = await Seat.findOne({seatId });
+    const seat = await Seat.findOne({ seatId });
     if (!seat) {
       console.error('Seat not found:', seatId);
       res.status(404).json({ error: 'Seat not found' });
@@ -574,6 +590,7 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
 
 app.post('/api/seats/initialize', initializeSeatsEndpoint);
 app.get('/api/events', getEvents);
+app.get('/api/events/recent', getRecentEvents);
 app.post('/api/events', createEvent);
 app.delete('/api/events/:id', deleteEvent);
 app.get('/api/seats', getSeats);

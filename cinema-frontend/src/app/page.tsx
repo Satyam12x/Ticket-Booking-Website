@@ -4,6 +4,7 @@ import axios from "axios";
 import Seat from "./components/Seat";
 import BookingModal from "./components/BookingModal";
 import { FaCouch } from "react-icons/fa";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface Event {
   _id: string;
@@ -32,6 +33,8 @@ export default function Home() {
   const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [error, setError] = useState("");
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     fetchEvents();
@@ -42,9 +45,20 @@ export default function Home() {
       const response = await axios.get("http://localhost:5000/api/events");
       const fetchedEvents = response.data;
       setEvents(fetchedEvents);
+      const eventId = searchParams.get("eventId");
       if (fetchedEvents.length > 0) {
-        setSelectedEvent(fetchedEvents[0]._id);
-        fetchSeats(fetchedEvents[0].date);
+        const initialEventId = eventId && fetchedEvents.find((evt: Event) => evt._id === eventId)
+          ? eventId
+          : fetchedEvents[0]._id;
+        setSelectedEvent(initialEventId);
+        const initialEvent = fetchedEvents.find((evt: Event) => evt._id === initialEventId);
+        if (initialEvent) {
+          fetchSeats(initialEvent.date);
+        }
+        // Clear query parameter after setting the event
+        if (eventId) {
+          router.replace("/", { scroll: false });
+        }
       }
     } catch (err) {
       setError("Failed to fetch events");
@@ -118,13 +132,9 @@ export default function Home() {
         </div>
         {selectedEventDetails ? (
           <div>
-            <p className="event-details-header">Event Details</p>
+            <h2 className="event-details-header">{selectedEventDetails.name}</h2>
             <p className="event-details-subtitle">Select your seats for the event</p>
             <div className="event-details-grid">
-              <div className="event-details-row">
-                <p className="event-details-label">Event Name</p>
-                <p className="event-details-value">{selectedEventDetails.name}</p>
-              </div>
               <div className="event-details-row">
                 <p className="event-details-label">Date</p>
                 <p className="event-details-value">
