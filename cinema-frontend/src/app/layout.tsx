@@ -1,4 +1,5 @@
 import "./globals.css";
+// import "./components/SeatSelection.css";
 import Header from "./components/header";
 
 export const metadata = {

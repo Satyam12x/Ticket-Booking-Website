@@ -11,7 +11,10 @@ interface Event {
   date: string;
   time: string;
   description: string;
+<<<<<<< Updated upstream
   venue: string;
+=======
+>>>>>>> Stashed changes
 }
 
 interface SeatData {
@@ -39,9 +42,17 @@ export default function Home() {
   const fetchEvents = async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/events");
+<<<<<<< Updated upstream
       setEvents(response.data);
       if (response.data.length > 0 && !selectedEvent) {
         setSelectedEvent(response.data[0].date);
+=======
+      const fetchedEvents = response.data;
+      setEvents(fetchedEvents);
+      if (fetchedEvents.length > 0) {
+        setSelectedEvent(fetchedEvents[0]._id);
+        fetchSeats(fetchedEvents[0].date);
+>>>>>>> Stashed changes
       }
     } catch (err) {
       setError("Failed to fetch events");
@@ -78,9 +89,13 @@ export default function Home() {
     }
   };
 
+<<<<<<< Updated upstream
   const selectedEventDetails = events.find(
     (event) => event.date === selectedEvent
   );
+=======
+  const selectedEventDetails = events.find((event) => event._id === selectedEvent);
+>>>>>>> Stashed changes
   const rows = ["A", "B", "C", "D", "E", "F"];
   const columns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -104,6 +119,7 @@ export default function Home() {
           </select>
           <span className="input-label">Select Event</span>
         </div>
+<<<<<<< Updated upstream
         {selectedEventDetails && (
           <div style={{ marginTop: "15px" }}>
             <h3>{selectedEventDetails.name}</h3>
@@ -119,9 +135,41 @@ export default function Home() {
             <p style={{ color: "#6b7280" }}>
               Description: {selectedEventDetails.description}
             </p>
+=======
+        {selectedEventDetails ? (
+          <div>
+            <p className="event-details-header">Event Details</p>
+            <p className="event-details-subtitle">Select your seats for the event</p>
+            <div className="event-details-grid">
+              <div className="event-details-row">
+                <p className="event-details-label">Event Name</p>
+                <p className="event-details-value">{selectedEventDetails.name}</p>
+              </div>
+              <div className="event-details-row">
+                <p className="event-details-label">Date</p>
+                <p className="event-details-value">
+                  {new Date(selectedEventDetails.date).toLocaleDateString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
+              <div className="event-details-row">
+                <p className="event-details-label">Time</p>
+                <p className="event-details-value">{selectedEventDetails.time}</p>
+              </div>
+              <div className="event-details-row">
+                <p className="event-details-label">Venue</p>
+                <p className="event-details-value">{selectedEventDetails.venue}</p>
+              </div>
+            </div>
+>>>>>>> Stashed changes
           </div>
         )}
       </div>
+<<<<<<< Updated upstream
       {selectedEvent && (
         <div className="card">
           <h3>Seat Layout</h3> {/* Fixed typo: removed </ Ascending */}
@@ -165,6 +213,49 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+=======
+      <div className="card">
+        <h3>Seat Layout</h3>
+        <div className="stage">STAGE</div>
+        <div className="seat-grid-container">
+          <div className="door">DOOR</div>
+          <div>
+            <div className="column-row">
+              {columns.map((col) => (
+                <div key={col} className="column-label">
+                  {col}
+                </div>
+              ))}
+            </div>
+            <div className="seat-grid">
+              {rows.map((row) => (
+                <div key={row} className="seat-row">
+                  <div className="row-label">{row}</div>
+                  {columns.map((col) => {
+                    const seatId = `${row}${col}`;
+                    const seat = seats.find((s) => s.seatId === seatId);
+                    return seat ? (
+                      <Seat
+                        key={seat.seatId}
+                        seat={seat}
+                        onClick={() => handleSeatClick(seat)}
+                        isColumnSix={col === 6}
+                      />
+                    ) : (
+                      <div
+                        key={seatId}
+                        className={`seat seat-available ${
+                          col === 6 ? "ml-gap" : ""
+                        }`}
+                        aria-hidden="true"
+                      ><FaCouch className="chair-icon" />
+                        <span className="seat-id">{seatId}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+>>>>>>> Stashed changes
             </div>
           </div>
           <div style={{ textAlign: "right", marginTop: "15px" }}>

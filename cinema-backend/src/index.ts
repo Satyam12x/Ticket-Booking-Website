@@ -10,6 +10,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+
 interface IEvent {
   name: string;
   date: string;
@@ -17,7 +18,10 @@ interface IEvent {
   description: string;
   venue: string;
   password: string;
+<<<<<<< Updated upstream
   seatCount: number;
+=======
+>>>>>>> Stashed changes
 }
 
 const eventSchema = new Schema<IEvent>({
@@ -31,7 +35,10 @@ const eventSchema = new Schema<IEvent>({
     default: 'Mukesh Bhati Acting School, E1/74, Milan Road, near YMCA University, Sector-11, Faridabad',
   },
   password: { type: String, required: true },
+<<<<<<< Updated upstream
   seatCount: { type: Number, required: true, default: 50, min: 1, max: 100 },
+=======
+>>>>>>> Stashed changes
 });
 
 const Event = mongoose.model<IEvent>('Event', eventSchema);
@@ -75,6 +82,7 @@ const seatSchema = new Schema<ISeat>({
 });
 
 const Seat = mongoose.model<ISeat>('Seat', seatSchema);
+
 
 const sendBookingConfirmation = async (
   email: string,
@@ -222,6 +230,7 @@ const sendBookingConfirmation = async (
               box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
               transition: transform 0.2s ease;
             }
+<<<<<<< Updated upstream
             .download-btn:hover {
               transform: translateY(-2px);
             }
@@ -296,6 +305,39 @@ const sendBookingConfirmation = async (
                 </ul>
               </div>
               <div class="admit">ADMIT ONE</div>
+=======
+          }
+        </style>
+      </head>
+      <body>
+        <div class="ticket">
+          <div class="left-section">
+            <h4 class="subheading">MUKESH BHATI ACTING SCHOOL & CULTURAL WING PRESENTS</h4>
+            <h1 class="title">PROFESSOR SAHAB</h1>
+            <h2 class="subtitle">A COMEDY PLAY</h2>
+            <p class="timing">07 PM ONWARDS</p>
+            <p>Dear ${name},</p>
+            <p><strong>Seat:</strong> ${seatId}</p>
+            <p><strong>Date:</strong> ${bookingDate}</p>
+            <p class="venue">
+              Venue: Mukesh Bhati Acting School, E1/74, Milan Road, <br>
+              near YMCA University, Sector-11, Faridabad
+            </p>
+            <a href="http://localhost:3000/ticket?seatId=${seatId}&bookingDate=${bookingDate}&name=${encodeURIComponent(
+              name
+            )}" class="download-btn">Download Ticket</a>
+          </div>
+          <div class="right-section">
+            <div class="instructions-box">
+              <h3>INSTRUCTIONS</h3>
+              <ul>
+                <li>Please be seated at least 20 minutes before the performance.</li>
+                <li>Keep your phones on silent mode.</li>
+                <li>Please occupy your allotted seat.</li>
+                <li>Photography & Recording strictly prohibited during the performance.</li>
+                <li>Eatables are not allowed inside.</li>
+              </ul>
+>>>>>>> Stashed changes
             </div>
           </div>
         </body>
@@ -310,7 +352,12 @@ const sendBookingConfirmation = async (
   }
 };
 
+<<<<<<< Updated upstream
 const initializeSeatsForEvent = async (eventId: mongoose.Types.ObjectId, seatCount: number): Promise<void> => {
+=======
+
+const initializeSeats = async (): Promise<void> => {
+>>>>>>> Stashed changes
   try {
     const existingSeats = await Seat.countDocuments({ eventId });
     if (existingSeats > 0) {
@@ -318,6 +365,7 @@ const initializeSeatsForEvent = async (eventId: mongoose.Types.ObjectId, seatCou
       return;
     }
 
+<<<<<<< Updated upstream
     const cols = Math.ceil(Math.sqrt(seatCount));
     const rows = Math.ceil(seatCount / cols);
     const seats = [];
@@ -326,6 +374,14 @@ const initializeSeatsForEvent = async (eventId: mongoose.Types.ObjectId, seatCou
     for (let rowIdx = 0; rowIdx < rows && seatIndex < seatCount; rowIdx++) {
       const row = String.fromCharCode(65 + rowIdx); // A, B, C, ...
       for (let col = 1; col <= cols && seatIndex < seatCount; col++) {
+=======
+    const rows = ['A', 'B', 'C', 'D', 'E', 'F'];
+    const columns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const seats = [];
+
+    for (let row of rows) {
+      for (let col of columns) {
+>>>>>>> Stashed changes
         const seatId = `${row}${col}`;
         seats.push({
           eventId,
@@ -335,11 +391,15 @@ const initializeSeatsForEvent = async (eventId: mongoose.Types.ObjectId, seatCou
           price: 300,
           bookings: [],
         });
+<<<<<<< Updated upstream
         seatIndex++;
+=======
+>>>>>>> Stashed changes
       }
     }
 
     await Seat.insertMany(seats);
+<<<<<<< Updated upstream
     console.log(`Seats initialized for event ${eventId}: ${seats.length} seats`);
   } catch (error) {
     console.error(`Failed to initialize seats for event ${eventId}:`, error);
@@ -354,11 +414,15 @@ const initializeSeats = async (): Promise<void> => {
       await initializeSeatsForEvent(event._id, event.seatCount);
     }
     console.log('All seats initialized successfully');
+=======
+    console.log('Seats initialized successfully');
+>>>>>>> Stashed changes
   } catch (error) {
     console.error('Failed to initialize seats:', error);
     throw error;
   }
 };
+
 
 const initializeSeatsEndpoint = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -383,14 +447,25 @@ const getEvents = async (req: Request, res: Response): Promise<void> => {
 
 const createEvent = async (req: Request, res: Response): Promise<void> => {
   try {
+<<<<<<< Updated upstream
     const { name, date, time, description, venue, password, seatCount } = req.body;
     console.log('Create event request received:', { name, date, time, description, venue, password, seatCount });
 
     if (!name || !date || !time || !description || !venue || !password || !seatCount || seatCount < 1) {
       console.error('Missing required fields:', { name, date, time, description, venue, password, seatCount });
       res.status(400).json({ error: 'Name, date, time, description, venue, password, and seatCount are required' });
+=======
+    const { name, date, time, description, venue, password } = req.body;
+    console.log('Create event request received:', { name, date, time, description, venue, password });
+
+
+    if (!name || !date || !time || !description || !venue || !password) {
+      console.error('Missing required fields:', { name, date, time, description, venue, password });
+      res.status(400).json({ error: 'Name, date, time, description, venue, and password are required' });
+>>>>>>> Stashed changes
       return;
     }
+
 
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(date)) {
@@ -398,6 +473,7 @@ const createEvent = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ error: 'Invalid date format. Use YYYY-MM-DD' });
       return;
     }
+
 
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
     if (!timeRegex.test(time)) {
@@ -424,11 +500,19 @@ const createEvent = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+<<<<<<< Updated upstream
     const event = new Event({ name, date, time, description, venue, password, seatCount });
     await event.save();
     console.log('Event saved successfully:', event);
 
     await initializeSeatsForEvent(event._id, seatCount);
+=======
+
+    const event = new Event({ name, date, time, description, venue, password });
+    await event.save();
+    console.log('Event saved successfully:', event);
+
+>>>>>>> Stashed changes
     res.status(201).json({ message: 'Event created successfully', event });
   } catch (error: any) {
     console.error('Create event error:', {
@@ -460,7 +544,12 @@ const deleteEvent = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+<<<<<<< Updated upstream
     const seatsWithBookings = await Seat.find({ eventId: event._id, 'bookings.0': { $exists: true } });
+=======
+
+    const seatsWithBookings = await Seat.find({ 'bookings.date': event.date });
+>>>>>>> Stashed changes
     if (seatsWithBookings.length > 0) {
       res.status(400).json({ error: 'Cannot delete event with existing bookings' });
       return;
@@ -483,13 +572,18 @@ const getSeats = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+
     const event = await Event.findOne({ date: date.toString() });
     if (!event) {
       res.status(400).json({ error: 'No event scheduled for this date' });
       return;
     }
 
+<<<<<<< Updated upstream
     const seats = await Seat.find({ eventId: event._id });
+=======
+    const seats = await Seat.find();
+>>>>>>> Stashed changes
     const seatsWithStatus = seats.map((seat) => {
       const booking = seat.bookings.find((b) => b.date === date);
       return {
@@ -505,8 +599,13 @@ const getSeats = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (seats.length === 0) {
+<<<<<<< Updated upstream
       await initializeSeatsForEvent(event._id, event.seatCount);
       const newSeats = await Seat.find({ eventId: event._id });
+=======
+      await initializeSeats();
+      const newSeats = await Seat.find();
+>>>>>>> Stashed changes
       const newSeatsWithStatus = newSeats.map((seat) => ({
         _id: seat._id,
         eventId: seat.eventId,
@@ -532,11 +631,13 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
   try {
     const { seatId, name, email, phone, bookingDate, quantity } = req.body;
 
+
     if (!seatId || !name || !email || !phone || !bookingDate) {
       console.error('Missing required fields:', { seatId, name, email, phone, bookingDate });
       res.status(400).json({ error: 'seatId, name, email, phone, and bookingDate are required' });
       return;
     }
+
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
@@ -549,6 +650,7 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ error: 'Invalid phone number format. Use 10 digits or +[country code][10 digits]' });
       return;
     }
+
 
     const event = await Event.findOne({ date: bookingDate });
     if (!event) {
@@ -589,6 +691,7 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ error: 'Failed to book seat' });
   }
 };
+
 
 app.post('/api/seats/initialize', initializeSeatsEndpoint);
 app.get('/api/events', getEvents);
