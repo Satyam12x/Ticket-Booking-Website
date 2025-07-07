@@ -10,7 +10,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-
 interface IEvent {
   name: string;
   date: string;
@@ -18,6 +17,7 @@ interface IEvent {
   description: string;
   venue: string;
   password: string;
+  seatCount: number;
 }
 
 const eventSchema = new Schema<IEvent>({
@@ -25,8 +25,13 @@ const eventSchema = new Schema<IEvent>({
   date: { type: String, required: true, unique: true },
   time: { type: String, required: true },
   description: { type: String, required: true },
-  venue: { type: String, required: true },
+  venue: {
+    type: String,
+    required: true,
+    default: 'Mukesh Bhati Acting School, E1/74, Milan Road, near YMCA University, Sector-11, Faridabad',
+  },
   password: { type: String, required: true },
+  seatCount: { type: Number, required: true, default: 50, min: 1, max: 100 },
 });
 
 const Event = mongoose.model<IEvent>('Event', eventSchema);
@@ -42,6 +47,7 @@ interface IBooking {
 }
 
 interface ISeat {
+  eventId: mongoose.Types.ObjectId;
   seatId: string;
   row: string;
   column: number;
@@ -50,7 +56,8 @@ interface ISeat {
 }
 
 const seatSchema = new Schema<ISeat>({
-  seatId: { type: String, required: true, unique: true },
+  eventId: { type: Schema.Types.ObjectId, ref: 'Event', required: true },
+  seatId: { type: String, required: true },
   row: { type: String, required: true },
   column: { type: Number, required: true },
   price: { type: Number, required: true },
@@ -69,7 +76,6 @@ const seatSchema = new Schema<ISeat>({
 
 const Seat = mongoose.model<ISeat>('Seat', seatSchema);
 
-
 const sendBookingConfirmation = async (
   email: string,
   seatId: string,
@@ -86,7 +92,9 @@ const sendBookingConfirmation = async (
     });
 
     const seat = await Seat.findOne({ seatId });
+    const event = await Event.findOne({ date: bookingDate });
     const price = seat ? seat.price : 300;
+    const venue = event ? event.venue : 'Mukesh Bhati Acting School, E1/74, Milan Road, near YMCA University, Sector-11, Faridabad';
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -94,205 +102,204 @@ const sendBookingConfirmation = async (
       subject: 'Your Seat Booking Confirmation',
       html: `
         <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Professor Sahab Ticket</title>
-        <style>
-          body {
-            margin: 0;
-            padding: 20px;
-            font-family: 'Helvetica', 'Arial', sans-serif;
-            background-color: #111;
-            color: #fff;
-          }
-          .ticket {
-            max-width: 600px;
-            margin: 0 auto;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            background: linear-gradient(to right, #000, #222);
-          }
-          .left-section {
-            padding: 30px;
-          }
-          .right-section {
-            background-color: #f8b219;
-            color: #000;
-            padding: 20px;
-            text-align: center;
-          }
-          .subheading {
-            font-size: 14px;
-            color: #ddd;
-            margin-bottom: 10px;
-            letter-spacing: 0.5px;
-          }
-          .title {
-            font-size: 32px;
-            color: #f8b219;
-            margin: 10px 0;
-            font-weight: bold;
-          }
-          .subtitle {
-            font-size: 20px;
-            font-weight: bold;
-            margin: 10px 0;
-            color: white;
-          }
-          .timing,
-          .dates,
-          .venue {
-            font-size: 16px;
-            margin: 8px 0;
-            line-height: 1.5;
-            color: white;
-          }
-          .qr-pay {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-          }
-          .scan-text {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 8px;
-          }
-          .qr-code {
-            width: 100px;
-            height: 100px;
-            background: #fff;
-            padding: 5px;
-            border-radius: 8px;
-          }
-          .price {
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-          }
-          .instructions-box h3 {
-            font-size: 16px;
-            margin-bottom: 10px;
-            color: #000;
-          }
-          .instructions-box ul {
-            list-style: none;
-            padding: 0;
-            font-size: 14px;
-            text-align: left;
-          }
-          .instructions-box ul li {
-            margin-bottom: 8px;
-            position: relative;
-            padding-left: 20px;
-          }
-          .instructions-box ul li::before {
-            content: '•';
-            color: #000;
-            position: absolute;
-            left: 0;
-          }
-          .admit {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 20px;
-            color: #000;
-          }
-          .download-btn {
-            display: inline-block;
-            background: linear-gradient(to right, #2563eb, #1e40af);
-            color: #fff;
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            margin-top: 20px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s ease;
-          }
-          .download-btn:hover {
-            transform: translateY(-2px);
-          }
-          p {
-            color: white;
-          }
-          @media only screen and (max-width: 600px) {
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Professor Sahab Ticket</title>
+          <style>
             body {
-              padding: 10px;
+              margin: 0;
+              padding: 20px;
+              font-family: 'Helvetica', 'Arial', sans-serif;
+              background-color: #111;
+              color: #fff;
             }
             .ticket {
-              flex-direction: column;
+              max-width: 600px;
+              margin: 0 auto;
+              border-radius: 12px;
+              overflow: hidden;
+              box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+              background: linear-gradient(to right, #000, #222);
             }
-            .left-section, .right-section {
+            .left-section {
+              padding: 30px;
+            }
+            .right-section {
+              background-color: #f8b219;
+              color: #000;
               padding: 20px;
+              text-align: center;
+            }
+            .subheading {
+              font-size: 14px;
+              color: #ddd;
+              margin-bottom: 10px;
+              letter-spacing: 0.5px;
             }
             .title {
-              font-size: 24px;
+              font-size: 32px;
+              color: #f8b219;
+              margin: 10px 0;
+              font-weight: bold;
             }
             .subtitle {
-              font-size: 18px;
+              font-size: 20px;
+              font-weight: bold;
+              margin: 10px 0;
+              color: white;
             }
-            .timing, .dates, .venue {
+            .timing,
+            .dates,
+            .venue {
+              font-size: 16px;
+              margin: 8px 0;
+              line-height: 1.5;
+              color: white;
+            }
+            .qr-pay {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-top: 20px;
+            }
+            .scan-text {
               font-size: 14px;
+              font-weight: bold;
+              margin-bottom: 8px;
             }
             .qr-code {
-              width: 80px;
-              height: 80px;
+              width: 100px;
+              height: 100px;
+              background: #fff;
+              padding: 5px;
+              border-radius: 8px;
+            }
+            .price {
+              font-size: 24px;
+              font-weight: bold;
+              color: white;
             }
             .instructions-box h3 {
-              font-size: 14px;
+              font-size: 16px;
+              margin-bottom: 10px;
+              color: #000;
             }
             .instructions-box ul {
-              font-size: 12px;
+              list-style: none;
+              padding: 0;
+              font-size: 14px;
+              text-align: left;
+            }
+            .instructions-box ul li {
+              margin-bottom: 8px;
+              position: relative;
+              padding-left: 20px;
+            }
+            .instructions-box ul li::before {
+              content: '•';
+              color: #000;
+              position: absolute;
+              left: 0;
             }
             .admit {
-              font-size: 16px;
+              font-size: 18px;
+              font-weight: bold;
+              margin-top: 20px;
+              color: #000;
             }
             .download-btn {
-              padding: 10px 20px;
-              font-size: 14px;
+              display: inline-block;
+              background: linear-gradient(to right, #2563eb, #1e40af);
+              color: #fff;
+              padding: 12px 24px;
+              border-radius: 8px;
+              text-decoration: none;
+              font-weight: bold;
+              margin-top: 20px;
+              text-align: center;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+              transition: transform 0.2s ease;
             }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="ticket">
-          <div class="left-section">
-            <h4 class="subheading">MUKESH BHATI ACTING SCHOOL & CULTURAL WING PRESENTS</h4>
-            <h1 class="title">PROFESSOR SAHAB</h1>
-            <h2 class="subtitle">A COMEDY PLAY</h2>
-            <p class="timing">07 PM ONWARDS</p>
-            <p>Dear ${name},</p>
-            <p><strong>Seat:</strong> ${seatId}</p>
-            <p><strong>Date:</strong> ${bookingDate}</p>
-            <p class="venue">
-              Venue: Mukesh Bhati Acting School, E1/74, Milan Road, <br>
-              near YMCA University, Sector-11, Faridabad
-            </p>
-            <a href="http://localhost:3000/ticket?seatId=${seatId}&bookingDate=${bookingDate}&name=${encodeURIComponent(
-              name
-            )}" class="download-btn">Download Ticket</a>
-          </div>
-          <div class="right-section">
-            <div class="instructions-box">
-              <h3>INSTRUCTIONS</h3>
-              <ul>
-                <li>Please be seated at least 20 minutes before the performance.</li>
-                <li>Keep your phones on silent mode.</li>
-                <li>Please occupy your allotted seat.</li>
-                <li>Photography & Recording strictly prohibited during the performance.</li>
-                <li>Eatables are not allowed inside.</li>
-              </ul>
+            .download-btn:hover {
+              transform: translateY(-2px);
+            }
+            p {
+              color: white;
+            }
+            @media only screen and (max-width: 600px) {
+              body {
+                padding: 10px;
+              }
+              .ticket {
+                flex-direction: column;
+              }
+              .left-section, .right-section {
+                padding: 20px;
+              }
+              .title {
+                font-size: 24px;
+              }
+              .subtitle {
+                font-size: 18px;
+              }
+              .timing, .dates, .venue {
+                font-size: 14px;
+              }
+              .qr-code {
+                width: 80px;
+                height: 80px;
+              }
+              .instructions-box h3 {
+                font-size: 14px;
+              }
+              .instructions-box ul {
+                font-size: 12px;
+              }
+              .admit {
+                font-size: 16px;
+              }
+              .download-btn {
+                padding: 10px 20px;
+                font-size: 14px;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="ticket">
+            <div class="left-section">
+              <h4 class="subheading">MUKESH BHATI ACTING SCHOOL & CULTURAL WING PRESENTS</h4>
+              <h1 class="title">${event ? event.name : 'PROFESSOR SAHAB'}</h1>
+              <h2 class="subtitle">A COMEDY PLAY</h2>
+              <p class="timing">${event ? event.time : '07 PM ONWARDS'}</p>
+              <p>Dear ${name},</p>
+              <p><strong>Seat:</strong> ${seatId}</p>
+              <p><strong>Date:</strong> ${bookingDate}</p>
+              <p class="venue">
+                Venue: ${venue}
+              </p>
+              <a href="http://localhost:3000/ticket?seatId=${seatId}&bookingDate=${bookingDate}&name=${encodeURIComponent(
+                name
+              )}" class="download-btn">Download Ticket</a>
             </div>
-            <div class="admit">ADMIT ONE</div>
+            <div class="right-section">
+              <div class="instructions-box">
+                <h3>INSTRUCTIONS</h3>
+                <ul>
+                  <li>Please be seated at least 20 minutes before the performance.</li>
+                  <li>Keep your phones on silent mode.</li>
+                  <li>Please occupy your allotted seat.</li>
+                  <li>Photography & Recording strictly prohibited during the performance.</li>
+                  <li>Eatables are not allowed inside.</li>
+                </ul>
+              </div>
+              <div class="admit">ADMIT ONE</div>
+            </div>
           </div>
-        </div>
-      </body>
-      </html>
+        </body>
+        </html>
       `,
     };
 
@@ -303,41 +310,55 @@ const sendBookingConfirmation = async (
   }
 };
 
-
-const initializeSeats = async (): Promise<void> => {
+const initializeSeatsForEvent = async (eventId: mongoose.Types.ObjectId, seatCount: number): Promise<void> => {
   try {
-    const existingSeats = await Seat.countDocuments();
+    const existingSeats = await Seat.countDocuments({ eventId });
     if (existingSeats > 0) {
-      console.log('Seats already initialized, skipping initialization.');
+      console.log(`Seats already initialized for event ${eventId}, skipping initialization.`);
       return;
     }
 
-    const rows = ['A', 'B', 'C', 'D', 'E', 'F'];
-    const columns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const cols = Math.ceil(Math.sqrt(seatCount));
+    const rows = Math.ceil(seatCount / cols);
     const seats = [];
+    let seatIndex = 0;
 
-    for (let row of rows) {
-      for (let col of columns) {
+    for (let rowIdx = 0; rowIdx < rows && seatIndex < seatCount; rowIdx++) {
+      const row = String.fromCharCode(65 + rowIdx); // A, B, C, ...
+      for (let col = 1; col <= cols && seatIndex < seatCount; col++) {
         const seatId = `${row}${col}`;
         seats.push({
+          eventId,
           seatId,
           row,
           column: col,
           price: 300,
           bookings: [],
         });
+        seatIndex++;
       }
     }
 
-    await Seat.deleteMany({});
     await Seat.insertMany(seats);
-    console.log('Seats initialized successfully');
+    console.log(`Seats initialized for event ${eventId}: ${seats.length} seats`);
+  } catch (error) {
+    console.error(`Failed to initialize seats for event ${eventId}:`, error);
+    throw error;
+  }
+};
+
+const initializeSeats = async (): Promise<void> => {
+  try {
+    const events = await Event.find();
+    for (const event of events) {
+      await initializeSeatsForEvent(event._id, event.seatCount);
+    }
+    console.log('All seats initialized successfully');
   } catch (error) {
     console.error('Failed to initialize seats:', error);
     throw error;
   }
 };
-
 
 const initializeSeatsEndpoint = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -362,16 +383,14 @@ const getEvents = async (req: Request, res: Response): Promise<void> => {
 
 const createEvent = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, date, time, description, venue, password } = req.body;
-    console.log('Create event request received:', { name, date, time, description, venue, password });
+    const { name, date, time, description, venue, password, seatCount } = req.body;
+    console.log('Create event request received:', { name, date, time, description, venue, password, seatCount });
 
-
-    if (!name || !date || !time || !description || !venue || !password) {
-      console.error('Missing required fields:', { name, date, time, description, venue, password });
-      res.status(400).json({ error: 'Name, date, time, description, venue, and password are required' });
+    if (!name || !date || !time || !description || !venue || !password || !seatCount || seatCount < 1) {
+      console.error('Missing required fields:', { name, date, time, description, venue, password, seatCount });
+      res.status(400).json({ error: 'Name, date, time, description, venue, password, and seatCount are required' });
       return;
     }
-
 
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(date)) {
@@ -379,7 +398,6 @@ const createEvent = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ error: 'Invalid date format. Use YYYY-MM-DD' });
       return;
     }
-
 
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
     if (!timeRegex.test(time)) {
@@ -406,11 +424,11 @@ const createEvent = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-
-    const event = new Event({ name, date, time, description, venue, password });
+    const event = new Event({ name, date, time, description, venue, password, seatCount });
     await event.save();
     console.log('Event saved successfully:', event);
 
+    await initializeSeatsForEvent(event._id, seatCount);
     res.status(201).json({ message: 'Event created successfully', event });
   } catch (error: any) {
     console.error('Create event error:', {
@@ -442,13 +460,13 @@ const deleteEvent = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-
-    const seatsWithBookings = await Seat.find({ 'bookings.date': event.date });
+    const seatsWithBookings = await Seat.find({ eventId: event._id, 'bookings.0': { $exists: true } });
     if (seatsWithBookings.length > 0) {
       res.status(400).json({ error: 'Cannot delete event with existing bookings' });
       return;
     }
 
+    await Seat.deleteMany({ eventId: event._id });
     await Event.findByIdAndDelete(id);
     res.json({ message: 'Event deleted successfully' });
   } catch (error) {
@@ -465,28 +483,37 @@ const getSeats = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-
     const event = await Event.findOne({ date: date.toString() });
     if (!event) {
       res.status(400).json({ error: 'No event scheduled for this date' });
       return;
     }
 
-    const seats = await Seat.find();
+    const seats = await Seat.find({ eventId: event._id });
     const seatsWithStatus = seats.map((seat) => {
       const booking = seat.bookings.find((b) => b.date === date);
       return {
-        ...seat.toObject(),
+        _id: seat._id,
+        eventId: seat.eventId,
+        seatId: seat.seatId,
+        row: seat.row,
+        column: seat.column,
+        price: seat.price,
         status: booking ? 'booked' : 'available',
         bookedBy: booking ? booking.bookedBy : null,
       };
     });
 
     if (seats.length === 0) {
-      await initializeSeats();
-      const newSeats = await Seat.find();
+      await initializeSeatsForEvent(event._id, event.seatCount);
+      const newSeats = await Seat.find({ eventId: event._id });
       const newSeatsWithStatus = newSeats.map((seat) => ({
-        ...seat.toObject(),
+        _id: seat._id,
+        eventId: seat.eventId,
+        seatId: seat.seatId,
+        row: seat.row,
+        column: seat.column,
+        price: seat.price,
         status: 'available',
         bookedBy: null,
       }));
@@ -505,13 +532,11 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
   try {
     const { seatId, name, email, phone, bookingDate, quantity } = req.body;
 
-
     if (!seatId || !name || !email || !phone || !bookingDate) {
       console.error('Missing required fields:', { seatId, name, email, phone, bookingDate });
       res.status(400).json({ error: 'seatId, name, email, phone, and bookingDate are required' });
       return;
     }
-
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
@@ -525,7 +550,6 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-
     const event = await Event.findOne({ date: bookingDate });
     if (!event) {
       console.error('No event found for date:', bookingDate);
@@ -533,7 +557,7 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const seat = await Seat.findOne({ seatId });
+    const seat = await Seat.findOne({ seatId, eventId: event._id });
     if (!seat) {
       console.error('Seat not found:', seatId);
       res.status(404).json({ error: 'Seat not found' });
@@ -565,7 +589,6 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ error: 'Failed to book seat' });
   }
 };
-
 
 app.post('/api/seats/initialize', initializeSeatsEndpoint);
 app.get('/api/events', getEvents);
