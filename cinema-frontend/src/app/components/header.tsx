@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import { FaBell } from "react-icons/fa";
 
@@ -26,10 +27,10 @@ export default function Header() {
         </div>
         <div className="nav-container">
           <nav className="nav">
-            <a href="/" className="nav-link">Home</a>
-            <a href="/explore" className="nav-link">Explore</a>
-            <a href="/create" className="nav-link">Create</a>
-            <a href="/my-events" className="nav-link">My Events</a>
+            <Link href="/" className="nav-link">Home</Link>
+            <Link href="/explore" className="nav-link">Nav 1</Link>
+            <Link href="/create" className="nav-link">Nav 2</Link>
+            <Link href="/my-events" className="nav-link">Nav 3</Link>
           </nav>
           <button
             className="notification-btn"
