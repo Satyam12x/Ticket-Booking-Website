@@ -12,6 +12,7 @@ interface Event {
   time: string;
   venue: string;
   description: string;
+  totalSeats: number;
 }
 
 interface SeatData {
@@ -85,8 +86,13 @@ export default function Home() {
   };
 
   const selectedEventDetails = events.find((event) => event._id === selectedEvent);
-  const rows = ["A", "B", "C", "D", "E", "F"];
-  const columns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  const columns = Array.from({ length: 10 }, (_, i) => i + 1);
+  const rows = selectedEventDetails
+    ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").slice(
+        0,
+        Math.ceil(selectedEventDetails.totalSeats / 10)
+      )
+    : [];
 
   return (
     <div className="theater-container">
@@ -138,6 +144,10 @@ export default function Home() {
                 <p className="event-details-label">Venue</p>
                 <p className="event-details-value">{selectedEventDetails.venue}</p>
               </div>
+              <div className="event-details-row">
+                <p className="event-details-label">Total Seats</p>
+                <p className="event-details-value">{selectedEventDetails.totalSeats}</p>
+              </div>
             </div>
           </div>
         ) : (
@@ -161,28 +171,36 @@ export default function Home() {
               {rows.map((row) => (
                 <div key={row} className="seat-row">
                   <div className="row-label">{row}</div>
-                  {columns.map((col) => {
-                    const seatId = `${row}${col}`;
-                    const seat = seats.find((s) => s.seatId === seatId);
-                    return seat ? (
-                      <Seat
-                        key={seat.seatId}
-                        seat={seat}
-                        onClick={() => handleSeatClick(seat)}
-                        isColumnSix={col === 6}
-                      />
-                    ) : (
-                      <div
-                        key={seatId}
-                        className={`seat seat-available ${
-                          col === 6 ? "ml-gap" : ""
-                        }`}
-                        aria-hidden="true"
-                      ><FaCouch className="chair-icon" />
-                        <span className="seat-id">{seatId}</span>
-                      </div>
-                    );
-                  })}
+                  {columns
+                    .slice(
+                      0,
+                      row === rows[rows.length - 1]
+                        ? selectedEventDetails!.totalSeats % 10 || 10
+                        : 10
+                    )
+                    .map((col) => {
+                      const seatId = `${row}${col}`;
+                      const seat = seats.find((s) => s.seatId === seatId);
+                      return seat ? (
+                        <Seat
+                          key={seat.seatId}
+                          seat={seat}
+                          onClick={() => handleSeatClick(seat)}
+                          isColumnSix={col === 6}
+                        />
+                      ) : (
+                        <div
+                          key={seatId}
+                          className={`seat seat-available ${
+                            col === 6 ? "ml-gap" : ""
+                          }`}
+                          aria-hidden="true"
+                        >
+                          <FaCouch className="chair-icon" />
+                          <span className="seat-id">{seatId}</span>
+                        </div>
+                      );
+                    })}
                 </div>
               ))}
             </div>

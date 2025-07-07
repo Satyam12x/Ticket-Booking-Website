@@ -10,7 +10,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-
 interface IEvent {
   name: string;
   date: string;
@@ -18,6 +17,7 @@ interface IEvent {
   description: string;
   venue: string;
   password: string;
+  totalSeats: number;
 }
 
 const eventSchema = new Schema<IEvent>({
@@ -27,6 +27,7 @@ const eventSchema = new Schema<IEvent>({
   description: { type: String, required: true },
   venue: { type: String, required: true },
   password: { type: String, required: true },
+  totalSeats: { type: Number, required: true, min: 1 },
 });
 
 const Event = mongoose.model<IEvent>('Event', eventSchema);
@@ -68,7 +69,6 @@ const seatSchema = new Schema<ISeat>({
 });
 
 const Seat = mongoose.model<ISeat>('Seat', seatSchema);
-
 
 const sendBookingConfirmation = async (
   email: string,
@@ -303,8 +303,7 @@ const sendBookingConfirmation = async (
   }
 };
 
-
-const initializeSeats = async (): Promise<void> => {
+const initializeSeats = async (eventId: string, totalSeats: number): Promise<void> => {
   try {
     const existingSeats = await Seat.countDocuments();
     if (existingSeats > 0) {
@@ -312,12 +311,14 @@ const initializeSeats = async (): Promise<void> => {
       return;
     }
 
-    const rows = ['A', 'B', 'C', 'D', 'E', 'F'];
-    const columns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const rows = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const columns = Array.from({ length: 10 }, (_, i) => i + 1);
     const seats = [];
+    let seatsGenerated = 0;
 
     for (let row of rows) {
       for (let col of columns) {
+        if (seatsGenerated >= totalSeats) break;
         const seatId = `${row}${col}`;
         seats.push({
           seatId,
@@ -326,22 +327,28 @@ const initializeSeats = async (): Promise<void> => {
           price: 300,
           bookings: [],
         });
+        seatsGenerated++;
       }
+      if (seatsGenerated >= totalSeats) break;
     }
 
     await Seat.deleteMany({});
     await Seat.insertMany(seats);
-    console.log('Seats initialized successfully');
+    console.log(`Seats initialized successfully for event ${eventId}: ${seats.length} seats`);
   } catch (error) {
     console.error('Failed to initialize seats:', error);
     throw error;
   }
 };
 
-
 const initializeSeatsEndpoint = async (req: Request, res: Response): Promise<void> => {
   try {
-    await initializeSeats();
+    const { eventId, totalSeats } = req.body;
+    if (!eventId || !totalSeats) {
+      res.status(400).json({ error: 'eventId and totalSeats are required' });
+      return;
+    }
+    await initializeSeats(eventId, totalSeats);
     res.status(201).json({ message: 'Seats initialized successfully' });
   } catch (error) {
     console.error('Initialize seats error:', error);
@@ -362,16 +369,14 @@ const getEvents = async (req: Request, res: Response): Promise<void> => {
 
 const createEvent = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, date, time, description, venue, password } = req.body;
-    console.log('Create event request received:', { name, date, time, description, venue, password });
+    const { name, date, time, description, venue, password, totalSeats } = req.body;
+    console.log('Create event request received:', { name, date, time, description, venue, password, totalSeats });
 
-
-    if (!name || !date || !time || !description || !venue || !password) {
-      console.error('Missing required fields:', { name, date, time, description, venue, password });
-      res.status(400).json({ error: 'Name, date, time, description, venue, and password are required' });
+    if (!name || !date || !time || !description || !venue || !password || !totalSeats) {
+      console.error('Missing required fields:', { name, date, time, description, venue, password, totalSeats });
+      res.status(400).json({ error: 'Name, date, time, description, venue, password, and totalSeats are required' });
       return;
     }
-
 
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(date)) {
@@ -380,11 +385,16 @@ const createEvent = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
     if (!timeRegex.test(time)) {
       console.error('Invalid time format:', time);
       res.status(400).json({ error: 'Invalid time format. Use HH:MM' });
+      return;
+    }
+
+    if (!Number.isInteger(totalSeats) || totalSeats < 1) {
+      console.error('Invalid totalSeats:', totalSeats);
+      res.status(400).json({ error: 'Total seats must be a positive integer' });
       return;
     }
 
@@ -406,10 +416,11 @@ const createEvent = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-
-    const event = new Event({ name, date, time, description, venue, password });
+    const event = new Event({ name, date, time, description, venue, password, totalSeats });
     await event.save();
     console.log('Event saved successfully:', event);
+
+    await initializeSeats(event._id.toString(), totalSeats);
 
     res.status(201).json({ message: 'Event created successfully', event });
   } catch (error: any) {
@@ -442,7 +453,6 @@ const deleteEvent = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-
     const seatsWithBookings = await Seat.find({ 'bookings.date': event.date });
     if (seatsWithBookings.length > 0) {
       res.status(400).json({ error: 'Cannot delete event with existing bookings' });
@@ -465,14 +475,13 @@ const getSeats = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-
     const event = await Event.findOne({ date: date.toString() });
     if (!event) {
       res.status(400).json({ error: 'No event scheduled for this date' });
       return;
     }
 
-    const seats = await Seat.find();
+    const seats = await Seat.find().limit(event.totalSeats);
     const seatsWithStatus = seats.map((seat) => {
       const booking = seat.bookings.find((b) => b.date === date);
       return {
@@ -483,8 +492,8 @@ const getSeats = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (seats.length === 0) {
-      await initializeSeats();
-      const newSeats = await Seat.find();
+      await initializeSeats(event._id.toString(), event.totalSeats);
+      const newSeats = await Seat.find().limit(event.totalSeats);
       const newSeatsWithStatus = newSeats.map((seat) => ({
         ...seat.toObject(),
         status: 'available',
@@ -505,13 +514,11 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
   try {
     const { seatId, name, email, phone, bookingDate, quantity } = req.body;
 
-
     if (!seatId || !name || !email || !phone || !bookingDate) {
       console.error('Missing required fields:', { seatId, name, email, phone, bookingDate });
       res.status(400).json({ error: 'seatId, name, email, phone, and bookingDate are required' });
       return;
     }
-
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
@@ -525,7 +532,6 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-
     const event = await Event.findOne({ date: bookingDate });
     if (!event) {
       console.error('No event found for date:', bookingDate);
@@ -533,7 +539,7 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const seat = await Seat.findOne({ seatId });
+    const seat = await Seat.findOne({seatId });
     if (!seat) {
       console.error('Seat not found:', seatId);
       res.status(404).json({ error: 'Seat not found' });
@@ -566,7 +572,6 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-
 app.post('/api/seats/initialize', initializeSeatsEndpoint);
 app.get('/api/events', getEvents);
 app.post('/api/events', createEvent);
@@ -577,7 +582,6 @@ app.post('/api/seats/book', bookSeat);
 mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost:27017/seat-booking')
   .then(async () => {
     console.log('Connected to MongoDB');
-    await initializeSeats();
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
