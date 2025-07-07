@@ -12,6 +12,7 @@ interface Event {
   time: string;
   description: string;
   venue: string;
+  totalSeats: number;
 }
 
 interface SeatData {
@@ -35,9 +36,10 @@ export default function Admin() {
     name: "",
     date: "",
     time: "",
-    venue: "",
+    venue: "Mukesh Bhati Acting School, E1/74, Milan Road, near YMCA University, Sector-11, Faridabad",
     description: "",
     password: "",
+    totalSeats: "",
   });
   const [formErrors, setFormErrors] = useState({
     name: "",
@@ -46,6 +48,7 @@ export default function Admin() {
     venue: "",
     description: "",
     password: "",
+    totalSeats: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [view, setView] = useState<"create" | "seats">("create");
@@ -116,6 +119,10 @@ export default function Admin() {
       newErrors.password =
         !value ? "Password is required" :
         value.length < 6 ? "Password must be at least 6 characters" : "";
+    } else if (name === "totalSeats") {
+      newErrors.totalSeats =
+        !value ? "Total seats is required" :
+        isNaN(Number(value)) || Number(value) < 1 ? "Total seats must be a positive number" : "";
     }
     setFormErrors(newErrors);
   };
@@ -128,6 +135,7 @@ export default function Admin() {
       venue: "",
       description: "",
       password: "",
+      totalSeats: "",
     };
     let isValid = true;
 
@@ -179,6 +187,14 @@ export default function Admin() {
       isValid = false;
     }
 
+    if (!formData.totalSeats) {
+      newErrors.totalSeats = "Total seats is required";
+      isValid = false;
+    } else if (isNaN(Number(formData.totalSeats)) || Number(formData.totalSeats) < 1) {
+      newErrors.totalSeats = "Total seats must be a positive number";
+      isValid = false;
+    }
+
     setFormErrors(newErrors);
     return isValid;
   };
@@ -193,14 +209,18 @@ export default function Admin() {
 
     setIsSubmitting(true);
     try {
-      await axios.post("http://localhost:5000/api/events", formData);
+      await axios.post("http://localhost:5000/api/events", {
+        ...formData,
+        totalSeats: Number(formData.totalSeats),
+      });
       setFormData({
         name: "",
         date: "",
         time: "",
-        venue: "",
+        venue: "Mukesh Bhati Acting School, E1/74, Milan Road, near YMCA University, Sector-11, Faridabad",
         description: "",
         password: "",
+        totalSeats: "",
       });
       fetchEvents();
     } catch (err: unknown) {
@@ -229,8 +249,13 @@ export default function Admin() {
   const selectedEventDetails = events.find(
     (event) => event.date === selectedEvent
   );
-  const rows = ["A", "B", "C", "D", "E", "F"];
-  const columns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  const columns = Array.from({ length: 10 }, (_, i) => i + 1);
+  const rows = selectedEventDetails
+    ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").slice(
+        0,
+        Math.ceil(selectedEventDetails.totalSeats / 10)
+      )
+    : [];
 
   return (
     <div className="theater-container">
@@ -299,6 +324,19 @@ export default function Admin() {
                   className={`form-input ${formErrors.description ? "input-error" : ""}`}
                 ></textarea>
                 {formErrors.description && <p className="error-text active">{formErrors.description}</p>}
+              </div>
+              <div className="form-group">
+                <label className="form-label">Total Seats</label>
+                <input
+                  type="number"
+                  name="totalSeats"
+                  value={formData.totalSeats}
+                  onChange={handleInputChange}
+                  placeholder="Enter total seats"
+                  className={`form-input ${formErrors.totalSeats ? "input-error" : ""}`}
+                  min="1"
+                />
+                {formErrors.totalSeats && <p className="error-text active">{formErrors.totalSeats}</p>}
               </div>
               <div className="form-group">
                 <label className="form-label">Password</label>
@@ -371,6 +409,7 @@ export default function Admin() {
             <p className="event-detail-text">Time: {selectedEventDetails.time}</p>
             <p className="event-detail-text">Venue: {selectedEventDetails.venue}</p>
             <p className="event-detail-text">Description: {selectedEventDetails.description}</p>
+            <p className="event-detail-text">Total Seats: {selectedEventDetails.totalSeats}</p>
           </div>
           <div className="card">
             <h3>Seat Layout</h3>
@@ -389,28 +428,35 @@ export default function Admin() {
                   {rows.map((row) => (
                     <div key={row} className="seat-row">
                       <div className="row-label">{row}</div>
-                      {columns.map((col) => {
-                        const seatId = `${row}${col}`;
-                        const seat = seats.find((s) => s.seatId === seatId);
-                        return seat ? (
-                          <Seat
-                            key={seat.seatId}
-                            seat={seat}
-                            onClick={() => handleSeatClick(seat)}
-                            isColumnSix={col === 6}
-                          />
-                        ) : (
-                          <div
-                            key={seatId}
-                            className={`seat seat-available ${
-                              col === 6 ? "ml-gap" : ""
-                            }`}
-                            aria-hidden="true"
-                          >
-                            <span className="seat-id">{seatId}</span>
-                          </div>
-                        );
-                      })}
+                      {columns
+                        .slice(
+                          0,
+                          row === rows[rows.length - 1]
+                            ? selectedEventDetails.totalSeats % 10 || 10
+                            : 10
+                        )
+                        .map((col) => {
+                          const seatId = `${row}${col}`;
+                          const seat = seats.find((s) => s.seatId === seatId);
+                          return seat ? (
+                            <Seat
+                              key={seat.seatId}
+                              seat={seat}
+                              onClick={() => handleSeatClick(seat)}
+                              isColumnSix={col === 6}
+                            />
+                          ) : (
+                            <div
+                              key={seatId}
+                              className={`seat seat-available ${
+                                col === 6 ? "ml-gap" : ""
+                              }`}
+                              aria-hidden="true"
+                            >
+                              <span className="seat-id">{seatId}</span>
+                            </div>
+                          );
+                        })}
                     </div>
                   ))}
                 </div>
