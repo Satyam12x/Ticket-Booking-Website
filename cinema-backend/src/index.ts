@@ -605,6 +605,101 @@ const bookSeat = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+const getEventById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    if (!id || !/^[0-9a-fA-F]{24}$/.test(id)) {
+      res.status(400).json({ error: 'Invalid event ID format' });
+      return;
+    }
+    const event = await Event.findById(id);
+    if (!event) {
+      res.status(404).json({ error: `Event not found for ID: ${id}` });
+      return;
+    }
+    res.json(event);
+  } catch (error) {
+    console.error('Get event by ID error:', error);
+    res.status(500).json({ error: 'Failed to fetch event details' });
+  }
+};
+
+const getSeatsByIds = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { seatIds, date } = req.query;
+    if (!seatIds || !date) {
+      res.status(400).json({ error: 'seatIds and date are required' });
+      return;
+    }
+
+    // Normalize seatIds to an array of strings
+    let seatIdArray: string[];
+    if (Array.isArray(seatIds)) {
+      // Ensure all elements are strings
+      if (!seatIds.every((id) => typeof id === 'string')) {
+        res.status(400).json({ error: 'All seatIds must be strings' });
+        return;
+      }
+      seatIdArray = seatIds as string[];
+    } else if (typeof seatIds === 'string') {
+      seatIdArray = seatIds.split(',');
+    } else {
+      res.status(400).json({ error: 'Invalid seatIds format' });
+      return;
+    }
+
+    // Validate seatIds format
+    if (!seatIdArray.every((id: string) => /^[A-Z][1-9][0-9]?$/.test(id))) {
+      res.status(400).json({ error: `Invalid seatId format in: ${seatIdArray.join(', ')}` });
+      return;
+    }
+
+    // Validate date format
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date.toString())) {
+      res.status(400).json({ error: `Invalid date format: ${date}` });
+      return;
+    }
+
+    const event = await Event.findOne({ date: date.toString() });
+    if (!event) {
+      res.status(400).json({ error: `No event found for date: ${date}` });
+      return;
+    }
+
+    const seats = await Seat.find({
+      seatId: { $in: seatIdArray },
+      eventId: event._id.toString(),
+    });
+
+    if (!seats.length || seats.length !== seatIdArray.length) {
+      res.status(404).json({
+        error: `Not all seats found for seatIds: ${seatIdArray.join(', ')} and date: ${date}`,
+      });
+      return;
+    }
+
+    const seatsWithStatus = seats.map((seat) => {
+      const booking = seat.bookings.find((b) => b.date === date);
+      return {
+        ...seat.toObject(),
+        status: booking ? 'booked' : 'available',
+        bookedBy: booking ? booking.bookedBy : null,
+      };
+    });
+
+    res.json(seatsWithStatus);
+  } catch (error) {
+    console.error('Get seats by IDs error:', error);
+    res.status(500).json({ error: 'Failed to fetch seat details' });
+  }
+};
+
+// Add the route
+app.get('/api/seats/by-ids', getSeatsByIds);
+
+// Add the route
+app.get('/api/events/:id', getEventById);
+
 app.post('/api/seats/initialize', initializeSeatsEndpoint);
 app.get('/api/events', getEvents);
 app.get('/api/events/recent', getRecentEvents);

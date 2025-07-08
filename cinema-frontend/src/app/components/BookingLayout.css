@@ -1,10 +1,10 @@
-/* Import font */
 @import url('https://fonts.googleapis.com/css2?family=Port+Lligat+Slab&display=swap');
 
 .booking-layout {
   display: flex;
   min-height: 100vh;
   font-family: 'Port Lligat Slab', serif;
+  background-color: #f7f3f0;
 }
 
 .booking-left {
@@ -15,6 +15,11 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  position: relative;
+}
+
+.booking-group{
+  position: relative;
 }
 
 .booking-right {
@@ -30,7 +35,6 @@
   position: relative;
 }
 
-/* Header text */
 .booking-heading {
   font-size: 14px;
   background-color: #a55b13;
@@ -42,12 +46,6 @@
   width: fit-content;
 }
 
-.booking-description {
-    width: 440px;
-    font-size: 16px;
-    line-height: 29px;
-}
-
 .booking-title {
   font-size: 48px;
   font-weight: 400;
@@ -57,12 +55,13 @@
 }
 
 .booking-description {
+  width: 440px;
   font-size: 16px;
+  line-height: 29px;
   color: #555;
   margin-bottom: 32px;
 }
 
-/* Label */
 .booking-label {
   font-size: 14px;
   font-weight: 600;
@@ -71,9 +70,8 @@
   display: block;
 }
 
-/* Dropdown */
 .booking-select {
-  width: 85%;
+  width: 85% !important;
   padding: 10px 12px;
   font-size: 15px;
   border: 1px solid #ccc;
@@ -81,24 +79,20 @@
   margin-bottom: 20px;
 }
 
-/* Event Info */
 .event-details {
   border: 1px solid #e0e0e0;
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 24px;
   font-size: 15px;
-  /* background-color: #f8f8f8; */
   color: #333;
   width: 85%;
-
 }
 
 .event-details p {
   margin-bottom: 6px;
 }
 
-/* Button */
 .book-button {
   background-color: #7a3e07;
   color: white;
@@ -111,8 +105,76 @@
   width: 85%;
   text-align: center;
   text-decoration: none;
+  display: inline-block;
 }
 
 .book-button:hover {
   background-color: #5e2f06;
+}
+
+.book-button.disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.booking-label {
+  position: absolute;
+  top: -0.4rem;
+  left: 0.8rem;
+  background: #ffffff;
+  color: #8F460A;
+  padding: 0 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+/* ✅ Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .booking-layout {
+    flex-direction: column-reverse;
+    background-color: white;
+  }
+
+  .booking-left,
+  .booking-right {
+    max-width: 100%;
+    padding: 1.5rem;
+  }
+
+  .booking-right{
+    width: 85%;
+    margin: auto;
+    margin-top: 100px;
+  }
+
+  .booking-left{
+    width: 100%;
+  }
+
+  .booking-title {
+    font-size: 32px;
+  }
+
+  .booking-description {
+    width: 100%;
+    font-size: 15px;
+    line-height: 26px;
+  }
+
+  .booking-select,
+  .event-details,
+  .book-button {
+    width: 100% !important;
+  }
+
+  .booking-right {
+    height: 200px;
+  }
+
+  .booking-right img {
+    height: 100%;
+    border-radius: 10px;
+  }
 }

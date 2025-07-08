@@ -2,6 +2,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { FaTimes } from "react-icons/fa";
+import { useRouter } from "next/navigation";
 
 interface BookingModalProps {
   seatId: string;
@@ -10,6 +11,7 @@ interface BookingModalProps {
   onClose: () => void;
   bookingDate: string;
   onBookingSuccess: () => void;
+  eventId: string; // Add eventId prop
 }
 
 export default function BookingModal({
@@ -19,7 +21,9 @@ export default function BookingModal({
   onClose,
   bookingDate,
   onBookingSuccess,
+  eventId,
 }: BookingModalProps) {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -91,7 +95,10 @@ export default function BookingModal({
         quantity,
       });
       onBookingSuccess();
-      onClose();
+      // Redirect to booking confirmation
+      router.push(
+        `/booking-confirmation?seatId=${seatId}&bookingDate=${bookingDate}&selectedEvent=${eventId}`
+      );
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         setSubmitError(
@@ -227,7 +234,7 @@ export default function BookingModal({
               )}
             </button>
             <button type="button" onClick={onClose} className="cancel-btn">
-              Cancel
+              Cancel Booking
             </button>
           </div>
         </form>
