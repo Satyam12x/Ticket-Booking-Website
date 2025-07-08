@@ -34,7 +34,7 @@ export default function Seat({ seat, onClick, isColumnSix, isSelected }: SeatPro
       tabIndex={seat.status === "available" ? 0 : -1}
     >
       <MdChair className="chair-icon" />
-      {/* <div className="tooltip">
+      <div className="tooltip">
         {seat.status === "booked" && seat.bookedBy ? (
           <>
             <div>Booked by: {seat.bookedBy.name}</div>
@@ -42,8 +42,8 @@ export default function Seat({ seat, onClick, isColumnSix, isSelected }: SeatPro
           </>
         ) : (
           `Price: ₹${seat.price}`
-        // )} */}
-      {/* </div> */}
+         )}
+      </div>
     </button>
   );
 }

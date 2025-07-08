@@ -564,10 +564,10 @@ h3 {
   position: relative;
   cursor: pointer;
   font-weight: 600;
-  background-color: white !important;
+  /* background-color: white !important; */
   /* box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15),
     inset 0 1px 3px rgba(255, 255, 255, 0.2); */
-  transition: transform 0.3s ease, background-color 0.3s ease,
+  transition: transform 0.3s ease,
     box-shadow 0.3s ease;
   perspective: 1000px;
   border: none !important;
@@ -585,18 +585,18 @@ h3 {
 } */
 
 .seat-booked {
-  background: #B7B7B7;
+  /* background: #B7B7B7; */
   color: #2f2d2d;
   /* border: 2px solid #6b6767; */
   cursor: not-allowed;
 }
 
 .seat-selected {
-  background: #5c3311;
-  color: #ffffff;
+  /* background: #5c3311; */
+  color: #412e2e;
   /* border: 2px solid #ca6e23; */
   transform: scale(1.1) rotateY(10deg);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
 }
 
 .chair-icon {
@@ -614,24 +614,7 @@ h3 {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.seat-tooltip {
-  position: absolute;
-  background: #1f2a44;
-  color: #ffffff;
-  padding: 0.75rem;
-  top: -80px;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  z-index: 100;
-  width: 160px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  animation: fadeIn 0.3s ease;
-}
+
 
 .row-label {
   display: flex;
@@ -706,8 +689,8 @@ h3 {
   top: -0.4rem;
   left: 0.8rem;
   background: #ffffff;
+  color: #8F460A;
   padding: 0 0.4rem;
-  color: #1f2a44;
   font-size: 0.8rem;
   font-weight: 500;
   transition: all 0.3s ease;
@@ -715,13 +698,13 @@ h3 {
 }
 
 .input-field {
-  padding: 0.6rem;
+  padding: 16px;
   border: none;
   border-radius: 8px;
   background: #ffffff;
   width: 100%;
   font-size: 0.9rem;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 3px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease, transform 0.2s ease, border-color 0.3s ease;
 }
 
@@ -733,7 +716,7 @@ h3 {
 .input-field:focus {
   outline: none;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1),
-    0 0 0 3px rgba(37, 99, 235, 0.4);
+    0 0 0 1px #4d4a48;
   transform: translateY(-2px);
 }
 
@@ -741,11 +724,11 @@ h3 {
   top: 0.6rem;
   left: 0.8rem;
   font-size: 0.9rem;
-  color: #6b7280;
+  color: #97999c;
 }
 
 .input-error {
-  border: 2px solid #ef4444;
+  border: 1px solid #ef4444;
   box-shadow: 0 0 6px rgba(239, 68, 68, 0.3);
 }
 
@@ -887,7 +870,20 @@ h3 {
 }
 
 .cancel-btn {
-  background: linear-gradient(to right, #dc2626, #b91c1c);
+  background: linear-gradient(to right, #FA2609, #FA2609);
+  color: #ffffff;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.3s ease, transform 0.2s ease,
+    background-color 0.3s ease;
+}
+.book-btn {
+  background: linear-gradient(to right, #26dc4e, #1cb929);
   color: #ffffff;
   padding: 0.6rem 1.2rem;
   border-radius: 8px;
@@ -901,13 +897,27 @@ h3 {
 }
 
 .cancel-btn:hover {
+  background: linear-gradient(to right, #b82916, #b11905);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), 0 0 6px rgba(220, 38, 38, 0.4);
-  transform: scale(1.05) rotate(-2deg);
+  /* transform: scale(1.05) rotate(-2deg); */
+}
+.book-btn:hover {
+  background: linear-gradient(to right, #16b83f, #05b147);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), 0 0 6px rgba(220, 38, 38, 0.4);
+  /* transform: scale(1.05) rotate(-2deg); */
 }
 
 .button-group {
   display: flex;
+  flex-direction: column;
   gap: 0.8rem;
+}
+
+.seat-booking-form{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 80vh;
 }
 
 .booked {
@@ -940,23 +950,6 @@ h3 {
   margin-bottom: 2rem;
 }
 
-.door {
-  background: linear-gradient(to bottom, #4b5e7a, #2d3b55);
-  color: #ffffff;
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  font-weight: bold;
-  width: 40px;
-  height: fit-content;
-  transform: translate(-100%, 200%);
-}
 
 .btn-small {
   padding: 0.5rem 1rem;

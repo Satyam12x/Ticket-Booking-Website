@@ -109,6 +109,8 @@
   cursor: pointer;
   transition: 0.2s ease;
   width: 85%;
+  text-align: center;
+  text-decoration: none;
 }
 
 .book-button:hover {

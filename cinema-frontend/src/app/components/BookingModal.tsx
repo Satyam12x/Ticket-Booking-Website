@@ -63,7 +63,8 @@ export default function BookingModal({
       newErrors.phone = "Phone number is required";
       isValid = false;
     } else if (!phoneRegex.test(formData.phone)) {
-      newErrors.phone = "Invalid phone number format (10 digits or +[country code][10 digits])";
+      newErrors.phone =
+        "Invalid phone number format (10 digits or +[country code][10 digits])";
       isValid = false;
     }
 
@@ -94,7 +95,8 @@ export default function BookingModal({
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         setSubmitError(
-          error.response?.data?.error || "Failed to book seat. Please try again."
+          error.response?.data?.error ||
+            "Failed to book seat. Please try again."
         );
       } else {
         setSubmitError("Failed to book seat. Please try again.");
@@ -110,19 +112,25 @@ export default function BookingModal({
 
     const newErrors = { ...errors };
     if (name === "name") {
-      newErrors.name =
-        !value.trim() ? "Name is required" :
-          value.length < 2 ? "Name must be at least 2 characters" : "";
+      newErrors.name = !value.trim()
+        ? "Name is required"
+        : value.length < 2
+        ? "Name must be at least 2 characters"
+        : "";
     } else if (name === "email") {
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      newErrors.email =
-        !value ? "Email is required" :
-          !emailRegex.test(value) ? "Invalid email format" : "";
+      newErrors.email = !value
+        ? "Email is required"
+        : !emailRegex.test(value)
+        ? "Invalid email format"
+        : "";
     } else if (name === "phone") {
       const phoneRegex = /^(\+?\d{1,3}[-.\s]?)?\d{10}$/;
-      newErrors.phone =
-        !value ? "Phone number is required" :
-          !phoneRegex.test(value) ? "Invalid phone number format (10 digits or +[country code][10 digits])" : "";
+      newErrors.phone = !value
+        ? "Phone number is required"
+        : !phoneRegex.test(value)
+        ? "Invalid phone number format (10 digits or +[country code][10 digits])"
+        : "";
     }
     setErrors(newErrors);
   };
@@ -131,55 +139,83 @@ export default function BookingModal({
     <>
       <div className="modal-overlay" onClick={onClose}></div>
       <div className="modal show">
-        <button onClick={onClose} className="modal-close" aria-label="Close modal">
+        <button
+          onClick={onClose}
+          className="modal-close"
+          aria-label="Close modal"
+        >
           <FaTimes size={16} />
         </button>
-        <h3 className="seat-title">Book Seat {seatId}</h3>
-        <p style={{ color: '#4f7496', marginBottom: '15px' }}>
-          Price: ₹{price} | Date: {bookingDate}
-        </p>
+        <h3 className="seat-title-2">Book Seat {seatId}</h3>
+        <div style={{ color: "gray", marginBottom: "15px" }}>
+          <p>Price: ₹{price} </p>
+          <p>Date: {bookingDate}</p>
+        </div>
         {submitError && <p className="error-text active">{submitError}</p>}
-        <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              className={`input-field ${errors.name ? "input-error" : ""}`}
-              placeholder="Enter your name"
-              required
-            />
-            {errors.name && <p className="error-text active">{errors.name}</p>}
-          </div>
-          <div className="input-group">
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className={`input-field ${errors.email ? "input-error" : ""}`}
-              placeholder="Enter your email"
-              required
-            />
-            {errors.email && <p className="error-text active">{errors.email}</p>}
-          </div>
-          <div className="input-group">
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              className={`input-field ${errors.phone ? "input-error" : ""}`}
-              placeholder="Enter your phone number"
-              required
-            />
-            {errors.phone && <p className="error-text active">{errors.phone}</p>}
+        <form onSubmit={handleSubmit} className="seat-booking-form">
+          <div className="placeholders">
+            <div className="input-group">
+              <label htmlFor="name" className="input-label">
+                Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                className={`input-field ${errors.name ? "input-error" : ""}`}
+                placeholder="Enter your name"
+                required
+              />
+              {errors.name && (
+                <p className="error-text active">{errors.name}</p>
+              )}
+            </div>
+
+            <div className="input-group">
+              <label htmlFor="email" className="input-label">
+                Email
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className={`input-field ${errors.email ? "input-error" : ""}`}
+                placeholder="Enter your email"
+                required
+              />
+              {errors.email && (
+                <p className="error-text active">{errors.email}</p>
+              )}
+            </div>
+
+            <div className="input-group">
+              <label htmlFor="phone" className="input-label">
+                Phone
+              </label>
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                className={`input-field ${errors.phone ? "input-error" : ""}`}
+                placeholder="Enter your phone number"
+                required
+              />
+              {errors.phone && (
+                <p className="error-text active">{errors.phone}</p>
+              )}
+            </div>
           </div>
           <div className="button-group">
             <button
               type="submit"
-              className={`book-button ${isSubmitting || Object.values(errors).some((e) => e) ? "disabled" : ""}`}
+              className={`book-btn ${
+                isSubmitting || Object.values(errors).some((e) => e)
+                  ? "disabled"
+                  : ""
+              }`}
               disabled={isSubmitting || Object.values(errors).some((e) => e)}
             >
               {isSubmitting ? (
@@ -190,11 +226,7 @@ export default function BookingModal({
                 "Confirm Booking"
               )}
             </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="cancel-btn"
-            >
+            <button type="button" onClick={onClose} className="cancel-btn">
               Cancel
             </button>
           </div>
