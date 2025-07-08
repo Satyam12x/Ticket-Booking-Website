@@ -1,6 +1,5 @@
-// components/Seat.tsx
 import { MdChair } from "react-icons/md";
-
+import "./SeatLayout.css";
 
 interface SeatData {
   _id: string;
@@ -29,19 +28,22 @@ export default function Seat({ seat, onClick, isColumnSix, isSelected }: SeatPro
           onClick();
         }
       }}
-      className={`seat ${seat.status === "available" ? "seat-available" : "seat-booked"} ${isSelected ? "seat-selected" : ""
-        } ${isColumnSix ? "ml-gap" : ""}`}
+      className={`seat ${seat.status === "available" ? "seat-available" : "seat-booked"} ${isSelected ? "seat-selected" : ""} ${isColumnSix ? "ml-gap" : ""}`}
       disabled={seat.status !== "available"}
       aria-label={`Seat ${seat.seatId} is ${seat.status}${isSelected ? ", selected" : ""}`}
       tabIndex={seat.status === "available" ? 0 : -1}
-      title={
-        seat.status === "booked" && seat.bookedBy
-          ? `Booked by ${seat.bookedBy.name}`
-          : `Seat ${seat.seatId} - ₹${seat.price}`
-      }
     >
       <MdChair className="chair-icon" />
-      {/* <span className="seat-id">{seat.seatId}</span> */}
+      <div className="tooltip">
+        {seat.status === "booked" && seat.bookedBy ? (
+          <>
+            <div>Booked by: {seat.bookedBy.name}</div>
+            <div>Phone: {seat.bookedBy.phone}</div>
+          </>
+        ) : (
+          `Price: ₹${seat.price}`
+        )}
+      </div>
     </button>
   );
 }
