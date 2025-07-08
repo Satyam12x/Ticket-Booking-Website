@@ -222,10 +222,10 @@ export default function SeatLayout() {
                         <div className="legend-box booked" />
                         <span>Booked</span>
                     </div>
-                    <div className="legend-item">
+                    {/* <div className="legend-item">
                         <div className="legend-box seat-selected" />
                         <span>Selected</span>
-                    </div>
+                    </div> */}
                 </div>
             </div>
 

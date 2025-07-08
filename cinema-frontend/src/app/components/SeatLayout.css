@@ -316,7 +316,7 @@
     border-radius: 8px;
     position: absolute;
     top: -70px;
-    left: 50%;
+    left: -100%;
     transform: translateX(-50%) translateY(10px) scale(0.8);
     font-size: 1rem;
     font-family: 'Port Lligat Slab', serif;
