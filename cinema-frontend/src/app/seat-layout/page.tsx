@@ -67,8 +67,8 @@ export default function SeatLayout() {
         try {
             const response = await axios.get(`http://localhost:5000/api/seats?date=${date}`);
             setSeats(response.data);
-        } catch (err) {
-            setError("Failed to fetch seats");
+        } catch (error) {
+            setError(`Failed to fetch seats ${error}`);
         } finally {
             setIsLoading(false);
         }
