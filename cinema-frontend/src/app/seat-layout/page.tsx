@@ -74,12 +74,12 @@ export default function SeatLayout() {
         }
     };
 
-    const handleEventChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const eventId = e.target.value;
-        setSelectedEvent(eventId);
-        const event = events.find((evt) => evt._id === eventId);
-        if (event) fetchSeats(event.date);
-    };
+    // const handleEventChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    //     const eventId = e.target.value;
+    //     setSelectedEvent(eventId);
+    //     const event = events.find((evt) => evt._id === eventId);
+    //     if (event) fetchSeats(event.date);
+    // };
 
     const handleSeatClick = (seat: SeatData) => {
         if (seat.status === "available") {
@@ -193,10 +193,10 @@ export default function SeatLayout() {
                         <div className="legend-box booked" />
                         <span>Booked</span>
                     </div>
-                    <div className="legend-item">
+                    {/* <div className="legend-item">
                         <div className="legend-box seat-selected" />
                         <span>Selected</span>
-                    </div>
+                    </div> */}
                 </div>
             </div>
 
