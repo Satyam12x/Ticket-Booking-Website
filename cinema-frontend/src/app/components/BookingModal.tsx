@@ -211,7 +211,7 @@ export default function BookingModal({
           <div className="button-group">
             <button
               type="submit"
-              className={`book-button ${
+              className={`book-btn ${
                 isSubmitting || Object.values(errors).some((e) => e)
                   ? "disabled"
                   : ""

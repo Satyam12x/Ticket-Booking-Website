@@ -46,6 +46,15 @@
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.seat-title-2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1f2a44;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
 .seat-subtitle {
     font-size: 1rem;
     color: #4f7496;
@@ -110,6 +119,7 @@
     font-weight: 100;
     text-transform: uppercase;
     z-index: 10;
+    border-top: 2px solid red;
 }
 
 .stage-text {
@@ -180,7 +190,7 @@
 .seat-placeholder {
     width: 50px;
     height: 50px;
-    background: #e4dddd;
+    /* background: #e4dddd; */
     border-radius: 8px;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -257,18 +267,19 @@
   position: relative;
   cursor: pointer;
   font-weight: 600;
-  background-color: white !important;
+  background-color: transparent !important;
   /* box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15),
     inset 0 1px 3px rgba(255, 255, 255, 0.2); */
-  transition: transform 0.3s ease, background-color 0.3s ease,
-    box-shadow 0.3s ease;
+  transition: transform 0.3s ease;
   perspective: 1000px;
   border: none !important;
+  z-index: 10 !important;
 }
 
 .seat-available {
   /* background: #8F460A; */
   color: #8F460A;
+  z-index: 10 !important;
   /* border: 2px solid #ca6e23; */
 }
 
@@ -278,7 +289,7 @@
 } */
 
 .seat-booked {
-  background: #B7B7B7;
+  /* background: #B7B7B7; */
   color: #2f2d2d;
   /* border: 2px solid #6b6767; */
   cursor: not-allowed;
@@ -302,32 +313,32 @@
 
 /* Improved tooltip styles for hover effect */
 .seat:hover .tooltip {
-    visibility: visible;
     opacity: 1;
+    visibility: visible;
     transform: translateY(0) scale(1);
 }
 
 .tooltip {
+    opacity: 1;
     visibility: hidden;
-    opacity: 0;
     background: linear-gradient(135deg, #1f2a44 0%, #3b4a6b 100%);
     color: #ffffff;
-    padding: 12px 16px;
+    padding: 5px;
     border-radius: 8px;
     position: absolute;
-    top: -70px;
-    left: -100%;
+    top: -30px;
+    left: -10px;
     transform: translateX(-50%) translateY(10px) scale(0.8);
-    font-size: 1rem;
-    font-family: 'Port Lligat Slab', serif;
+    font-size: 12px;
+    font-family: sans-serif;
     white-space: nowrap;
-    z-index: 20;
+    z-index: 200 !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     transition: opacity 0.3s ease, transform 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.tooltip::after {
+/* .tooltip::after {
     content: "";
     position: absolute;
     bottom: -10px;
@@ -336,7 +347,7 @@
     border-width: 10px 10px 0;
     border-style: solid;
     border-color: #1f2a44 transparent transparent transparent;
-}
+} */
 
 .tooltip div {
     margin-bottom: 4px;
