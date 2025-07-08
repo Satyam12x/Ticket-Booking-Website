@@ -245,6 +245,107 @@
     margin-bottom: 1rem;
 }
 
+/* Seat styles */
+.seat {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  font-weight: 600;
+  background-color: white !important;
+  /* box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15),
+    inset 0 1px 3px rgba(255, 255, 255, 0.2); */
+  transition: transform 0.3s ease, background-color 0.3s ease,
+    box-shadow 0.3s ease;
+  perspective: 1000px;
+  border: none !important;
+}
+
+.seat-available {
+  /* background: #8F460A; */
+  color: #8F460A;
+  /* border: 2px solid #ca6e23; */
+}
+
+/* .seat-available:hover {
+  transform: scale(1.2) rotateY(15deg);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), 0 0 8px rgba(52, 199, 89, 0.5);
+} */
+
+.seat-booked {
+  background: #B7B7B7;
+  color: #2f2d2d;
+  /* border: 2px solid #6b6767; */
+  cursor: not-allowed;
+}
+
+.seat-selected {
+  /* background: #5c3311; */
+  color: #412e2e;
+  /* border: 2px solid #ca6e23; */
+  transform: scale(1.1) rotateY(10deg);
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
+}
+
+.chair-icon {
+  font-size: 2.5rem;
+  margin-bottom: 3px;
+}
+.ml-gap {
+    margin-left: 40px;
+}
+
+/* Improved tooltip styles for hover effect */
+.seat:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.tooltip {
+    visibility: hidden;
+    opacity: 0;
+    background: linear-gradient(135deg, #1f2a44 0%, #3b4a6b 100%);
+    color: #ffffff;
+    padding: 12px 16px;
+    border-radius: 8px;
+    position: absolute;
+    top: -70px;
+    left: -100%;
+    transform: translateX(-50%) translateY(10px) scale(0.8);
+    font-size: 1rem;
+    font-family: 'Port Lligat Slab', serif;
+    white-space: nowrap;
+    z-index: 20;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tooltip::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 10px 10px 0;
+    border-style: solid;
+    border-color: #1f2a44 transparent transparent transparent;
+}
+
+.tooltip div {
+    margin-bottom: 4px;
+}
+
+.tooltip div:last-child {
+    margin-bottom: 0;
+}
+
 @media only screen and (max-width: 768px) {
     .seat-layout-container {
         padding: 1rem;
@@ -319,6 +420,11 @@
         margin-left: 30px;
     }
 
+    .seat {
+        width: 40px;
+        height: 40px;
+    }
+
     .seat-placeholder {
         width: 40px;
         height: 40px;
@@ -341,6 +447,21 @@
     .legend-box {
         width: 1.5rem;
         height: 1.5rem;
+    }
+
+    .chair-icon {
+        font-size: 1.5rem;
+    }
+
+    .tooltip {
+        top: -60px;
+        font-size: 0.85rem;
+        padding: 10px 14px;
+    }
+
+    .tooltip::after {
+        bottom: -8px;
+        border-width: 8px 8px 0;
     }
 }
 
@@ -412,6 +533,11 @@
         margin-left: 20px;
     }
 
+    .seat {
+        width: 32px;
+        height: 32px;
+    }
+
     .seat-placeholder {
         width: 32px;
         height: 32px;
@@ -420,5 +546,20 @@
     .seat-line {
         width: calc(20px + 10 * 32px + 9 * 6px + 20px);
         margin: 15px auto 0;
+    }
+
+    .chair-icon {
+        font-size: 1.2rem;
+    }
+
+    .tooltip {
+        top: -50px;
+        font-size: 0.75rem;
+        padding: 8px 12px;
+    }
+
+    .tooltip::after {
+        bottom: -6px;
+        border-width: 6px 6px 0;
     }
 }

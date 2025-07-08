@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Seat from "../components/Seat";
 import BookingModal from "../components/BookingModal";
-import { FaCouch } from "react-icons/fa";
+// import { FaCouch } from "react-icons/fa";
 
 interface Event {
   _id: string;

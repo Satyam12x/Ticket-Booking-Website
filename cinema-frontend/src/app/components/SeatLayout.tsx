@@ -1,5 +1,4 @@
-// components/SeatLayout.tsx
-// "use client";
+"use client";
 import "./SeatLayout.css";
 import { FaChevronLeft } from "react-icons/fa";
 import Seat from "./Seat";
@@ -15,6 +14,7 @@ interface Event {
     time: string;
     venue: string;
     description: string;
+    totalSeats: number;
 }
 
 interface SeatData {
@@ -40,6 +40,7 @@ export default function SeatLayout() {
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [totalSeats, setTotalSeats] = useState<number | null>(null);
 
     // Get eventId from query parameters
     const eventIdFromQuery = searchParams.get("eventId");
@@ -55,7 +56,10 @@ export default function SeatLayout() {
                     const initialEventId = eventIdFromQuery || fetchedEvents[0]._id;
                     setSelectedEvent(initialEventId);
                     const event = fetchedEvents.find((e: Event) => e._id === initialEventId);
-                    if (event) fetchSeats(event.date);
+                    if (event) {
+                        setTotalSeats(event.totalSeats);
+                        fetchSeats(event.date);
+                    }
                 }
             } catch (err) {
                 setError("Failed to fetch events");
@@ -82,7 +86,10 @@ export default function SeatLayout() {
         const eventId = e.target.value;
         setSelectedEvent(eventId);
         const event = events.find((evt) => evt._id === eventId);
-        if (event) fetchSeats(event.date);
+        if (event) {
+            setTotalSeats(event.totalSeats);
+            fetchSeats(event.date);
+        }
     };
 
     const handleSeatClick = (seat: SeatData) => {
@@ -97,6 +104,37 @@ export default function SeatLayout() {
         if (event) fetchSeats(event.date);
         setSelectedSeat(null);
         setIsBookingModalOpen(false);
+    };
+
+    // Generate seat grid based on totalSeats
+    const getSeatGrid = () => {
+        if (!totalSeats) return [];
+        const seatsPerRow = Math.min(columns.length, 10); // Max 10 columns
+        const totalRows = Math.min(rows.length, Math.ceil(totalSeats / seatsPerRow));
+        const grid: SeatData[][] = [];
+
+        let seatIndex = 0;
+        for (let i = 0; i < totalRows; i++) {
+            const row: SeatData[] = [];
+            for (let j = 0; j < seatsPerRow && seatIndex < totalSeats; j++) {
+                const seatId = `${rows[i]}${columns[j]}`;
+                const seat = seats.find((s) => s.seatId === seatId);
+                row.push(
+                    seat || {
+                        _id: seatId,
+                        seatId,
+                        row: rows[i],
+                        column: columns[j],
+                        price: 300,
+                        status: "available",
+                        bookedBy: null,
+                    }
+                );
+                seatIndex++;
+            }
+            grid.push(row);
+        }
+        return grid;
     };
 
     return (
@@ -117,7 +155,7 @@ export default function SeatLayout() {
                     <select
                         value={selectedEvent}
                         onChange={handleEventChange}
-                        className="event-select"
+                        className="booking-select"
                         aria-label="Select an event"
                         disabled={isLoading}
                     >
@@ -140,38 +178,40 @@ export default function SeatLayout() {
             {isLoading && <div className="spinner">Loading...</div>}
             {error && <p className="error-text">{error}</p>}
 
+            <div className="seat-info">
+                <p><strong>Total Seats:</strong> {totalSeats !== null ? totalSeats : "Loading..."}</p>
+                <p><strong>Available Seats:</strong> {seats.filter(s => s.status === "available").length}</p>
+            </div>
+
             <div className="seat-card">
-                <div className="stage-curve">STAGE</div>
+                <div className="stage-curve">
+                    <span className="stage-text">STAGE</span>
+                </div>
                 <div className="door-label">DOOR</div>
 
                 <div className="column-row">
-                    {columns.map((col) => (
+                    {columns.slice(0, Math.min(columns.length, 10)).map((col) => (
                         <div key={col} className="column-label">{col}</div>
                     ))}
                 </div>
 
                 <div className="seat-grid">
-                    {rows.map((row) => (
-                        <div key={row} className="seat-row">
-                            <div className="row-label">{row}</div>
-                            {columns.map((col) => {
-                                const seatId = `${row}${col}`;
-                                const seat = seats.find((s) => s.seatId === seatId);
-                                return seat ? (
-                                    <Seat
-                                        key={seat.seatId}
-                                        seat={seat}
-                                        onClick={() => handleSeatClick(seat)}
-                                        isColumnSix={col === 6}
-                                        isSelected={seat.seatId === selectedSeat}
-                                    />
-                                ) : (
-                                    <div key={seatId} className="seat-placeholder" aria-hidden="true" />
-                                );
-                            })}
+                    {getSeatGrid().map((row, rowIndex) => (
+                        <div key={rows[rowIndex]} className="seat-row">
+                            <div className="row-label">{rows[rowIndex]}</div>
+                            {row.map((seat, colIndex) => (
+                                <Seat
+                                    key={seat.seatId}
+                                    seat={seat}
+                                    onClick={() => handleSeatClick(seat)}
+                                    isColumnSix={columns[colIndex] === 6}
+                                    isSelected={seat.seatId === selectedSeat}
+                                />
+                            ))}
                         </div>
                     ))}
                 </div>
+                <div className="seat-line"></div>
 
                 <div className="seat-legend">
                     <div className="legend-item">
@@ -182,10 +222,10 @@ export default function SeatLayout() {
                         <div className="legend-box booked" />
                         <span>Booked</span>
                     </div>
-                    <div className="legend-item">
+                    {/* <div className="legend-item">
                         <div className="legend-box seat-selected" />
                         <span>Selected</span>
-                    </div>
+                    </div> */}
                 </div>
             </div>
 
