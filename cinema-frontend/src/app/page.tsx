@@ -10,7 +10,7 @@ const Page = () => {
     // Simulate loading (e.g., fetching data from MongoDB via Express)
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 3000); // 3-second delay, adjust as needed
+    }, 1900); // 3-second delay, adjust as needed
 
     return () => clearTimeout(timer);
   }, []);

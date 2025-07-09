@@ -4,7 +4,7 @@ import { FaChevronLeft } from "react-icons/fa";
 import Seat from "../components/Seat";
 import BookingModal from "../components/BookingModal";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { MdChair } from "react-icons/md";
@@ -31,7 +31,7 @@ interface SeatData {
 }
 
 export default function SeatLayout() {
-  const router = useRouter();
+  // const router = useRouter();
   const searchParams = useSearchParams();
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<string>("");
@@ -59,8 +59,8 @@ export default function SeatLayout() {
             await fetchSeats(event.date);
           }
         }
-      } catch (err) {
-        setError("Failed to fetch events");
+      } catch (error) {
+        setError(`Failed to fetch events ${error}`);
       } finally {
         setIsLoading(false);
       }
@@ -76,8 +76,8 @@ export default function SeatLayout() {
       );
       setSeats(response.data);
       setError("");
-    } catch (err) {
-      setError("Failed to fetch seats");
+    } catch (error) {
+      setError(`Failed to fetch seats ${error}`);
     } finally {
       setIsLoading(false);
     }
