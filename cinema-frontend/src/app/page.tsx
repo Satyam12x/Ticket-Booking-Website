@@ -1,10 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "./components/AuthContext";
 import BookingLayout from "./components/BookingLayout";
 import Loader from "./components/loader";
-import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function HomePage() {
+  const { user, isLoading: authLoading } = useAuth();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -14,9 +17,19 @@ export default function HomePage() {
     return () => clearTimeout(timer);
   }, []);
 
-  return (
-    <ProtectedRoute>
-      {isLoading ? <Loader isLoading={true} /> : <BookingLayout />}
-    </ProtectedRoute>
-  );
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, authLoading, router]);
+
+  if (authLoading || isLoading) {
+    return <Loader isLoading={true} />;
+  }
+
+  if (!user) {
+    return null; // Redirect will handle navigation
+  }
+
+  return <BookingLayout />;
 }

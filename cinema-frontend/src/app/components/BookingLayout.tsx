@@ -3,8 +3,8 @@ import "./BookingLayout.css";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import axios from "axios";
 import { useAuth } from "./AuthContext";
+import ProtectedRoute from "./ProtectedRoute";
 
 interface Event {
   _id: string;
@@ -15,7 +15,7 @@ interface Event {
   description: string;
 }
 
-export default function BookingLayout() {
+function BookingLayout() {
   const { user, logout } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<string>("");
@@ -32,6 +32,7 @@ export default function BookingLayout() {
       try {
         const res = await fetch("http://localhost:5000/api/events", {
           cache: "no-store",
+          credentials: "include",
         });
         if (!res.ok) {
           throw new Error("Failed to fetch events");
@@ -50,12 +51,27 @@ export default function BookingLayout() {
     fetchEvents();
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to logout");
+      }
+      logout();
+    } catch (error: any) {
+      console.error("Logout error:", error.message);
+    }
+  };
+
   return (
     <div className="booking-layout">
       <div className="booking-left">
         <div className="header-group">
           <span className="booking-heading">Hello, {user?.name || "Guest"}</span>
-          <button onClick={logout} className="logout-button" aria-label="Logout">
+          <button onClick={handleLogout} className="logout-button" aria-label="Logout">
             Logout
           </button>
         </div>
@@ -74,12 +90,12 @@ export default function BookingLayout() {
             value={selectedEvent}
             onChange={(e) => setSelectedEvent(e.target.value)}
             aria-label="Select an event"
-            disabled={isLoading}
+            disabled={isLoading || events.length === 0}
           >
             {isLoading ? (
               <option value="">Loading events...</option>
             ) : events.length === 0 ? (
-              <option value="">No events available</option>
+              <option value="">No future events available</option>
             ) : (
               events.map((event) => (
                 <option key={event._id} value={event._id}>
@@ -124,14 +140,14 @@ export default function BookingLayout() {
               </p>
             </div>
           ) : (
-            <p className="no-events">No events available</p>
+            <p className="no-events">No future events available</p>
           )}
         </div>
 
         <Link
           href={`/seat-layout?eventId=${selectedEvent}`}
           className={`book-button ${
-            !selectedEvent || isLoading ? "disabled" : ""
+            !selectedEvent || isLoading || events.length === 0 ? "disabled" : ""
           }`}
           aria-label="Book Seats Now"
         >
@@ -149,5 +165,13 @@ export default function BookingLayout() {
         />
       </div>
     </div>
+  );
+}
+
+export default function ProtectedBookingLayout() {
+  return (
+    <ProtectedRoute>
+      <BookingLayout />
+    </ProtectedRoute>
   );
 }

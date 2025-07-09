@@ -17,7 +17,7 @@ export default function LoginPage() {
     try {
       await login(formData.email, formData.password);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Invalid email or password");
     } finally {
       setIsSubmitting(false);
     }
@@ -71,9 +71,6 @@ export default function LoginPage() {
           {isSubmitting ? "Logging in..." : "Login"}
         </button>
       </form>
-      <p>
-        Don't have an account? <Link href="/signup">Sign Up</Link>
-      </p>
       <p>
         Forgot your password? <Link href="/forgot-password">Reset Password</Link>
       </p>

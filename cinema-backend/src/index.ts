@@ -17,7 +17,7 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: 'http://localhost:3000', // Matches your frontend URL
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   })
@@ -26,7 +26,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Validate environment variables
-const requiredEnvVars = ['MONGODB_URL', 'JWT_SECRET', 'EMAIL_USER', 'EMAIL_PASS', 'ADMIN_PASSWORD'];
+const requiredEnvVars = ['MONGODB_URL', 'JWT_SECRET', 'EMAIL_USER', 'EMAIL_PASS', 'ADMIN_PASSWORD', 'USER_EMAIL', 'USER_PASSWORD', 'USER_NAME'];
 const missingEnvVars = requiredEnvVars.filter((varName) => !process.env[varName]);
 if (missingEnvVars.length) {
   console.error(`Missing environment variables: ${missingEnvVars.join(', ')}`);
@@ -76,7 +76,7 @@ interface IOtp {
   email: string;
   otp: string;
   expiresAt: Date;
-  type: 'signup' | 'reset-password';
+  type: 'reset-password';
 }
 
 // Schemas
@@ -116,7 +116,7 @@ const userSchema = new Schema<IUser>({
   name: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, trim: true },
   password: { type: String, required: true },
-  isVerified: { type: Boolean, default: false },
+  isVerified: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -124,7 +124,7 @@ const otpSchema = new Schema<IOtp>({
   email: { type: String, required: true, trim: true },
   otp: { type: String, required: true },
   expiresAt: { type: Date, required: true },
-  type: { type: String, enum: ['signup', 'reset-password'], required: true },
+  type: { type: String, enum: ['reset-password'], required: true },
 });
 
 otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
@@ -196,11 +196,7 @@ const authenticateToken = async (req: Request, res: Response, next: NextFunction
     if (!user) {
       console.error('Authentication error: User not found', { userId: decoded.userId });
       res.status(401).json({ error: 'Authentication failed: User not found' });
-      return;
-    }
-    if (!user.isVerified) {
-      console.error('Authentication error: User not verified', { userId: decoded.userId, email: user.email });
-      res.status(401).json({ error: 'Authentication failed: Account not verified' });
+      res.clearCookie('token');
       return;
     }
     (req as any).user = user;
@@ -213,20 +209,22 @@ const authenticateToken = async (req: Request, res: Response, next: NextFunction
       method: req.method,
     });
     res.status(401).json({ error: `Invalid token: ${error.message}` });
+    res.clearCookie('token');
+    return;
   }
 };
 
 // Email Utility
-const sendOtpEmail = async (email: string, otp: string, type: 'signup' | 'reset-password'): Promise<void> => {
+const sendOtpEmail = async (email: string, otp: string, type: 'reset-password'): Promise<void> => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
   });
 
-  const subject = type === 'signup' ? 'Verify Your Email' : 'Reset Your Password';
+  const subject = 'Reset Your Password';
   const html = `
     <p>Dear User,</p>
-    <p>Your OTP for ${type === 'signup' ? 'email verification' : 'password reset'} is <strong>${otp}</strong>.</p>
+    <p>Your OTP for password reset is <strong>${otp}</strong>.</p>
     <p>This OTP is valid for 5 minutes.</p>
     <p>Thank you,</p>
     <p>Mukesh Bhati Acting School</p>
@@ -249,75 +247,9 @@ const sendOtpEmail = async (email: string, otp: string, type: 'signup' | 'reset-
 const generateOtp = (): string => randomBytes(3).toString('hex').toUpperCase();
 
 // Auth Routes
-app.post('/api/auth/signup', validateEmail, async (req: Request, res: Response): Promise<void> => {
-  const { name, email, password } = req.body;
-  console.log('Signup request:', { name, email });
-  if (!name || !email || !password) {
-    console.error('Signup error: Missing required fields', { body: req.body });
-    res.status(400).json({ error: 'Name, email, and password are required' });
-    return;
-  }
-  if (password.length < 6) {
-    console.error('Signup error: Password too short', { email });
-    res.status(400).json({ error: 'Password must be at least 6 characters' });
-    return;
-  }
-  try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      console.error('Signup error: Email already registered', { email });
-      res.status(400).json({ error: 'Email already registered' });
-      return;
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashedPassword });
-    await user.save();
-    const otp = generateOtp();
-    await Otp.create({ email, otp, expiresAt: new Date(Date.now() + 5 * 60 * 1000), type: 'signup' });
-    await sendOtpEmail(email, otp, 'signup');
-    res.status(201).json({ message: 'User created, OTP sent to email' });
-  } catch (error: any) {
-    console.error('Signup error:', { message: error.message, stack: error.stack, email });
-    res.status(500).json({ error: 'Failed to sign up' });
-  }
-});
-
-app.post('/api/auth/verify-otp', validateEmail, async (req: Request, res: Response): Promise<void> => {
-  const { email, otp, type } = req.body;
-  console.log('Verify OTP request:', { email, type });
-  if (!email || !otp || !type) {
-    console.error('Verify OTP error: Missing required fields', { body: req.body });
-    res.status(400).json({ error: 'Email, OTP, and type are required' });
-    return;
-  }
-  try {
-    const otpRecord = await Otp.findOne({ email, otp, type });
-    if (!otpRecord || otpRecord.expiresAt < new Date()) {
-      console.error('Verify OTP error: Invalid or expired OTP', { email, type });
-      res.status(400).json({ error: 'Invalid or expired OTP' });
-      return;
-    }
-    if (type === 'signup') {
-      const user = await User.findOne({ email });
-      if (!user) {
-        console.error('Verify OTP error: User not found', { email });
-        res.status(404).json({ error: 'User not found' });
-        return;
-      }
-      user.isVerified = true;
-      await user.save();
-    }
-    await Otp.deleteOne({ email, otp });
-    res.json({ message: 'OTP verified successfully' });
-  } catch (error: any) {
-    console.error('Verify OTP error:', { message: error.message, stack: error.stack, email, type });
-    res.status(500).json({ error: 'Failed to verify OTP' });
-  }
-});
-
 app.post('/api/auth/login', validateEmail, async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
-  console.log('Login request:', { email, body: req.body });
+  console.log('Login request:', { email });
   if (!email || !password) {
     console.error('Login error: Missing email or password', { body: req.body });
     res.status(400).json({ error: 'Email and password are required' });
@@ -325,9 +257,9 @@ app.post('/api/auth/login', validateEmail, async (req: Request, res: Response): 
   }
   try {
     const user = await User.findOne({ email }).select('+password');
-    if (!user || !user.isVerified) {
-      console.error('Login error: Invalid credentials or unverified account', { email });
-      res.status(401).json({ error: 'Invalid credentials or unverified account' });
+    if (!user) {
+      console.error('Login error: Invalid credentials', { email });
+      res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
     const isMatch = await bcrypt.compare(password, user.password);
@@ -339,8 +271,8 @@ app.post('/api/auth/login', validateEmail, async (req: Request, res: Response): 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET!, { expiresIn: '1d' });
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // False in development
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Adjusted for development
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 24 * 60 * 60 * 1000, // 1 day
       path: '/',
     });
@@ -355,9 +287,9 @@ app.post('/api/auth/login', validateEmail, async (req: Request, res: Response): 
 app.post('/api/auth/forgot-password', validateEmail, async (req: Request, res: Response): Promise<void> => {
   const { email } = req.body;
   console.log('Forgot password request:', { email });
-  if (!email) {
-    console.error('Forgot password error: Email required', { body: req.body });
-    res.status(400).json({ error: 'Email is required' });
+  if (!email || email !== process.env.USER_EMAIL) {
+    console.error('Forgot password error: Invalid email', { body: req.body });
+    res.status(400).json({ error: 'Invalid email' });
     return;
   }
   try {
@@ -385,6 +317,11 @@ app.post('/api/auth/reset-password', validateEmail, async (req: Request, res: Re
     res.status(400).json({ error: 'Email, OTP, and new password are required' });
     return;
   }
+  if (email !== process.env.USER_EMAIL) {
+    console.error('Reset password error: Invalid email', { email });
+    res.status(400).json({ error: 'Invalid email' });
+    return;
+  }
   if (newPassword.length < 6) {
     console.error('Reset password error: Password too short', { email });
     res.status(400).json({ error: 'New password must be at least 6 characters' });
@@ -410,6 +347,23 @@ app.post('/api/auth/reset-password', validateEmail, async (req: Request, res: Re
   } catch (error: any) {
     console.error('Reset password error:', { message: error.message, stack: error.stack, email });
     res.status(500).json({ error: 'Failed to reset password' });
+  }
+});
+
+app.post('/api/auth/logout', (req: Request, res: Response): void => {
+  console.log('Logout request received');
+  try {
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      path: '/',
+    });
+    console.log('Logout successful: Token cookie cleared');
+    res.json({ message: 'Logout successful' });
+  } catch (error: any) {
+    console.error('Logout error:', { message: error.message, stack: error.stack });
+    res.status(500).json({ error: 'Failed to logout' });
   }
 });
 
@@ -448,8 +402,8 @@ const sendBookingConfirmation = async (
     if (!/^\d{4}-\d{2}-\d{2}$/.test(bookingDate)) {
       throw new Error(`Invalid bookingDate format: ${bookingDate}`);
     }
-    if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
-      throw new Error(`Invalid email format: ${email}`);
+    if (email !== process.env.USER_EMAIL) {
+      throw new Error(`Invalid email: ${email}`);
     }
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -575,6 +529,30 @@ const initializeSeats = async (eventId: string, totalSeats: number, session?: Cl
   }
 };
 
+// Initialize default user
+const initializeDefaultUser = async (): Promise<void> => {
+  try {
+    const email = process.env.USER_EMAIL!;
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) {
+      const hashedPassword = await bcrypt.hash(process.env.USER_PASSWORD!, 10);
+      const user = new User({
+        name: process.env.USER_NAME!,
+        email,
+        password: hashedPassword,
+        isVerified: true,
+      });
+      await user.save();
+      console.log(`Default user created: ${email}`);
+    } else {
+      console.log(`Default user already exists: ${email}`);
+    }
+  } catch (error: any) {
+    console.error('Failed to initialize default user:', { message: error.message, stack: error.stack });
+    throw error;
+  }
+};
+
 // Routes
 app.post('/api/seats/initialize', async (req: Request, res: Response): Promise<void> => {
   const { eventId, totalSeats } = req.body;
@@ -602,7 +580,9 @@ app.post('/api/seats/initialize', async (req: Request, res: Response): Promise<v
 app.get('/api/events', async (req: Request, res: Response): Promise<void> => {
   try {
     const today = new Date().toISOString().split('T')[0];
-    const events = await Event.find({ date: { $gte: today } }).sort({ date: 1 }).select('-password');
+    const events = await Event.find({ 
+      date: { $gte: today, $ne: today } // Exclude events for today
+    }).sort({ date: 1 }).select('-password');
     res.json(events);
   } catch (error: any) {
     console.error('Get events error:', { message: error.message, stack: error.stack });
@@ -614,7 +594,11 @@ app.get('/api/events/recent', async (req: Request, res: Response): Promise<void>
   try {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const events = await Event.find({ createdAt: { $gte: sevenDaysAgo } }).sort({ createdAt: -1 }).select('-password');
+    const today = new Date().toISOString().split('T')[0];
+    const events = await Event.find({ 
+      createdAt: { $gte: sevenDaysAgo },
+      date: { $gte: today, $ne: today } // Exclude events for today
+    }).sort({ createdAt: -1 }).select('-password');
     res.json(events);
   } catch (error: any) {
     console.error('Get recent events error:', { message: error.message, stack: error.stack });
@@ -650,6 +634,12 @@ app.post('/api/events', validateDateFormat, async (req: Request, res: Response):
     if (existingEvent) {
       console.error('Create event error: Event already exists for date', { date });
       res.status(400).json({ error: 'An event already exists for this date' });
+      return;
+    }
+    const today = new Date().toISOString().split('T')[0];
+    if (date === today) {
+      console.error('Create event error: Cannot create event for today', { date });
+      res.status(400).json({ error: 'Cannot create event for the current date' });
       return;
     }
     const session = await mongoose.startSession();
@@ -732,6 +722,12 @@ app.get('/api/seats', validateDateFormat, async (req: Request, res: Response): P
     return;
   }
   try {
+    const today = new Date().toISOString().split('T')[0];
+    if (date === today) {
+      console.error('Get seats error: Cannot fetch seats for today', { date });
+      res.status(400).json({ error: 'Cannot book seats for the current date' });
+      return;
+    }
     const event = await Event.findOne({ date: date.toString() });
     if (!event) {
       console.error('Get seats error: No event found', { date });
@@ -775,14 +771,15 @@ app.post(
       res.status(400).json({ error: 'seatId, name, email, phone, and bookingDate are required' });
       return;
     }
-    if (user.email !== email) {
+    if (user.email !== email || email !== process.env.USER_EMAIL) {
       console.error('Booking error: Email mismatch', { userEmail: user.email, providedEmail: email });
-      res.status(403).json({ error: 'Email must match logged-in user' });
+      res.status(403).json({ error: 'Email must match the registered user' });
       return;
     }
-    if (!/^[A-Z][1-9][0-9]?$/.test(seatId)) {
-      console.error('Booking error: Invalid seatId format', { seatId });
-      res.status(400).json({ error: 'Invalid seatId format' });
+    const today = new Date().toISOString().split('T')[0];
+    if (bookingDate === today) {
+      console.error('Booking error: Cannot book for today', { bookingDate });
+      res.status(400).json({ error: 'Cannot book seats for the current date' });
       return;
     }
     const session = await mongoose.startSession();
@@ -841,6 +838,12 @@ app.get('/api/events/:id', async (req: Request, res: Response): Promise<void> =>
       res.status(404).json({ error: 'Event not found' });
       return;
     }
+    const today = new Date().toISOString().split('T')[0];
+    if (event.date === today) {
+      console.error('Get event error: Event is today', { id, date: today });
+      res.status(400).json({ error: 'Cannot access event scheduled for today' });
+      return;
+    }
     res.json(event);
   } catch (error: any) {
     console.error('Get event by ID error:', { message: error.message, stack: error.stack, id });
@@ -877,6 +880,12 @@ app.get('/api/seats/by-ids', validateDateFormat, async (req: Request, res: Respo
     return;
   }
   try {
+    const today = new Date().toISOString().split('T')[0];
+    if (date === today) {
+      console.error('Get seats by IDs error: Cannot fetch seats for today', { date });
+      res.status(400).json({ error: 'Cannot fetch seats for the current date' });
+      return;
+    }
     const event = await Event.findOne({ date: date.toString() });
     if (!event) {
       console.error('Get seats by IDs error: No event found', { date });
@@ -907,8 +916,9 @@ app.get('/api/seats/by-ids', validateDateFormat, async (req: Request, res: Respo
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGODB_URL!, { retryWrites: true, w: 'majority' })
-  .then(() => {
+  .then(async () => {
     console.log('Connected to MongoDB');
+    await initializeDefaultUser();
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
