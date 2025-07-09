@@ -1,0 +1,39 @@
+.loaderContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: white; /* Wheat background for day theme */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.dotWrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #A0522D; /* Sienna color */
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5); /* Stronger shadow for spinning effect */
+  transform-origin: center; /* Ensure rotation is around dot's center */
+}
+
+.loaderCore {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(45deg, #8B4513, #D2691E); /* Brownish gradient */
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(139, 69, 19, 0.6); /* Strong glow */
+}

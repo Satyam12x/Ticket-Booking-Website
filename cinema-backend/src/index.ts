@@ -85,16 +85,38 @@ const sendBookingConfirmation = async (
   bookingDate: string
 ): Promise<void> => {
   try {
+    // Validate seatId format (e.g., A1, B12)
+    if (!/^[A-Z][1-9][0-9]?$/.test(seatId)) {
+      throw new Error(`Invalid seatId format: ${seatId}`);
+    }
+
     // Find the seat to get the associated eventId
     const seat = await Seat.findOne({ seatId });
     if (!seat) {
-      throw new Error('Seat not found');
+      throw new Error(`Seat not found for seatId: ${seatId}`);
     }
 
-    // Find the event associated with the seat, renaming to avoid conflict
-    const eventDetails = await Event.findById(seat.eventId);
+    // Validate eventId format
+    const eventId = seat.eventId;
+    if (!eventId || !/^[0-9a-fA-F]{24}$/.test(eventId)) {
+      throw new Error(`Invalid eventId format: ${eventId}`);
+    }
+
+    // Find the event associated with the seat
+    const eventDetails = await Event.findById(eventId);
     if (!eventDetails) {
-      throw new Error('Event not found for this seat');
+      throw new Error(`Event not found for eventId: ${eventId}`);
+    }
+
+    // Validate bookingDate format
+    if (!bookingDate || !/^\d{4}-\d{2}-\d{2}$/.test(bookingDate)) {
+      throw new Error(`Invalid bookingDate format: ${bookingDate}`);
+    }
+
+    // Validate email format
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      throw new Error(`Invalid email format: ${email}`);
     }
 
     const transporter = nodemailer.createTransport({
@@ -313,9 +335,16 @@ const sendBookingConfirmation = async (
     };
 
     await transporter.sendMail(mailOptions);
-  } catch (error) {
-    console.error('Email sending error:', error);
-    throw new Error('Failed to send booking confirmation email');
+    console.log(`Booking confirmation email sent to ${email} for seat ${seatId}`);
+  } catch (error: any) {
+    console.error('Email sending error:', {
+      message: error.message,
+      stack: error.stack,
+      seatId,
+      email,
+      bookingDate,
+    });
+    throw new Error(`Failed to send booking confirmation email: ${error.message}`);
   }
 };
 
