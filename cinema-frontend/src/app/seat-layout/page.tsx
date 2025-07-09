@@ -4,10 +4,11 @@ import { FaChevronLeft } from "react-icons/fa";
 import Seat from "../components/Seat";
 import BookingModal from "../components/BookingModal";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { MdChair } from "react-icons/md";
+import Loader from "../components/loader";
 
 interface Event {
   _id: string;
@@ -30,6 +31,7 @@ interface SeatData {
 }
 
 export default function SeatLayout() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<string>("");
@@ -43,7 +45,6 @@ export default function SeatLayout() {
 
   useEffect(() => {
     const fetchEvents = async () => {
-      setIsLoading(true);
       try {
         const response = await axios.get("http://localhost:5000/api/events");
         const fetchedEvents = response.data;
@@ -54,10 +55,12 @@ export default function SeatLayout() {
           const event = fetchedEvents.find(
             (e: Event) => e._id === initialEventId
           );
-          if (event) fetchSeats(event.date);
+          if (event) {
+            await fetchSeats(event.date);
+          }
         }
-      } catch (error) {
-        setError(`Failed to fetch events ${error}`);
+      } catch (err) {
+        setError("Failed to fetch events");
       } finally {
         setIsLoading(false);
       }
@@ -72,8 +75,9 @@ export default function SeatLayout() {
         `http://localhost:5000/api/seats?date=${date}`
       );
       setSeats(response.data);
-    } catch (error) {
-      setError(`Failed to fetch seats ${error}`);
+      setError("");
+    } catch (err) {
+      setError("Failed to fetch seats");
     } finally {
       setIsLoading(false);
     }
@@ -111,7 +115,10 @@ export default function SeatLayout() {
     : [];
 
   return (
-    <div
+     <>
+      <Loader isLoading={isLoading} />
+      {!isLoading && (
+        <div
       className="seat-layout-container"
       style={{ "--num-rows": rows.length } as React.CSSProperties}
     >
@@ -151,7 +158,7 @@ export default function SeatLayout() {
                 </div> */}
       </header>
 
-      {isLoading && <div className="spinner">Loading...</div>}
+      {/* {isLoading && <div className="spinner">Loading...</div>} */}
       {error && <p className="error-text">{error}</p>}
       <div className="seat-back">
         <div className="seat-card">
@@ -221,21 +228,23 @@ export default function SeatLayout() {
       </div>
 
       {isBookingModalOpen && selectedSeat && (
-  <BookingModal
-    seatId={selectedSeat}
-    price={seats.find((s) => s.seatId === selectedSeat)?.price || 300}
-    quantity={1}
-    onClose={() => {
-      setIsBookingModalOpen(false);
-      setSelectedSeat(null);
-    }}
-    bookingDate={
-      events.find((evt) => evt._id === selectedEvent)?.date || ""
-    }
-    onBookingSuccess={handleBookingSuccess}
-    eventId={selectedEvent} // Pass eventId
-  />
-)}
+        <BookingModal
+          seatId={selectedSeat}
+          price={seats.find((s) => s.seatId === selectedSeat)?.price || 300}
+          quantity={1}
+          onClose={() => {
+            setIsBookingModalOpen(false);
+            setSelectedSeat(null);
+          }}
+          bookingDate={
+            events.find((evt) => evt._id === selectedEvent)?.date || ""
+          }
+          onBookingSuccess={handleBookingSuccess}
+          eventId={selectedEvent} // Pass eventId
+        />
+      )}
     </div>
+      )}
+    </>
   );
 }
