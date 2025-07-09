@@ -3,6 +3,7 @@ import mongoose, { Schema } from 'mongoose';
 import nodemailer from 'nodemailer';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { time } from 'console';
 
 dotenv.config();
 
@@ -84,6 +85,40 @@ const sendBookingConfirmation = async (
   bookingDate: string
 ): Promise<void> => {
   try {
+    // Validate seatId format (e.g., A1, B12)
+    if (!/^[A-Z][1-9][0-9]?$/.test(seatId)) {
+      throw new Error(`Invalid seatId format: ${seatId}`);
+    }
+
+    // Find the seat to get the associated eventId
+    const seat = await Seat.findOne({ seatId });
+    if (!seat) {
+      throw new Error(`Seat not found for seatId: ${seatId}`);
+    }
+
+    // Validate eventId format
+    const eventId = seat.eventId;
+    if (!eventId || !/^[0-9a-fA-F]{24}$/.test(eventId)) {
+      throw new Error(`Invalid eventId format: ${eventId}`);
+    }
+
+    // Find the event associated with the seat
+    const eventDetails = await Event.findById(eventId);
+    if (!eventDetails) {
+      throw new Error(`Event not found for eventId: ${eventId}`);
+    }
+
+    // Validate bookingDate format
+    if (!bookingDate || !/^\d{4}-\d{2}-\d{2}$/.test(bookingDate)) {
+      throw new Error(`Invalid bookingDate format: ${bookingDate}`);
+    }
+
+    // Validate email format
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      throw new Error(`Invalid email format: ${email}`);
+    }
+
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -92,8 +127,7 @@ const sendBookingConfirmation = async (
       },
     });
 
-    const seat = await Seat.findOne({ seatId });
-    const price = seat ? seat.price : 300;
+    const price = seat.price || 200;
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -270,16 +304,13 @@ const sendBookingConfirmation = async (
           <div class="ticket">
             <div class="left-section">
               <h4 class="subheading">MUKESH BHATI ACTING SCHOOL & CULTURAL WING PRESENTS</h4>
-              <h1 class="title">PROFESSOR SAHAB</h1>
+              <h1 class="title">${eventDetails.name}</h1>
               <h2 class="subtitle">A COMEDY PLAY</h2>
-              <p class="timing">07 PM ONWARDS</p>
+              <p class="timing">${eventDetails.time}</p>
               <p>Dear ${name},</p>
               <p><strong>Seat:</strong> ${seatId}</p>
               <p><strong>Date:</strong> ${bookingDate}</p>
-              <p class="venue">
-                Venue: Mukesh Bhati Acting School, E1/74, Milan Road, <br>
-                near YMCA University, Sector-11, Faridabad
-              </p>
+              <p class="venue">Venue: ${eventDetails.venue}</p>
               <a href="http://localhost:3000/ticket?seatId=${seatId}&bookingDate=${bookingDate}&name=${encodeURIComponent(
         name
       )}" class="download-btn">Download Ticket</a>
@@ -304,9 +335,16 @@ const sendBookingConfirmation = async (
     };
 
     await transporter.sendMail(mailOptions);
-  } catch (error) {
-    console.error('Email sending error:', error);
-    throw new Error('Failed to send booking confirmation email');
+    console.log(`Booking confirmation email sent to ${email} for seat ${seatId}`);
+  } catch (error: any) {
+    console.error('Email sending error:', {
+      message: error.message,
+      stack: error.stack,
+      seatId,
+      email,
+      bookingDate,
+    });
+    throw new Error(`Failed to send booking confirmation email: ${error.message}`);
   }
 };
 
