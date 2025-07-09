@@ -917,24 +917,14 @@ h3 {
   height: 80vh;
 }
 
-.booked {
-  background: linear-gradient(to bottom, #ef4444, #c92c2c);
-  border: 2px solid #b91c1c;
-}
-
-.avail {
-  background: #8f460a;
-  border: 2px solid #ca6e23;
-}
-
 .spinner {
-  animation: spin 1s linear infinite;
+  animation: spin 8s linear infinite;
   font-size: 1.5rem;
   margin-right: 8px;
 }
 
 .spinner-btn {
-  animation: spin 1s linear infinite;
+  animation: spin 8s linear infinite;
   font-size: 1rem;
   margin-right: 8px;
 }

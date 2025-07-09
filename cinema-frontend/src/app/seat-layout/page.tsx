@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
+import { MdChair } from "react-icons/md";
 
 interface Event {
   _id: string;
@@ -55,8 +56,8 @@ export default function SeatLayout() {
           );
           if (event) fetchSeats(event.date);
         }
-      } catch (err) {
-        setError("Failed to fetch events");
+      } catch (error) {
+        setError(`Failed to fetch events ${error}`);
       } finally {
         setIsLoading(false);
       }
@@ -71,8 +72,8 @@ export default function SeatLayout() {
         `http://localhost:5000/api/seats?date=${date}`
       );
       setSeats(response.data);
-    } catch (err) {
-      setError("Failed to fetch seats");
+    } catch (error) {
+      setError(`Failed to fetch seats ${error}`);
     } finally {
       setIsLoading(false);
     }
@@ -204,11 +205,11 @@ export default function SeatLayout() {
 
           <div className="seat-legend">
             <div className="legend-item">
-              <div className="legend-box avail" />
+              <MdChair className="chair-icon legend-box avail" />
               <span>Available</span>
             </div>
             <div className="legend-item">
-              <div className="legend-box booked" />
+              <MdChair className="chair-icon legend-box booked" />
               <span>Booked</span>
             </div>
             {/* <div className="legend-item">
