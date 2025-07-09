@@ -53,7 +53,9 @@ export default function SeatLayout() {
         if (fetchedEvents.length > 0) {
           const initialEventId = eventIdFromQuery || fetchedEvents[0]._id;
           setSelectedEvent(initialEventId);
-          const event = fetchedEvents.find((e: Event) => e._id === initialEventId);
+          const event = fetchedEvents.find(
+            (e: Event) => e._id === initialEventId
+          );
           if (event) {
             await fetchSeats(event.date);
           }
@@ -70,7 +72,9 @@ export default function SeatLayout() {
   const fetchSeats = async (date: string) => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:5000/api/seats?date=${date}`);
+      const response = await axios.get(
+        `http://localhost:5000/api/seats?date=${date}`
+      );
       setSeats(response.data);
       setError("");
     } catch (err) {
@@ -104,10 +108,14 @@ export default function SeatLayout() {
   };
 
   const getSeatGrid = () => {
-    const totalSeats = events.find((e) => e._id === selectedEvent)?.totalSeats || 0;
+    const totalSeats =
+      events.find((e) => e._id === selectedEvent)?.totalSeats || 0;
     if (!totalSeats) return [];
     const seatsPerRow = Math.min(columns.length, 10);
-    const totalRows = Math.min(rows.length, Math.ceil(totalSeats / seatsPerRow));
+    const totalRows = Math.min(
+      rows.length,
+      Math.ceil(totalSeats / seatsPerRow)
+    );
     const grid: SeatData[][] = [];
 
     let seatIndex = 0;
@@ -140,16 +148,18 @@ export default function SeatLayout() {
       {!isLoading && (
         <div className="seat-layout-container">
           <header className="seat-header">
-            <button
+            {/* <button
               onClick={() => router.push("/")}
               className="back-btn"
               aria-label="Go back to booking page"
             >
               <FaChevronLeft size={18} />
             </button>
-            <h2 className="seat-title">CHOOSE YOUR PREFERRED SEATS</h2>
+            <h2 className="seat-title">
+              CHOOSE YOUR PREFERRED SEATS WITH EASE
+            </h2>
             <p className="seat-subtitle">
-              Select a seat for {events.find((e) => e._id === selectedEvent)?.name || "the event"}
+              Enjoy a seamless booking experience tailored to your comfort
             </p>
             <div className="event-select-container">
               <select
@@ -164,7 +174,8 @@ export default function SeatLayout() {
                 ) : (
                   events.map((event) => (
                     <option key={event._id} value={event._id}>
-                      {event.name} - {new Date(event.date).toLocaleDateString("en-US", {
+                      {event.name} -{" "}
+                      {new Date(event.date).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
                         timeZone: "UTC",
@@ -173,14 +184,21 @@ export default function SeatLayout() {
                   ))
                 )}
               </select>
-            </div>
+            </div> */}
           </header>
 
           {error && <p className="error-text">{error}</p>}
 
           <div className="seat-info">
-            <p><strong>Total Seats:</strong> {events.find((e) => e._id === selectedEvent)?.totalSeats || "Loading..."}</p>
-            <p><strong>Available Seats:</strong> {seats.filter(s => s.status === "available").length}</p>
+            <p>
+              <strong>Total Seats:</strong>{" "}
+              {events.find((e) => e._id === selectedEvent)?.totalSeats ||
+                "Loading..."}
+            </p>
+            <p>
+              <strong>Available Seats:</strong>{" "}
+              {seats.filter((s) => s.status === "available").length}
+            </p>
           </div>
 
           <div className="seat-card">
@@ -191,7 +209,9 @@ export default function SeatLayout() {
 
             <div className="column-row">
               {columns.slice(0, Math.min(columns.length, 10)).map((col) => (
-                <div key={col} className="column-label">{col}</div>
+                <div key={col} className="column-label">
+                  {col}
+                </div>
               ))}
             </div>
 
@@ -234,7 +254,9 @@ export default function SeatLayout() {
                 setIsBookingModalOpen(false);
                 setSelectedSeat(null);
               }}
-              bookingDate={events.find((evt) => evt._id === selectedEvent)?.date || ""}
+              bookingDate={
+                events.find((evt) => evt._id === selectedEvent)?.date || ""
+              }
               onBookingSuccess={handleBookingSuccess}
               eventId={selectedEvent}
             />
