@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Seat from "../components/Seat";
 import BookingModal from "../components/BookingModal";
-// import { FaCouch } from "react-icons/fa";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 interface Event {
   _id: string;
@@ -25,7 +25,7 @@ interface SeatData {
   bookedBy: { name: string; email: string; phone: string } | null;
 }
 
-export default function Admin() {
+function Admin() {
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<string>("");
   const [seats, setSeats] = useState<SeatData[]>([]);
@@ -36,7 +36,8 @@ export default function Admin() {
     name: "",
     date: "",
     time: "",
-    venue: "Mukesh Bhati Acting School, E1/74, Milan Road, near YMCA University, Sector-11, Faridabad",
+    venue:
+      "Mukesh Bhati Acting School, E1/74, Milan Road, near YMCA University, Sector-11, Faridabad",
     description: "",
     password: "",
     totalSeats: "",
@@ -59,21 +60,27 @@ export default function Admin() {
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/events");
+      const response = await axios.get("http://localhost:5000/api/events", {
+        withCredentials: true,
+      });
       setEvents(response.data);
     } catch (err) {
       setError("Failed to fetch events");
+      console.error("Fetch events error:", err);
     }
   };
 
   const fetchSeats = async (date: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/seats?date=${date}`
+        `http://localhost:5000/api/seats?date=${date}`,
+        { withCredentials: true }
       );
       setSeats(response.data);
+      setError("");
     } catch (err) {
       setError("Failed to fetch seats");
+      console.error("Fetch seats error:", err);
     }
   };
 
@@ -88,41 +95,59 @@ export default function Admin() {
     if (selectedEvent) {
       fetchSeats(selectedEvent);
     }
+    setIsBookingModalOpen(false);
+    setSelectedSeat(null);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
     const newErrors = { ...formErrors };
     if (name === "name") {
-      newErrors.name =
-        !value.trim() ? "Event name is required" :
-        value.length < 2 ? "Event name must be at least 2 characters" : "";
+      newErrors.name = !value.trim()
+        ? "Event name is required"
+        : value.length < 2
+        ? "Event name must be at least 2 characters"
+        : "";
     } else if (name === "date") {
-      newErrors.date =
-        !value ? "Date is required" :
-        !/^\d{4}-\d{2}-\d{2}$/.test(value) ? "Invalid date format (YYYY-MM-DD)" : "";
+      newErrors.date = !value
+        ? "Date is required"
+        : !/^\d{4}-\d{2}-\d{2}$/.test(value)
+        ? "Invalid date format (YYYY-MM-DD)"
+        : "";
     } else if (name === "time") {
-      newErrors.time =
-        !value ? "Time is required" :
-        !/^\d{2}:\d{2}$/.test(value) ? "Invalid time format (HH:MM)" : "";
+      newErrors.time = !value
+        ? "Time is required"
+        : !/^\d{2}:\d{2}$/.test(value)
+        ? "Invalid time format (HH:MM)"
+        : "";
     } else if (name === "venue") {
-      newErrors.venue =
-        !value.trim() ? "Venue is required" :
-        value.length < 2 ? "Venue must be at least 2 characters" : "";
+      newErrors.venue = !value.trim()
+        ? "Venue is required"
+        : value.length < 2
+        ? "Venue must be at least 2 characters"
+        : "";
     } else if (name === "description") {
-      newErrors.description =
-        !value.trim() ? "Description is required" :
-        value.length < 10 ? "Description must be at least 10 characters" : "";
+      newErrors.description = !value.trim()
+        ? "Description is required"
+        : value.length < 10
+        ? "Description must be at least 10 characters"
+        : "";
     } else if (name === "password") {
-      newErrors.password =
-        !value ? "Password is required" :
-        value.length < 6 ? "Password must be at least 6 characters" : "";
+      newErrors.password = !value
+        ? "Password is required"
+        : value.length < 6
+        ? "Password must be at least 6 characters"
+        : "";
     } else if (name === "totalSeats") {
-      newErrors.totalSeats =
-        !value ? "Total seats is required" :
-        isNaN(Number(value)) || Number(value) < 1 ? "Total seats must be a positive number" : "";
+      newErrors.totalSeats = !value
+        ? "Total seats is required"
+        : isNaN(Number(value)) || Number(value) < 1
+        ? "Total seats must be a positive number"
+        : "";
     }
     setFormErrors(newErrors);
   };
@@ -190,7 +215,10 @@ export default function Admin() {
     if (!formData.totalSeats) {
       newErrors.totalSeats = "Total seats is required";
       isValid = false;
-    } else if (isNaN(Number(formData.totalSeats)) || Number(formData.totalSeats) < 1) {
+    } else if (
+      isNaN(Number(formData.totalSeats)) ||
+      Number(formData.totalSeats) < 1
+    ) {
       newErrors.totalSeats = "Total seats must be a positive number";
       isValid = false;
     }
@@ -209,15 +237,20 @@ export default function Admin() {
 
     setIsSubmitting(true);
     try {
-      await axios.post("http://localhost:5000/api/events", {
-        ...formData,
-        totalSeats: Number(formData.totalSeats),
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/events",
+        {
+          ...formData,
+          totalSeats: Number(formData.totalSeats),
+        },
+        { withCredentials: true }
+      );
       setFormData({
         name: "",
         date: "",
         time: "",
-        venue: "Mukesh Bhati Acting School, E1/74, Milan Road, near YMCA University, Sector-11, Faridabad",
+        venue:
+          "Mukesh Bhati Acting School, E1/74, Milan Road, near YMCA University, Sector-11, Faridabad",
         description: "",
         password: "",
         totalSeats: "",
@@ -229,6 +262,7 @@ export default function Admin() {
       } else {
         setError("Failed to create event");
       }
+      console.error("Create event error:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -249,12 +283,15 @@ export default function Admin() {
   const selectedEventDetails = events.find(
     (event) => event.date === selectedEvent
   );
+
+  // Ensure eventId is valid before rendering BookingModal
+  const eventIdForBooking = selectedEventDetails?._id || "";
+
   const columns = Array.from({ length: 10 }, (_, i) => i + 1);
   const rows = selectedEventDetails
-    ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").slice(
-        0,
-        Math.ceil(selectedEventDetails.totalSeats / 10)
-      )
+    ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        .split("")
+        .slice(0, Math.ceil(selectedEventDetails.totalSeats / 10))
     : [];
 
   return (
@@ -274,9 +311,13 @@ export default function Admin() {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Enter event name"
-                  className={`form-input ${formErrors.name ? "input-error" : ""}`}
+                  className={`form-input ${
+                    formErrors.name ? "input-error" : ""
+                  }`}
                 />
-                {formErrors.name && <p className="error-text active">{formErrors.name}</p>}
+                {formErrors.name && (
+                  <p className="error-text active">{formErrors.name}</p>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">Date</label>
@@ -286,9 +327,13 @@ export default function Admin() {
                   value={formData.date}
                   onChange={handleInputChange}
                   placeholder="Select date"
-                  className={`form-input ${formErrors.date ? "input-error" : ""}`}
+                  className={`form-input ${
+                    formErrors.date ? "input-error" : ""
+                  }`}
                 />
-                {formErrors.date && <p className="error-text active">{formErrors.date}</p>}
+                {formErrors.date && (
+                  <p className="error-text active">{formErrors.date}</p>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">Time</label>
@@ -298,9 +343,13 @@ export default function Admin() {
                   value={formData.time}
                   onChange={handleInputChange}
                   placeholder="Select time"
-                  className={`form-input ${formErrors.time ? "input-error" : ""}`}
+                  className={`form-input ${
+                    formErrors.time ? "input-error" : ""
+                  }`}
                 />
-                {formErrors.time && <p className="error-text active">{formErrors.time}</p>}
+                {formErrors.time && (
+                  <p className="error-text active">{formErrors.time}</p>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">Venue</label>
@@ -310,9 +359,13 @@ export default function Admin() {
                   value={formData.venue}
                   onChange={handleInputChange}
                   placeholder="Enter venue"
-                  className={`form-input ${formErrors.venue ? "input-error" : ""}`}
+                  className={`form-input ${
+                    formErrors.venue ? "input-error" : ""
+                  }`}
                 />
-                {formErrors.venue && <p className="error-text active">{formErrors.venue}</p>}
+                {formErrors.venue && (
+                  <p className="error-text active">{formErrors.venue}</p>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">Description</label>
@@ -321,9 +374,13 @@ export default function Admin() {
                   value={formData.description}
                   onChange={handleInputChange}
                   placeholder="Enter event description"
-                  className={`form-input ${formErrors.description ? "input-error" : ""}`}
+                  className={`form-input ${
+                    formErrors.description ? "input-error" : ""
+                  }`}
                 ></textarea>
-                {formErrors.description && <p className="error-text active">{formErrors.description}</p>}
+                {formErrors.description && (
+                  <p className="error-text active">{formErrors.description}</p>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">Total Seats</label>
@@ -333,10 +390,14 @@ export default function Admin() {
                   value={formData.totalSeats}
                   onChange={handleInputChange}
                   placeholder="Enter total seats"
-                  className={`form-input ${formErrors.totalSeats ? "input-error" : ""}`}
+                  className={`form-input ${
+                    formErrors.totalSeats ? "input-error" : ""
+                  }`}
                   min="1"
                 />
-                {formErrors.totalSeats && <p className="error-text active">{formErrors.totalSeats}</p>}
+                {formErrors.totalSeats && (
+                  <p className="error-text active">{formErrors.totalSeats}</p>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">Password</label>
@@ -346,15 +407,21 @@ export default function Admin() {
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="Enter password"
-                  className={`form-input ${formErrors.password ? "input-error" : ""}`}
+                  className={`form-input ${
+                    formErrors.password ? "input-error" : ""
+                  }`}
                 />
-                {formErrors.password && <p className="error-text active">{formErrors.password}</p>}
+                {formErrors.password && (
+                  <p className="error-text active">{formErrors.password}</p>
+                )}
               </div>
               <div className="form-actions">
                 <button
                   type="submit"
                   className="submit-btn"
-                  disabled={isSubmitting || Object.values(formErrors).some((e) => e)}
+                  disabled={
+                    isSubmitting || Object.values(formErrors).some((e) => e)
+                  }
                 >
                   {isSubmitting ? "Creating..." : "Create Event"}
                 </button>
@@ -371,7 +438,9 @@ export default function Admin() {
                   <div key={event._id} className="event-item">
                     <div
                       className="event-image"
-                      style={{ backgroundImage: `url("https://cdna.artstation.com/p/assets/images/images/026/941/604/large/kaustubh-chaudhary-doremon-pink.jpg?1590151532")` }}
+                      style={{
+                        backgroundImage: `url("https://cdna.artstation.com/p/assets/images/images/026/941/604/large/kaustubh-chaudhary-doremon-pink.jpg?1590151532")`,
+                      }}
                     ></div>
                     <div className="event-info">
                       <p className="event-name">{event.name}</p>
@@ -405,11 +474,21 @@ export default function Admin() {
           </button>
           <div className="event-details">
             <h2 className="form-title">{selectedEventDetails.name}</h2>
-            <p className="event-detail-text">Date: {selectedEventDetails.date}</p>
-            <p className="event-detail-text">Time: {selectedEventDetails.time}</p>
-            <p className="event-detail-text">Venue: {selectedEventDetails.venue}</p>
-            <p className="event-detail-text">Description: {selectedEventDetails.description}</p>
-            <p className="event-detail-text">Total Seats: {selectedEventDetails.totalSeats}</p>
+            <p className="event-detail-text">
+              Date: {selectedEventDetails.date}
+            </p>
+            <p className="event-detail-text">
+              Time: {selectedEventDetails.time}
+            </p>
+            <p className="event-detail-text">
+              Venue: {selectedEventDetails.venue}
+            </p>
+            <p className="event-detail-text">
+              Description: {selectedEventDetails.description}
+            </p>
+            <p className="event-detail-text">
+              Total Seats: {selectedEventDetails.totalSeats}
+            </p>
           </div>
           <div className="card">
             <h3>Seat Layout</h3>
@@ -432,7 +511,7 @@ export default function Admin() {
                         .slice(
                           0,
                           row === rows[rows.length - 1]
-                            ? selectedEventDetails.totalSeats % 10 || 10
+                            ? selectedEventDetails!.totalSeats % 10 || 10
                             : 10
                         )
                         .map((col) => {
@@ -444,17 +523,14 @@ export default function Admin() {
                               seat={seat}
                               onClick={() => handleSeatClick(seat)}
                               isColumnSix={col === 6}
+                              isSelected={seat.seatId === selectedSeat}
                             />
                           ) : (
                             <div
                               key={seatId}
-                              className={`seat seat-available ${
-                                col === 6 ? "ml-gap" : ""
-                              }`}
+                              className="seat-placeholder"
                               aria-hidden="true"
-                            >
-                              <span className="seat-id">{seatId}</span>
-                            </div>
+                            />
                           );
                         })}
                     </div>
@@ -465,16 +541,28 @@ export default function Admin() {
           </div>
         </div>
       )}
-      {isBookingModalOpen && selectedSeat && (
+      {isBookingModalOpen && selectedSeat && eventIdForBooking && (
         <BookingModal
           seatId={selectedSeat}
-          price={300}
+          price={seats.find((s) => s.seatId === selectedSeat)?.price || 300}
           quantity={1}
-          onClose={() => setIsBookingModalOpen(false)}
+          onClose={() => {
+            setIsBookingModalOpen(false);
+            setSelectedSeat(null);
+          }}
           bookingDate={selectedEvent}
           onBookingSuccess={handleBookingSuccess}
+          eventId={eventIdForBooking}
         />
       )}
     </div>
+  );
+}
+
+export default function ProtectedAdminLayout() {
+  return (
+    <ProtectedRoute>
+      <Admin />
+    </ProtectedRoute>
   );
 }

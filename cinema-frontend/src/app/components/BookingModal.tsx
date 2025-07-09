@@ -3,7 +3,7 @@ import { useState } from "react";
 import axios from "axios";
 import { FaTimes } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { useAuth } from "./AuthContext"; // Import AuthContext
+import { useAuth } from "./AuthContext";
 
 interface BookingModalProps {
   seatId: string;
@@ -25,10 +25,10 @@ export default function BookingModal({
   eventId,
 }: BookingModalProps) {
   const router = useRouter();
-  const { user } = useAuth(); // Get authenticated user
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
+    name: "",
+    email: "",
     phone: "",
   });
   const [errors, setErrors] = useState({
@@ -68,9 +68,6 @@ export default function BookingModal({
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = "Invalid email format";
       isValid = false;
-    } else if (formData.email !== user.email) {
-      newErrors.email = "Email must match your account email";
-      isValid = false;
     }
 
     const phoneRegex = /^(\+?\d{1,3}[-.\s]?)?\d{10}$/;
@@ -78,7 +75,8 @@ export default function BookingModal({
       newErrors.phone = "Phone number is required";
       isValid = false;
     } else if (!phoneRegex.test(formData.phone)) {
-      newErrors.phone = "Invalid phone number format (10 digits or +[country code][10 digits])";
+      newErrors.phone =
+        "Invalid phone number format (10 digits or +[country code][10 digits])";
       isValid = false;
     }
 
@@ -94,6 +92,16 @@ export default function BookingModal({
       return;
     }
 
+    // Log the data being sent
+    console.log("Booking request data:", {
+      seatId,
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      bookingDate,
+      eventId,
+    });
+
     setIsSubmitting(true);
     try {
       const response = await axios.post(
@@ -104,9 +112,9 @@ export default function BookingModal({
           email: formData.email,
           phone: formData.phone,
           bookingDate,
-          eventId, // Include eventId for potential backend validation
+          eventId,
         },
-        { withCredentials: true } // Add withCredentials
+        { withCredentials: true }
       );
       console.log("Booking response:", response.data);
       onBookingSuccess();
@@ -116,11 +124,12 @@ export default function BookingModal({
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const errorMessage =
-          error.response?.data?.error || "Failed to book seat. Please try again.";
+          error.response?.data?.error ||
+          "Failed to book seat. Please try again.";
         console.error("Booking error:", error.response?.data || error.message);
         setSubmitError(errorMessage);
         if (errorMessage.includes("Authentication required")) {
-          router.push("/login"); // Redirect to login if token is missing
+          router.push("/login");
         }
       } else {
         console.error("Booking error:", error);
@@ -148,8 +157,6 @@ export default function BookingModal({
         ? "Email is required"
         : !emailRegex.test(value)
         ? "Invalid email format"
-        : value !== user.email
-        ? "Email must match your account email"
         : "";
     } else if (name === "phone") {
       const phoneRegex = /^(\+?\d{1,3}[-.\s]?)?\d{10}$/;
@@ -166,7 +173,11 @@ export default function BookingModal({
     <>
       <div className="modal-overlay" onClick={onClose}></div>
       <div className="modal show">
-        <button onClick={onClose} className="modal-close" aria-label="Close modal">
+        <button
+          onClick={onClose}
+          className="modal-close"
+          aria-label="Close modal"
+        >
           <FaTimes size={16} />
         </button>
         <h3 className="seat-title-2">Book Seat {seatId}</h3>
@@ -190,7 +201,9 @@ export default function BookingModal({
                 placeholder="Enter your name"
                 required
               />
-              {errors.name && <p className="error-text active">{errors.name}</p>}
+              {errors.name && (
+                <p className="error-text active">{errors.name}</p>
+              )}
             </div>
 
             <div className="input-group">
@@ -206,7 +219,9 @@ export default function BookingModal({
                 placeholder="Enter your email"
                 required
               />
-              {errors.email && <p className="error-text active">{errors.email}</p>}
+              {errors.email && (
+                <p className="error-text active">{errors.email}</p>
+              )}
             </div>
 
             <div className="input-group">
@@ -222,13 +237,19 @@ export default function BookingModal({
                 placeholder="Enter your phone number"
                 required
               />
-              {errors.phone && <p className="error-text active">{errors.phone}</p>}
+              {errors.phone && (
+                <p className="error-text active">{errors.phone}</p>
+              )}
             </div>
           </div>
           <div className="button-group">
             <button
               type="submit"
-              className={`book-btn ${isSubmitting || Object.values(errors).some((e) => e) ? "disabled" : ""}`}
+              className={`book-btn ${
+                isSubmitting || Object.values(errors).some((e) => e)
+                  ? "disabled"
+                  : ""
+              }`}
               disabled={isSubmitting || Object.values(errors).some((e) => e)}
             >
               {isSubmitting ? (
