@@ -1,8 +1,9 @@
-// components/BookingModal.tsx
+"use client";
 import { useState } from "react";
 import axios from "axios";
 import { FaTimes } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import { useAuth } from "./AuthContext"; // Import AuthContext
 
 interface BookingModalProps {
   seatId: string;
@@ -11,7 +12,7 @@ interface BookingModalProps {
   onClose: () => void;
   bookingDate: string;
   onBookingSuccess: () => void;
-  eventId: string; // Add eventId prop
+  eventId: string;
 }
 
 export default function BookingModal({
@@ -24,9 +25,10 @@ export default function BookingModal({
   eventId,
 }: BookingModalProps) {
   const router = useRouter();
+  const { user } = useAuth(); // Get authenticated user
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    name: user?.name || "",
+    email: user?.email || "",
     phone: "",
   });
   const [errors, setErrors] = useState({
@@ -36,6 +38,12 @@ export default function BookingModal({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+
+  // Redirect to login if user is not authenticated
+  if (!user) {
+    router.push("/login");
+    return null;
+  }
 
   const validateForm = () => {
     const newErrors = {
@@ -60,6 +68,9 @@ export default function BookingModal({
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = "Invalid email format";
       isValid = false;
+    } else if (formData.email !== user.email) {
+      newErrors.email = "Email must match your account email";
+      isValid = false;
     }
 
     const phoneRegex = /^(\+?\d{1,3}[-.\s]?)?\d{10}$/;
@@ -67,8 +78,7 @@ export default function BookingModal({
       newErrors.phone = "Phone number is required";
       isValid = false;
     } else if (!phoneRegex.test(formData.phone)) {
-      newErrors.phone =
-        "Invalid phone number format (10 digits or +[country code][10 digits])";
+      newErrors.phone = "Invalid phone number format (10 digits or +[country code][10 digits])";
       isValid = false;
     }
 
@@ -86,26 +96,34 @@ export default function BookingModal({
 
     setIsSubmitting(true);
     try {
-      await axios.post("http://localhost:5000/api/seats/book", {
-        seatId,
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        bookingDate,
-        quantity,
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/seats/book",
+        {
+          seatId,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          bookingDate,
+          eventId, // Include eventId for potential backend validation
+        },
+        { withCredentials: true } // Add withCredentials
+      );
+      console.log("Booking response:", response.data);
       onBookingSuccess();
-      // Redirect to booking confirmation
       router.push(
         `/booking-confirmation?seatId=${seatId}&bookingDate=${bookingDate}&selectedEvent=${eventId}`
       );
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        setSubmitError(
-          error.response?.data?.error ||
-            "Failed to book seat. Please try again."
-        );
+        const errorMessage =
+          error.response?.data?.error || "Failed to book seat. Please try again.";
+        console.error("Booking error:", error.response?.data || error.message);
+        setSubmitError(errorMessage);
+        if (errorMessage.includes("Authentication required")) {
+          router.push("/login"); // Redirect to login if token is missing
+        }
       } else {
+        console.error("Booking error:", error);
         setSubmitError("Failed to book seat. Please try again.");
       }
     } finally {
@@ -130,6 +148,8 @@ export default function BookingModal({
         ? "Email is required"
         : !emailRegex.test(value)
         ? "Invalid email format"
+        : value !== user.email
+        ? "Email must match your account email"
         : "";
     } else if (name === "phone") {
       const phoneRegex = /^(\+?\d{1,3}[-.\s]?)?\d{10}$/;
@@ -146,16 +166,12 @@ export default function BookingModal({
     <>
       <div className="modal-overlay" onClick={onClose}></div>
       <div className="modal show">
-        <button
-          onClick={onClose}
-          className="modal-close"
-          aria-label="Close modal"
-        >
+        <button onClick={onClose} className="modal-close" aria-label="Close modal">
           <FaTimes size={16} />
         </button>
         <h3 className="seat-title-2">Book Seat {seatId}</h3>
         <div style={{ color: "gray", marginBottom: "15px" }}>
-          <p>Price: ₹{price} </p>
+          <p>Price: ₹{price}</p>
           <p>Date: {bookingDate}</p>
         </div>
         {submitError && <p className="error-text active">{submitError}</p>}
@@ -174,9 +190,7 @@ export default function BookingModal({
                 placeholder="Enter your name"
                 required
               />
-              {errors.name && (
-                <p className="error-text active">{errors.name}</p>
-              )}
+              {errors.name && <p className="error-text active">{errors.name}</p>}
             </div>
 
             <div className="input-group">
@@ -192,9 +206,7 @@ export default function BookingModal({
                 placeholder="Enter your email"
                 required
               />
-              {errors.email && (
-                <p className="error-text active">{errors.email}</p>
-              )}
+              {errors.email && <p className="error-text active">{errors.email}</p>}
             </div>
 
             <div className="input-group">
@@ -210,19 +222,13 @@ export default function BookingModal({
                 placeholder="Enter your phone number"
                 required
               />
-              {errors.phone && (
-                <p className="error-text active">{errors.phone}</p>
-              )}
+              {errors.phone && <p className="error-text active">{errors.phone}</p>}
             </div>
           </div>
           <div className="button-group">
             <button
               type="submit"
-              className={`book-btn ${
-                isSubmitting || Object.values(errors).some((e) => e)
-                  ? "disabled"
-                  : ""
-              }`}
+              className={`book-btn ${isSubmitting || Object.values(errors).some((e) => e) ? "disabled" : ""}`}
               disabled={isSubmitting || Object.values(errors).some((e) => e)}
             >
               {isSubmitting ? (

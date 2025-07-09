@@ -179,3 +179,10 @@
     border-radius: 10px;
   }
 }
+
+
+.header-group {
+  display: flex;
+  gap: 12px;
+  border: none !important;
+}

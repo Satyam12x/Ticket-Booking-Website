@@ -1,9 +1,10 @@
-// components/BookingLayout.tsx
+"use client";
 import "./BookingLayout.css";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import Link from "next/link"; // Import Link
+import Link from "next/link";
 import axios from "axios";
+import { useAuth } from "./AuthContext";
 
 interface Event {
   _id: string;
@@ -15,6 +16,7 @@ interface Event {
 }
 
 export default function BookingLayout() {
+  const { user, logout } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -28,14 +30,19 @@ export default function BookingLayout() {
     const fetchEvents = async () => {
       setIsLoading(true);
       try {
-        const res = await axios.get("http://localhost:5000/api/events");
-        const fetchedEvents = res.data;
+        const res = await fetch("http://localhost:5000/api/events", {
+          cache: "no-store",
+        });
+        if (!res.ok) {
+          throw new Error("Failed to fetch events");
+        }
+        const fetchedEvents = await res.json();
         setEvents(fetchedEvents);
         if (fetchedEvents.length > 0) {
           setSelectedEvent(fetchedEvents[0]._id);
         }
-      } catch (error) {
-        setError(`Failed to fetch events ${error}`);
+      } catch (error: any) {
+        setError(`Failed to fetch events: ${error.message}`);
       } finally {
         setIsLoading(false);
       }
@@ -46,7 +53,12 @@ export default function BookingLayout() {
   return (
     <div className="booking-layout">
       <div className="booking-left">
-        <span className="booking-heading">Hello Everyone</span>
+        <div className="header-group">
+          <span className="booking-heading">Hello, {user?.name || "Guest"}</span>
+          <button onClick={logout} className="logout-button" aria-label="Logout">
+            Logout
+          </button>
+        </div>
         <h2 className="booking-title">
           Made your show booking experience effortless!
         </h2>
@@ -121,6 +133,7 @@ export default function BookingLayout() {
           className={`book-button ${
             !selectedEvent || isLoading ? "disabled" : ""
           }`}
+          aria-label="Book Seats Now"
         >
           Book Seats Now
         </Link>
@@ -130,8 +143,8 @@ export default function BookingLayout() {
         <Image
           src="/theater.jpg"
           alt="Theater Scene"
-          layout="fill"
-          objectFit="cover"
+          fill
+          style={{ objectFit: "cover" }}
           onError={() => console.error("Failed to load theater image")}
         />
       </div>
