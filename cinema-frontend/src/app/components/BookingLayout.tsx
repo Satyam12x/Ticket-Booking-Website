@@ -1,9 +1,10 @@
-// components/BookingLayout.tsx
+"use client";
 import "./BookingLayout.css";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import Link from "next/link"; // Import Link
-import axios from "axios";
+import Link from "next/link";
+import { useAuth } from "./AuthContext";
+import ProtectedRoute from "./ProtectedRoute";
 
 interface Event {
   _id: string;
@@ -14,7 +15,8 @@ interface Event {
   description: string;
 }
 
-export default function BookingLayout() {
+function BookingLayout() {
+  const { user, logout } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -28,14 +30,20 @@ export default function BookingLayout() {
     const fetchEvents = async () => {
       setIsLoading(true);
       try {
-        const res = await axios.get("http://localhost:5000/api/events");
-        const fetchedEvents = res.data;
+        const res = await fetch("http://localhost:5000/api/events", {
+          cache: "no-store",
+          credentials: "include",
+        });
+        if (!res.ok) {
+          throw new Error("Failed to fetch events");
+        }
+        const fetchedEvents = await res.json();
         setEvents(fetchedEvents);
         if (fetchedEvents.length > 0) {
           setSelectedEvent(fetchedEvents[0]._id);
         }
       } catch (error) {
-        setError(`Failed to fetch events ${error}`);
+        setError("Failed to fetch events");
       } finally {
         setIsLoading(false);
       }
@@ -43,10 +51,30 @@ export default function BookingLayout() {
     fetchEvents();
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to logout");
+      }
+      logout();
+    } catch (error: any) {
+      console.error("Logout error:", error.message);
+    }
+  };
+
   return (
     <div className="booking-layout">
       <div className="booking-left">
-        <span className="booking-heading">Hello Everyone</span>
+        <div className="header-group">
+          <span className="booking-heading">Hello, {user?.name || "Guest"}</span>
+          <button onClick={handleLogout} className="logout-button" aria-label="Logout">
+            Logout
+          </button>
+        </div>
         <h2 className="booking-title">
           Made your show booking experience effortless!
         </h2>
@@ -62,12 +90,12 @@ export default function BookingLayout() {
             value={selectedEvent}
             onChange={(e) => setSelectedEvent(e.target.value)}
             aria-label="Select an event"
-            disabled={isLoading}
+            disabled={isLoading || events.length === 0}
           >
             {isLoading ? (
               <option value="">Loading events...</option>
             ) : events.length === 0 ? (
-              <option value="">No events available</option>
+              <option value="">No future events available</option>
             ) : (
               events.map((event) => (
                 <option key={event._id} value={event._id}>
@@ -84,7 +112,7 @@ export default function BookingLayout() {
         <div className="booking-group">
           <label className="booking-label">Show Details</label>
           {isLoading ? (
-            <div className="spinner">Loading...</div>
+            <div className="spinner"></div>
           ) : error ? (
             <p className="error-text">{error}</p>
           ) : selectedEventDetails ? (
@@ -112,15 +140,16 @@ export default function BookingLayout() {
               </p>
             </div>
           ) : (
-            <p className="no-events">No events available</p>
+            <p className="no-events">No future events available</p>
           )}
         </div>
 
         <Link
           href={`/seat-layout?eventId=${selectedEvent}`}
           className={`book-button ${
-            !selectedEvent || isLoading ? "disabled" : ""
+            !selectedEvent || isLoading || events.length === 0 ? "disabled" : ""
           }`}
+          aria-label="Book Seats Now"
         >
           Book Seats Now
         </Link>
@@ -130,11 +159,19 @@ export default function BookingLayout() {
         <Image
           src="/theater.jpg"
           alt="Theater Scene"
-          layout="fill"
-          objectFit="cover"
+          fill
+          style={{ objectFit: "cover" }}
           onError={() => console.error("Failed to load theater image")}
         />
       </div>
     </div>
+  );
+}
+
+export default function ProtectedBookingLayout() {
+  return (
+    <ProtectedRoute>
+      <BookingLayout />
+    </ProtectedRoute>
   );
 }

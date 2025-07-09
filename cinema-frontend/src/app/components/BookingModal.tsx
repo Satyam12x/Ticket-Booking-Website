@@ -1,8 +1,9 @@
-// components/BookingModal.tsx
+"use client";
 import { useState } from "react";
 import axios from "axios";
 import { FaTimes } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import { useAuth } from "./AuthContext";
 
 interface BookingModalProps {
   seatId: string;
@@ -11,7 +12,7 @@ interface BookingModalProps {
   onClose: () => void;
   bookingDate: string;
   onBookingSuccess: () => void;
-  eventId: string; // Add eventId prop
+  eventId: string;
 }
 
 export default function BookingModal({
@@ -24,6 +25,7 @@ export default function BookingModal({
   eventId,
 }: BookingModalProps) {
   const router = useRouter();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -36,6 +38,12 @@ export default function BookingModal({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+
+  // Redirect to login if user is not authenticated
+  if (!user) {
+    router.push("/login");
+    return null;
+  }
 
   const validateForm = () => {
     const newErrors = {
@@ -84,28 +92,47 @@ export default function BookingModal({
       return;
     }
 
+    // Log the data being sent
+    console.log("Booking request data:", {
+      seatId,
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      bookingDate,
+      eventId,
+    });
+
     setIsSubmitting(true);
     try {
-      await axios.post("http://localhost:5000/api/seats/book", {
-        seatId,
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        bookingDate,
-        quantity,
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/seats/book",
+        {
+          seatId,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          bookingDate,
+          eventId,
+        },
+        { withCredentials: true }
+      );
+      console.log("Booking response:", response.data);
       onBookingSuccess();
-      // Redirect to booking confirmation
       router.push(
         `/booking-confirmation?seatId=${seatId}&bookingDate=${bookingDate}&selectedEvent=${eventId}`
       );
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        setSubmitError(
+        const errorMessage =
           error.response?.data?.error ||
-            "Failed to book seat. Please try again."
-        );
+          "Failed to book seat. Please try again.";
+        console.error("Booking error:", error.response?.data || error.message);
+        setSubmitError(errorMessage);
+        if (errorMessage.includes("Authentication required")) {
+          router.push("/login");
+        }
       } else {
+        console.error("Booking error:", error);
         setSubmitError("Failed to book seat. Please try again.");
       }
     } finally {
@@ -155,7 +182,7 @@ export default function BookingModal({
         </button>
         <h3 className="seat-title-2">Book Seat {seatId}</h3>
         <div style={{ color: "gray", marginBottom: "15px" }}>
-          <p>Price: ₹{price} </p>
+          <p>Price: ₹{price}</p>
           <p>Date: {bookingDate}</p>
         </div>
         {submitError && <p className="error-text active">{submitError}</p>}

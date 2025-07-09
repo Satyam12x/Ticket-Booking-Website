@@ -147,6 +147,7 @@
     width: 85%;
     margin: auto;
     margin-top: 100px;
+    z-index: 999;
   }
 
   .booking-left{
@@ -177,4 +178,11 @@
     height: 100%;
     border-radius: 10px;
   }
+}
+
+
+.header-group {
+  display: flex;
+  gap: 12px;
+  border: none !important;
 }
