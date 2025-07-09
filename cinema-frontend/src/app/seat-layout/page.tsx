@@ -31,7 +31,6 @@ interface SeatData {
 }
 
 export default function SeatLayout() {
-  // const router = useRouter();
   const searchParams = useSearchParams();
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<string>("");
@@ -45,9 +44,15 @@ export default function SeatLayout() {
 
   useEffect(() => {
     const fetchEvents = async () => {
+      setIsLoading(true);
       try {
-        const response = await axios.get("http://localhost:5000/api/events");
-        const fetchedEvents = response.data;
+        const response = await fetch("http://localhost:5000/api/events", {
+          cache: "no-store",
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch events");
+        }
+        const fetchedEvents = await response.json();
         setEvents(fetchedEvents);
         if (fetchedEvents.length > 0) {
           const initialEventId = eventIdFromQuery || fetchedEvents[0]._id;
@@ -59,8 +64,8 @@ export default function SeatLayout() {
             await fetchSeats(event.date);
           }
         }
-      } catch (error) {
-        setError(`Failed to fetch events ${error}`);
+      } catch (error: any) {
+        setError(`Failed to fetch events: ${error.message}`);
       } finally {
         setIsLoading(false);
       }
@@ -71,24 +76,22 @@ export default function SeatLayout() {
   const fetchSeats = async (date: string) => {
     setIsLoading(true);
     try {
-      const response = await axios.get(
-        `http://localhost:5000/api/seats?date=${date}`
+      const response = await fetch(
+        `http://localhost:5000/api/seats?date=${date}`,
+        { cache: "no-store" }
       );
-      setSeats(response.data);
+      if (!response.ok) {
+        throw new Error("Failed to fetch seats");
+      }
+      const data = await response.json();
+      setSeats(data);
       setError("");
-    } catch (error) {
-      setError(`Failed to fetch seats ${error}`);
+    } catch (error: any) {
+      setError(`Failed to fetch seats: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
   };
-
-  // const handleEventChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  //     const eventId = e.target.value;
-  //     setSelectedEvent(eventId);
-  //     const event = events.find((evt) => evt._id === eventId);
-  //     if (event) fetchSeats(event.date);
-  // };
 
   const handleSeatClick = (seat: SeatData) => {
     if (seat.status === "available") {
@@ -115,135 +118,108 @@ export default function SeatLayout() {
     : [];
 
   return (
-     <>
+    <>
       <Loader isLoading={isLoading} />
       {!isLoading && (
         <div
-      className="seat-layout-container"
-      style={{ "--num-rows": rows.length } as React.CSSProperties}
-    >
-      <header className="seat-header">
-        <Link
-          href="/"
-          className="back-btn"
-          aria-label="Go back to booking page"
+          className="seat-layout-container"
+          style={{ "--num-rows": rows.length } as React.CSSProperties}
         >
-          <FaChevronLeft size={18} />
-        </Link>
-        <h2 className="seat-title">CHOOSE YOUR PREFERRED SEATS WITH EASE</h2>
-        <p className="seat-subtitle">
-          Enjoy a seamless booking experience tailored to your comfort
-        </p>
-        {/* <div className="event-select-container">
-                    <select
-                        value={selectedEvent}
-                        onChange={handleEventChange}
-                        className="booking-select"
-                        aria-label="Select an event"
-                        disabled={isLoading}
-                    >
-                        {events.length === 0 ? (
-                            <option value="">No events available</option>
+          <header className="seat-header">
+            <Link
+              href="/"
+              className="back-btn"
+              aria-label="Go back to booking page"
+            >
+              <FaChevronLeft size={18} />
+            </Link>
+            <h2 className="seat-title">CHOOSE YOUR PREFERRED SEATS WITH EASE</h2>
+            <p className="seat-subtitle">
+              Enjoy a seamless booking experience tailored to your comfort
+            </p>
+          </header>
+
+          {error && <p className="error-text">{error}</p>}
+          <div className="seat-back">
+            <div className="seat-card">
+              <div className="stage-curve">
+                <div className="stage-text">STAGE</div>
+              </div>
+              <div className="door-label">DOOR</div>
+
+              <div className="column-row">
+                {columns.map((col) => (
+                  <div key={col} className="column-label">
+                    {col}
+                  </div>
+                ))}
+              </div>
+
+              <div className="seat-grid">
+                {rows.map((row) => (
+                  <div key={row} className="seat-row">
+                    <div className="row-label">{row}</div>
+                    {columns
+                      .slice(
+                        0,
+                        row === rows[rows.length - 1]
+                          ? selectedEventDetails!.totalSeats % 10 || 10
+                          : 10
+                      )
+                      .map((col) => {
+                        const seatId = `${row}${col}`;
+                        const seat = seats.find((s) => s.seatId === seatId);
+                        return seat ? (
+                          <Seat
+                            key={seat.seatId}
+                            seat={seat}
+                            onClick={() => handleSeatClick(seat)}
+                            isColumnSix={col === 6}
+                            isSelected={seat.seatId === selectedSeat}
+                          />
                         ) : (
-                            events.map((event) => (
-                                <option key={event._id} value={event._id}>
-                                    {event.name} - {new Date(event.date).toLocaleDateString("en-US", {
-                                        month: "short",
-                                        day: "numeric",
-                                    })}
-                                </option>
-                            ))
-                        )}
-                    </select>
-                </div> */}
-      </header>
-
-      {/* {isLoading && <div className="spinner">Loading...</div>} */}
-      {error && <p className="error-text">{error}</p>}
-      <div className="seat-back">
-        <div className="seat-card">
-          <div className="stage-curve">
-            <div className="stage-text">STAGE</div>
-          </div>
-          <div className="door-label">DOOR</div>
-
-          <div className="column-row">
-            {columns.map((col) => (
-              <div key={col} className="column-label">
-                {col}
+                          <div
+                            key={seatId}
+                            className="seat-placeholder"
+                            aria-hidden="true"
+                          />
+                        );
+                      })}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+              <div className="seat-line"></div>
 
-          <div className="seat-grid">
-            {rows.map((row) => (
-              <div key={row} className="seat-row">
-                <div className="row-label">{row}</div>
-                {columns
-                  .slice(
-                    0,
-                    row === rows[rows.length - 1]
-                      ? selectedEventDetails!.totalSeats % 10 || 10
-                      : 10
-                  )
-                  .map((col) => {
-                    const seatId = `${row}${col}`;
-                    const seat = seats.find((s) => s.seatId === seatId);
-                    return seat ? (
-                      <Seat
-                        key={seat.seatId}
-                        seat={seat}
-                        onClick={() => handleSeatClick(seat)}
-                        isColumnSix={col === 6}
-                        isSelected={seat.seatId === selectedSeat}
-                      />
-                    ) : (
-                      <div
-                        key={seatId}
-                        className="seat-placeholder"
-                        aria-hidden="true"
-                      />
-                    );
-                  })}
+              <div className="seat-legend">
+                <div className="legend-item">
+                  <MdChair className="chair-icon legend-box avail" />
+                  <span>Available</span>
+                </div>
+                <div className="legend-item">
+                  <MdChair className="chair-icon legend-box booked" />
+                  <span>Booked</span>
+                </div>
               </div>
-            ))}
+            </div>
           </div>
-          <div className="seat-line"></div>
 
-          <div className="seat-legend">
-            <div className="legend-item">
-              <MdChair className="chair-icon legend-box avail" />
-              <span>Available</span>
-            </div>
-            <div className="legend-item">
-              <MdChair className="chair-icon legend-box booked" />
-              <span>Booked</span>
-            </div>
-            {/* <div className="legend-item">
-                        <div className="legend-box seat-selected" />
-                        <span>Selected</span>
-                    </div> */}
-          </div>
+          {isBookingModalOpen && selectedSeat && (
+            <BookingModal
+              seatId={selectedSeat}
+              price={seats.find((s) => s.seatId === selectedSeat)?.price || 300}
+              quantity={1}
+              onClose={() => {
+                setIsBookingModalOpen(false);
+                setSelectedSeat(null);
+              }}
+              bookingDate={
+                events.find((evt) => evt._id === selectedEvent)?.date || ""
+              }
+              onBookingSuccess={handleBookingSuccess}
+              eventId={selectedEvent}
+            />
+          )}
         </div>
-      </div>
-
-      {isBookingModalOpen && selectedSeat && (
-        <BookingModal
-          seatId={selectedSeat}
-          price={seats.find((s) => s.seatId === selectedSeat)?.price || 300}
-          quantity={1}
-          onClose={() => {
-            setIsBookingModalOpen(false);
-            setSelectedSeat(null);
-          }}
-          bookingDate={
-            events.find((evt) => evt._id === selectedEvent)?.date || ""
-          }
-          onBookingSuccess={handleBookingSuccess}
-          eventId={selectedEvent} // Pass eventId
-        />
-      )}
-    </div>
       )}
     </>
   );

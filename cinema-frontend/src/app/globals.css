@@ -942,6 +942,25 @@ h3 {
   font-size: 0.875rem;
 }
 
+.logout-button{
+  font-size: 14px;
+    background-color: #a55b13;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 20px;
+    width: -moz-fit-content;
+    width: fit-content;
+    border: none;
+
+}
+
+.header-group{
+  display: flex;
+  gap: 12px;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
