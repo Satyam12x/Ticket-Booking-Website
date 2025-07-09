@@ -918,13 +918,13 @@ h3 {
 }
 
 .spinner {
-  animation: spin 8s linear infinite;
+  animation: spin 1s linear infinite;
   font-size: 1.5rem;
   margin-right: 8px;
 }
 
 .spinner-btn {
-  animation: spin 8s linear infinite;
+  animation: spin 1s linear infinite;
   font-size: 1rem;
   margin-right: 8px;
 }

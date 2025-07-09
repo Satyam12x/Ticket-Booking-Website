@@ -35,7 +35,7 @@ export default function BookingLayout() {
           setSelectedEvent(fetchedEvents[0]._id);
         }
       } catch (error) {
-        setError("Failed to fetch events");
+        setError(`Failed to fetch events ${error}`);
       } finally {
         setIsLoading(false);
       }
@@ -84,7 +84,7 @@ export default function BookingLayout() {
         <div className="booking-group">
           <label className="booking-label">Show Details</label>
           {isLoading ? (
-            <div className="spinner">Loading...</div>
+            <div className="spinner"></div>
           ) : error ? (
             <p className="error-text">{error}</p>
           ) : selectedEventDetails ? (
