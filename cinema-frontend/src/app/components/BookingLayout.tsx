@@ -35,7 +35,7 @@ export default function BookingLayout() {
           setSelectedEvent(fetchedEvents[0]._id);
         }
       } catch (error) {
-        setError("Failed to fetch events");
+        setError(`Failed to fetch events ${error}`);
       } finally {
         setIsLoading(false);
       }
