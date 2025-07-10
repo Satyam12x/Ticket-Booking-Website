@@ -1,99 +1,86 @@
+"use client";
 import { useState } from "react";
-import axios from "axios";
-import { FaTimes } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 interface DeleteEventModalProps {
   eventId: string;
   onClose: () => void;
-  onDelete: (password: string) => void;
+  onDelete: (eventId: string, password: string) => Promise<void>;
 }
 
-export default function DeleteEventModal({
-  eventId,
-  onClose,
-  onDelete,
-}: DeleteEventModalProps) {
+export default function DeleteEventModal({ eventId, onClose, onDelete }: DeleteEventModalProps) {
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const validatePassword = (value: string) => {
-    if (!value) return "Password is required";
-    if (value.length < 6) return "Password must be at least 6 characters";
-    return "";
-  };
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
-    const passwordError = validatePassword(password);
-    if (passwordError) {
-      setError(passwordError);
+    if (!password) {
+      setError("Password is required");
       return;
     }
-
     setIsSubmitting(true);
     try {
-      await axios.delete(`http://localhost:5000/api/events/${eventId}`, {
-        data: { password },
-      });
-      onDelete(password);
+      await onDelete(eventId, password);
       onClose();
-    } catch (error) {
-      setError(
-        `Failed to delete event. Please try again. ${error}`
-      );
+    } catch (err) {
+      setError("Failed to delete event. Check your password.");
+      toast.error("Failed to delete event");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <>
-      <div className="modal-overlay" onClick={onClose}></div>
-      <div className="modal show">
-        <button onClick={onClose} className="modal-close" aria-label="Close modal">
-          <FaTimes size={16} />
-        </button>
-        <h3>Confirm Event Deletion</h3>
-        <p style={{ color: '#6b7280', marginBottom: '15px' }}>
-          Enter the admin password to delete this event.
-        </p>
-        {error && <p className="error-text active">{error}</p>}
-        <form onSubmit={handleSubmit}>
-          <div className="input-group">
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <h2 className="modal-title">Delete Event</h2>
+        <p className="modal-text">Enter the admin password to delete this event.</p>
+        {error && <p className="error-text">{error}</p>}
+        <form onSubmit={handleSubmit} className="modal-form" aria-label="Delete Event Form">
+          <div className="form-group">
+            <label htmlFor="password" className="form-label">Password</label>
             <input
               type="password"
+              id="password"
               value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setError(validatePassword(e.target.value));
-              }}
-              className={`input-field ${error ? "input-error" : ""}`}
-              required
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter admin password"
+              className={`form-input ${error ? "input-error" : ""}`}
+              aria-invalid={!!error}
+              aria-describedby={error ? "password-error" : undefined}
             />
-            {/* <span className="input-label">Password</span> */}
+            {error && <p id="password-error" className="error-text">{error}</p>}
           </div>
-          <div className="button-group">
-            <button
-              type="submit"
-              className="submit-btn"
-              disabled={isSubmitting || !!error}
-            >
-              {isSubmitting ? "Deleting..." : "Delete Event"}
-            </button>
+          <div className="modal-actions">
             <button
               type="button"
+              className="action-button cancel-button"
               onClick={onClose}
-              className="cancel-btn"
+              aria-label="Cancel deletion"
             >
               Cancel
+            </button>
+            <button
+              type="submit"
+              className={`action-button delete-button ${isSubmitting ? "button-disabled" : ""}`}
+              disabled={isSubmitting}
+              aria-label="Confirm event deletion"
+              aria-disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <span className="button-loading">
+                  <span className="spinner"></span>
+                  Deleting...
+                </span>
+              ) : (
+                "Delete Event"
+              )}
             </button>
           </div>
         </form>
       </div>
-    </>
+    </div>
   );
 }
