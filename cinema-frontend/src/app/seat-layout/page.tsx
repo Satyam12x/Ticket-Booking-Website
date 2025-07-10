@@ -41,9 +41,8 @@ export default function SeatLayout() {
   const [error, setError] = useState("");
 
   const eventIdFromQuery = searchParams.get("eventId");
-  const from = searchParams.get("from"); // Get 'from' query parameter
+  const from = searchParams.get("from"); 
 
-  // Determine back button destination
   const backDestination = from === "admin" ? "admin" : "/";
 
   useEffect(() => {
@@ -65,7 +64,7 @@ export default function SeatLayout() {
             (e: Event) => e._id === initialEventId
           );
           if (event) {
-            await fetchSeats(event.date); // Use event.date instead of event._id
+            await fetchSeats(event.date); 
           }
         }
       } catch (error) {

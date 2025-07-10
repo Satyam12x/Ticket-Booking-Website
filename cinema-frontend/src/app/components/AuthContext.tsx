@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         { withCredentials: true }
       );
       console.log("Booking successful:", res.data);
-      router.push("/confirmation"); // Adjust to your desired route
+      router.push("/confirmation"); 
     } catch (error) {
       console.error(`Booking error: ${error}`);
       throw new Error("Failed to book seat");

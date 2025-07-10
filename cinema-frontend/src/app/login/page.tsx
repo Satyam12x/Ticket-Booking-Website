@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { useAuth } from '../components/AuthContext';
-import Link from 'next/link';
+// import Link from 'next/link';
 import { FaUserAlt } from "react-icons/fa";
 import '../components/LoginPage.css';
 
@@ -17,8 +17,8 @@ const LoginPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       await login(formData.email, formData.password);
-    } catch (err: any) {
-      setError(err.message || "Invalid email or password");
+    } catch (error) {
+      setError(`nvalid email or password: ${error}`);
     } finally {
       setIsSubmitting(false);
     }

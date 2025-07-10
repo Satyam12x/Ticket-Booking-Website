@@ -8,13 +8,13 @@ interface LoaderProps {
 }
 
 const Loader: React.FC<LoaderProps> = ({ isLoading }) => {
-  const dotCount = 8; // Dots from 4 corners and 4 sides
-  const radius = 60; // Radius for central ring formation
+  const dotCount = 8; 
+  const radius = 60; 
 
   const dotVariants: Variants = {
     initial: (index: number) => {
       const isCorner = index % 2 === 0;
-      const offset = isCorner ? 1000 : 700; // Corners go further out
+      const offset = isCorner ? 1000 : 700; 
       return {
         x: (index % 2 === 0 ? (index < 4 ? -offset : offset) : 0),
         y: (index < 2 || index >= 6 ? -offset : index >= 2 && index < 6 ? offset : 0),
@@ -30,23 +30,23 @@ const Loader: React.FC<LoaderProps> = ({ isLoading }) => {
       scale: 1,
       transition: {
         duration: 1.5,
-        ease: [0.68, -0.55, 0.265, 1.55], // Elastic easing for convergence
+        ease: [0.68, -0.55, 0.265, 1.55], 
         delay: index * 0.1,
       } as Transition,
     }),
     ring: (index: number) => ({
       x: Math.cos((index / dotCount) * 2 * Math.PI + Math.PI / 4) * radius,
       y: Math.sin((index / dotCount) * 2 * Math.PI + Math.PI / 4) * radius,
-      scale: [1, 1.4, 1], // Subtle scale pulse
-      opacity: [1, 0.6, 1], // Subtle opacity pulse
-      rotate: [0, 360], // Individual dot spin on its own axis
+      scale: [1, 1.4, 1], 
+      opacity: [1, 0.6, 1], 
+      rotate: [0, 360], 
       transition: {
-        duration: 1.5, // Ring rotation speed
+        duration: 1.5,
         rotate: {
-          duration: 1, // Faster individual spin (1s per 360°)
+          duration: 1, 
           repeat: Infinity,
           repeatType: 'loop',
-          ease: 'linear', // Smooth spin
+          ease: 'linear', 
         },
         x: { duration: 1.5, repeat: Infinity, repeatType: 'loop', ease: 'easeInOut' },
         y: { duration: 1.5, repeat: Infinity, repeatType: 'loop', ease: 'easeInOut' },
@@ -69,10 +69,10 @@ const Loader: React.FC<LoaderProps> = ({ isLoading }) => {
   const coreVariants: Variants = {
     initial: { scale: 0, opacity: 0 },
     animate: {
-      scale: [1, 1.3, 1], // Pronounced pulse
+      scale: [1, 1.3, 1], 
       opacity: 1,
       transition: {
-        duration: 1.5, // Sync with ring rotation
+        duration: 1.5, 
         repeat: Infinity,
         ease: 'easeInOut',
       } as Transition,

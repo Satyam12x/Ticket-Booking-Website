@@ -39,7 +39,6 @@ export default function BookingModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  // Redirect to login if user is not authenticated
   if (!user) {
     router.push("/login");
     return null;

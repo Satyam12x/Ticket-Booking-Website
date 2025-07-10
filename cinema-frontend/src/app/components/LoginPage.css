@@ -151,7 +151,6 @@ html {
     text-align: center;
 }
 
-/* Responsive Design */
 @media screen and (max-width: 480px) {
     .login-box {
         padding: 30px 20px;

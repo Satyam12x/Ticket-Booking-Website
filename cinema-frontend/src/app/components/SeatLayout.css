@@ -200,7 +200,7 @@
 }
 
 .seat-line {
-    width: calc(30px + 10 * 50px + 9 * 10px + 40px); /* row-label + 10 seats * seat-width + 9 gaps + column-row margin-left */
+    width: calc(30px + 10 * 50px + 9 * 10px + 40px); 
     height: 2px;
     background-color: #8F460A;
     margin: 30px auto 0;
@@ -292,11 +292,6 @@
   /* border: 2px solid #ca6e23; */
 }
 
-/* .seat-available:hover {
-  transform: scale(1.2) rotateY(15deg);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), 0 0 8px rgba(52, 199, 89, 0.5);
-} */
-
 .seat-booked {
   /* background: #B7B7B7; */
   color: #B7B7B7;
@@ -320,7 +315,6 @@
     margin-left: 40px;
 }
 
-/* Improved tooltip styles for hover effect */
 .seat:hover .tooltip {
     opacity: 1;
     visibility: visible;

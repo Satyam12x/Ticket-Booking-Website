@@ -130,7 +130,6 @@
   z-index: 1;
 }
 
-/* ✅ Mobile Responsive Styles */
 @media (max-width: 768px) {
   .booking-layout {
     flex-direction: column-reverse;
