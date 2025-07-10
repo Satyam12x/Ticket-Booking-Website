@@ -1,5 +1,5 @@
 "use client";
-import "../components/SeatLayout.css";
+import "./SeatLayout.css";
 import { FaChevronLeft } from "react-icons/fa";
 import Seat from "../components/Seat";
 import BookingModal from "../components/BookingModal";
@@ -29,7 +29,7 @@ interface SeatDetails {
   bookedBy: { name: string; email: string; phone: string } | null;
 }
 
-function SeatLayout() {
+function AdminSeatLayout() {
   const searchParams = useSearchParams();
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<string>("");
@@ -50,7 +50,11 @@ function SeatLayout() {
           credentials: "include",
         });
         if (!response.ok) {
-          throw new Error("Failed to fetch events");
+          throw new Error(
+            response.status === 403
+              ? "Access denied: Admin privileges required"
+              : "Failed to fetch events"
+          );
         }
         const fetchedEvents = await response.json();
         setEvents(fetchedEvents);
@@ -65,7 +69,8 @@ function SeatLayout() {
           }
         }
       } catch (error) {
-        setError(`Failed to fetch events: ${error}`);
+        setError(`${error}`);
+        console.error("Fetch events error:", error);
       } finally {
         setIsLoading(false);
       }
@@ -128,17 +133,15 @@ function SeatLayout() {
         >
           <header className="seat-header">
             <Link
-              href="/"
+              href="/admin"
               className="back-btn"
-              aria-label="Go back to booking page"
+              aria-label="Go back to admin dashboard"
             >
               <FaChevronLeft size={18} />
             </Link>
-            <h2 className="seat-title">
-              CHOOSE YOUR PREFERRED SEATS WITH EASE
-            </h2>
+            <h2 className="seat-title">ADMIN SEAT BOOKING</h2>
             <p className="seat-subtitle">
-              Enjoy a seamless booking experience tailored to your comfort
+              Manage seat bookings for events as an administrator
             </p>
           </header>
 
@@ -228,10 +231,10 @@ function SeatLayout() {
   );
 }
 
-export default function ProtectedSeatLayout() {
+export default function ProtectedAdminSeatLayout() {
   return (
-    <ProtectedRoute>
-      <SeatLayout />
+    <ProtectedRoute requireAdmin={true}>
+      <AdminSeatLayout />
     </ProtectedRoute>
   );
 }

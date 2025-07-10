@@ -9,7 +9,7 @@
     border-radius: 12px;
 }
 
-.seat-back{
+.seat-back {
     max-width: 100%;
 }
 
@@ -194,7 +194,6 @@
 .seat-placeholder {
     width: 50px;
     height: 50px;
-    /* background: #e4dddd; */
     border-radius: 8px;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -213,7 +212,6 @@
     gap: 2rem;
     margin-top: 2rem;
     font-size: 0.9rem;
-    /* color: #1f2a44; */
 }
 
 .legend-item {
@@ -226,21 +224,17 @@
     width: 2rem;
     height: 2rem;
     border-radius: 8px;
-    /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); */
 }
 
 .legend-box.avail {
-    /* background: #8F460A; */
     color: #8F460A !important;
     border: none;
     box-shadow: none !important;
 }
 
 .legend-box.booked {
-    /* background: #B7B7B7; */
     color: #B7B7B7 !important;
     box-shadow: none !important;
-    /* border: 2px solid #6b6767; */
     border: none;
 }
 
@@ -266,64 +260,57 @@
 
 /* Seat styles */
 .seat {
-  width: 50px;
-  height: 50px;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  cursor: pointer;
-  font-weight: 600;
-  background-color: transparent !important;
-  /* box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15),
-    inset 0 1px 3px rgba(255, 255, 255, 0.2); */
-  transition: transform 0.3s ease;
-  perspective: 1000px;
-  border: none !important;
-  z-index: 10 !important;
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    font-weight: 600;
+    background-color: transparent !important;
+    transition: transform 0.3s ease;
+    perspective: 1000px;
+    border: none !important;
+    z-index: 10 !important;
 }
 
 .seat-available {
-  /* background: #8F460A; */
-  color: #8F460A;
-  z-index: 10 !important;
-  /* border: 2px solid #ca6e23; */
+    color: #8F460A;
+    z-index: 10 !important;
 }
 
 .seat-booked {
-  /* background: #B7B7B7; */
-  color: #B7B7B7;
-  /* border: 2px solid #6b6767; */
-  cursor: not-allowed;
+    color: #B7B7B7;
+    cursor: not-allowed;
 }
 
 .seat-selected {
-  /* background: #5c3311; */
-  color: #412e2e;
-  /* border: 2px solid #ca6e23; */
-  transform: scale(1.1) rotateY(10deg);
-  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
+    color: #412e2e;
+    transform: scale(1.1) rotateY(10deg);
 }
 
 .chair-icon {
-  font-size: 2.5rem;
-  margin-bottom: 3px;
+    font-size: 2.5rem;
+    margin-bottom: 3px;
 }
+
 .ml-gap {
     margin-left: 40px;
 }
 
 .seat:hover .tooltip {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0) scale(1);
+    opacity: 0;
+    visibility: hidden;
+    display: none;
 }
 
 .tooltip {
-    opacity: 1;
+    opacity: 0;
     visibility: hidden;
+    display: none;
     background: linear-gradient(135deg, #1f2a44 0%, #3b4a6b 100%);
     color: #ffffff;
     padding: 5px;
@@ -341,17 +328,6 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* .tooltip::after {
-    content: "";
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-width: 10px 10px 0;
-    border-style: solid;
-    border-color: #1f2a44 transparent transparent transparent;
-} */
-
 .tooltip div {
     margin-bottom: 4px;
 }
@@ -360,18 +336,17 @@
     margin-bottom: 0;
 }
 
-@media (max-width: 1000px){
-    .seat-card{
+@media (max-width: 1000px) {
+    .seat-card {
         margin: 0;
         width: 900px;
     }
-    .seat-back{
+    .seat-back {
         overflow-x: auto;
     }
-    .seat-title{
+    .seat-title {
         margin-top: 40px;
     }
-    
 }
 
 @media only screen and (max-width: 768px) {
@@ -481,18 +456,14 @@
         padding: 10px 14px;
     }
 
-    .tooltip::after {
-        bottom: -8px;
-        border-width: 8px 8px 0;
-    }
-    .back-btn{
+    .back-btn {
         width: 38px;
         height: 38px;
         left: 6px;
         top: 80px;
     }
 
-    .seat-card{
+    .seat-card {
         box-shadow: none;
     }
 }
@@ -522,7 +493,7 @@
         padding: 1rem;
     }
 
-    .seat-card{
+    .seat-card {
         width: 500px;
     }
 
@@ -532,7 +503,7 @@
         height: 80px;
     }
 
-    .ml-gap{
+    .ml-gap {
         margin-left: 10px !important;
     }
 
@@ -596,10 +567,5 @@
         top: -35px;
         font-size: 8px;
         padding: 8px 12px;
-    }
-
-    .tooltip::after {
-        bottom: -6px;
-        border-width: 6px 6px 0;
     }
 }
