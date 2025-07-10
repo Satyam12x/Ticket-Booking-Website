@@ -1,161 +1,225 @@
-.auth-container {
-  max-width: 450px;
-  margin: 80px auto;
-  padding: 30px;
-  background: rgba(255, 255, 255, 0.05);
+/* Base styles */
+body,
+html {
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f9f9f9;
+}
+
+.page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  height: 100vh;
+}
+
+.login-box {
+  background: #ffffff;
+  padding: 40px 30px;
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  text-align: center;
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-.auth-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
+  box-shadow: 0px 10px 24px rgba(0, 0, 0, 0.1);
   width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(147, 51, 234, 0.2));
-  z-index: -1;
+  max-width: 400px;
+  text-align: center;
 }
 
-.auth-container h2 {
-  margin-bottom: 25px;
-  font-size: 2rem;
-  font-weight: 600;
+.avatar-circle {
+  background-color: #8a4001;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-icon {
   color: #fff;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  background: linear-gradient(to right, #2563eb, #9333ea);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 26px;
 }
 
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.welcome-text {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1c1c1c;
 }
 
-.input-group {
-  display: flex;
-  flex-direction: column;
+.sub-text {
+  margin-top: 6px;
+  color: #777;
+  font-size: 15px;
+}
+
+.form {
+  margin-top: 24px;
   text-align: left;
 }
 
-.input-label {
-  margin-bottom: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
-  transition: color 0.3s ease;
-}
-
-.input-field {
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.input-field:focus {
-  outline: none;
-  border-color: #2563eb;
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 8px rgba(37, 99, 235, 0.3);
-}
-
-.auth-btn {
-  padding: 12px;
-  background: linear-gradient(135deg, #2563eb, #9333ea);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
+.label {
+  display: block;
   font-weight: 600;
-  text-transform: uppercase;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #333;
 }
 
-.auth-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+.input-wrapper {
+  position: relative;
+  margin-bottom: 18px;
 }
 
-.auth-btn:disabled {
-  background: linear-gradient(135deg, #6b7280, #4b5563);
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+.input {
+  width: 100%;
+  padding: 10px 40px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s;
 }
 
-.auth-container a {
-  color: #60a5fa;
+.input:focus {
+  border-color: #8a4001;
+}
+
+.input-icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #999;
+}
+
+.input-wrapper .input-icon:first-child {
+  left: 12px;
+}
+
+.eye-icon {
+  right: 12px;
+  cursor: pointer;
+  position: absolute;
+}
+
+.options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #444;
+  margin-top: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.forgot-password {
+  color: #8a4001;
   text-decoration: none;
-  font-size: 0.9rem;
   font-weight: 500;
-  transition: color 0.3s ease;
 }
 
-.auth-container a:hover {
-  color: #93c5fd;
+.forgot-password:hover {
+  color: #732f00;
   text-decoration: underline;
 }
 
-.error-text {
-  color: #f87171;
-  font-size: 0.85rem;
-  margin-top: 10px;
-  animation: shake 0.3s ease-in-out;
+.signin-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #8a4001;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.signin-btn:hover {
+  background-color: #732f00;
 }
 
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+.signin-btn:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
-@media (max-width: 600px) {
-  .auth-container {
-    margin: 20px;
-    padding: 20px;
-    border-radius: 12px;
+.register-btn {
+  display: inline-block;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.register-btn button {
+  width: 100%;
+  padding: 12px;
+  background-color: #8a4001;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.register-btn button:hover {
+  background-color: #732f00;
+}
+
+.register-btn button:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.demo-warning {
+  margin-top: 20px;
+  font-size: 13px;
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ffeeba;
+  text-align: center;
+}
+
+@media screen and (max-width: 480px) {
+  .login-box {
+    padding: 30px 20px;
   }
 
-  .auth-container h2 {
-    font-size: 1.5rem;
+  .welcome-text {
+    font-size: 20px;
   }
 
-  .input-field {
-    padding: 10px;
-    font-size: 0.9rem;
+  .sub-text {
+    font-size: 14px;
   }
 
-  .auth-btn {
-    
-    padding: 10px;
-    font-size: 0.9rem;
+  .label {
+    font-size: 13px;
+  }
+
+  .input {
+    padding: 10px 36px;
+    font-size: 13px;
+  }
+
+  .signin-btn,
+  .register-btn button {
+    font-size: 15px;
+  }
+
+  .demo-warning {
+    font-size: 12px;
   }
 }

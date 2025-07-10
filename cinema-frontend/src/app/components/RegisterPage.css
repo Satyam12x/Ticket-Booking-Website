@@ -15,7 +15,7 @@ html {
     height: 100vh;
 }
 
-.login-box {
+.register-box {
     background: #ffffff;
     padding: 40px 30px;
     border-radius: 16px;
@@ -98,12 +98,6 @@ html {
     left: 12px;
 }
 
-.eye-icon {
-    right: 12px;
-    cursor: pointer;
-    position: absolute;
-}
-
 .options {
     display: flex;
     justify-content: space-between;
@@ -116,13 +110,19 @@ html {
     gap: 10px;
 }
 
-.forgot-password {
+.login-link {
     color: #8a4001;
     text-decoration: none;
     font-weight: 500;
 }
 
-.signin-btn {
+.login-link:hover {
+    color: #732f00;
+    text-decoration: underline;
+}
+
+.register-btn,
+.verify-btn {
     width: 100%;
     padding: 12px;
     background-color: #8a4001;
@@ -136,8 +136,16 @@ html {
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-.signin-btn:hover {
+.register-btn:hover,
+.verify-btn:hover {
     background-color: #732f00;
+}
+
+.register-btn:disabled,
+.verify-btn:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 .demo-warning {
@@ -152,7 +160,7 @@ html {
 }
 
 @media screen and (max-width: 480px) {
-    .login-box {
+    .register-box {
         padding: 30px 20px;
     }
 
@@ -173,7 +181,8 @@ html {
         font-size: 13px;
     }
 
-    .signin-btn {
+    .register-btn,
+    .verify-btn {
         font-size: 15px;
     }
 

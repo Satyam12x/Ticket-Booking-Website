@@ -1,9 +1,9 @@
 "use client";
 import React, { useState } from 'react';
 import { useAuth } from '../components/AuthContext';
-// import Link from 'next/link';
+import Link from 'next/link';
 import { FaUserAlt } from "react-icons/fa";
-import '../components/LoginPage.css';
+import '../components/Login.css';
 
 const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -18,7 +18,7 @@ const LoginPage: React.FC = () => {
     try {
       await login(formData.email, formData.password);
     } catch (error) {
-      setError(`nvalid email or password: ${error}`);
+      setError(`Invalid email or password: ${error}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -71,11 +71,11 @@ const LoginPage: React.FC = () => {
             {/* <span className="input-icon eye-icon">👁️</span> */}
           </div>
 
-          {/* <div className="options">
+          <div className="options">
             <Link href="/forgot-password" className="forgot-password">
               Forgot Password?
             </Link>
-          </div> */}
+          </div>
 
           <button
             type="submit"
@@ -85,6 +85,16 @@ const LoginPage: React.FC = () => {
           >
             {isSubmitting ? "Signing in..." : "Sign In"}
           </button>
+
+          <Link href="/register" className="register-btn">
+            <button
+              type="button"
+              className="signin-btn"
+              aria-label="Register"
+            >
+              Register
+            </button>
+          </Link>
         </form>
       </div>
     </div>

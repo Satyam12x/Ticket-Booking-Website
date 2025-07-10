@@ -48,14 +48,35 @@ function Admin() {
       const response = await axios.get("http://localhost:5000/api/events", {
         withCredentials: true,
       });
-      console.log("Fetch events response:", response.data);
+      console.log("Fetch events response:", {
+        count: response.data.length,
+        events: response.data.map((e: Event) => ({
+          id: e._id,
+          name: e.name,
+          date: e.date,
+        })),
+      });
       setEvents(response.data);
       setError("");
-    } catch (err) {
-      console.error("Fetch events error:", err);
-      setError(
-        "Failed to fetch events. Please check the server or your authentication."
-      );
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        const errorMessage =
+          err.response?.status === 403
+            ? "Access denied: Admin privileges required"
+            : err.response?.data?.error || "Failed to fetch events";
+        setError(errorMessage);
+        console.error("Fetch events error:", {
+          message: err.message,
+          status: err.response?.status,
+          data: err.response?.data,
+        });
+        if (err.response?.status === 403) {
+          router.push("/login?error=admin-required");
+        }
+      } else {
+        setError("Failed to fetch events");
+        console.error("Fetch events error:", err);
+      }
     }
   };
 
@@ -234,13 +255,18 @@ function Admin() {
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         const errorMessage =
-          err.response?.data?.error || "Failed to create event";
+          err.response?.status === 403
+            ? "Access denied: Admin privileges required"
+            : err.response?.data?.error || "Failed to create event";
         setError(errorMessage);
         console.error("Create event error:", {
-          message: errorMessage,
+          message: err.message,
           status: err.response?.status,
           data: err.response?.data,
         });
+        if (err.response?.status === 403) {
+          router.push("/login?error=admin-required");
+        }
       } else {
         setError("Failed to create event");
         console.error("Create event error:", err);
@@ -426,7 +452,7 @@ function Admin() {
 
 export default function ProtectedAdminLayout() {
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requireAdmin={true}>
       <Admin />
     </ProtectedRoute>
   );

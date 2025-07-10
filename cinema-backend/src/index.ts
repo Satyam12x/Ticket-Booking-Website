@@ -31,6 +31,7 @@ const requiredEnvVars = [
   "JWT_SECRET",
   "EMAIL_USER",
   "EMAIL_PASS",
+  "ADMIN_EMAIL",
   "ADMIN_PASSWORD",
   "USER_EMAIL",
   "USER_PASSWORD",
@@ -80,6 +81,7 @@ interface IUser {
   email: string;
   password: string;
   isVerified: boolean;
+  isAdmin: boolean;
   createdAt: Date;
 }
 
@@ -87,7 +89,7 @@ interface IOtp {
   email: string;
   otp: string;
   expiresAt: Date;
-  type: "reset-password";
+  type: "register" | "reset-password";
 }
 
 // Schemas
@@ -127,7 +129,8 @@ const userSchema = new Schema<IUser>({
   name: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, trim: true },
   password: { type: String, required: true },
-  isVerified: { type: Boolean, default: true },
+  isVerified: { type: Boolean, default: false },
+  isAdmin: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -135,7 +138,7 @@ const otpSchema = new Schema<IOtp>({
   email: { type: String, required: true, trim: true },
   otp: { type: String, required: true },
   expiresAt: { type: Date, required: true },
-  type: { type: String, enum: ["reset-password"], required: true },
+  type: { type: String, enum: ["register", "reset-password"], required: true },
 });
 
 otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
@@ -197,9 +200,7 @@ const validatePhone = (
 ): void => {
   const { phone } = req.body || {};
   if (phone && !/^(\+?\d{1,3}[-.\s]?)?\d{10}$/.test(phone)) {
-    console.error("ValidatePhone error: Invalid phone number format", {
-      phone,
-    });
+    console.error("ValidatePhone error: Invalid phone number format", { phone });
     res
       .status(400)
       .json({
@@ -223,10 +224,7 @@ const authenticateToken = async (
     method: req.method,
     cookies: req.cookies,
     headers: {
-      ...req.headers,
-      authorization: req.headers.authorization
-        ? "Bearer <redacted>"
-        : undefined,
+      authorization: req.headers.authorization ? "Bearer <redacted>" : undefined,
     },
   });
   if (!token) {
@@ -252,6 +250,14 @@ const authenticateToken = async (
       res.clearCookie("token");
       return;
     }
+    if (!user.isVerified) {
+      console.error("Authentication error: User not verified", {
+        userId: decoded.userId,
+      });
+      res.status(401).json({ error: "User email not verified" });
+      res.clearCookie("token");
+      return;
+    }
     (req as any).user = user;
     next();
   } catch (error: any) {
@@ -267,21 +273,39 @@ const authenticateToken = async (
   }
 };
 
+const restrictToAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const user = (req as any).user;
+  if (!user.isAdmin) {
+    console.error("Admin access denied", {
+      userId: user._id,
+      email: user.email,
+      url: req.url,
+    });
+    res.status(403).json({ error: "Forbidden: Admin access required" });
+    return;
+  }
+  next();
+};
+
 // Email Utility
 const sendOtpEmail = async (
   email: string,
   otp: string,
-  type: "reset-password"
+  type: "register" | "reset-password"
 ): Promise<void> => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
   });
 
-  const subject = "Reset Your Password";
+  const subject = type === "register" ? "Verify Your Email" : "Reset Your Password";
   const html = `
     <p>Dear User,</p>
-    <p>Your OTP for password reset is <strong>${otp}</strong>.</p>
+    <p>Your OTP for ${type === "register" ? "email verification" : "password reset"} is <strong>${otp}</strong>.</p>
     <p>This OTP is valid for 5 minutes.</p>
     <p>Thank you,</p>
     <p>Mukesh Bhati Acting School</p>
@@ -302,13 +326,129 @@ const sendOtpEmail = async (
       email,
       type,
     });
-    throw error;
+    throw new Error(`Failed to send OTP email: ${error.message}`);
   }
 };
 
 const generateOtp = (): string => randomBytes(3).toString("hex").toUpperCase();
 
 // Auth Routes
+app.post(
+  "/api/auth/register",
+  validateEmail,
+  async (req: Request, res: Response): Promise<void> => {
+    const { name, email, password } = req.body;
+    console.log("Register request:", { email });
+    if (!name || !email || !password) {
+      console.error("Register error: Missing required fields", {
+        body: req.body,
+      });
+      res.status(400).json({ error: "Name, email, and password are required" });
+      return;
+    }
+    if (password.length < 6) {
+      console.error("Register error: Password too short", { email });
+      res
+        .status(400)
+        .json({ error: "Password must be at least 6 characters" });
+      return;
+    }
+    try {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        console.error("Register error: Email already registered", { email });
+        res.status(400).json({ error: "Email already registered" });
+        return;
+      }
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = new User({
+        name,
+        email,
+        password: hashedPassword,
+        isVerified: false,
+        isAdmin: false, // Explicitly set isAdmin to false for all new registrations
+      });
+      await user.save();
+      const otp = generateOtp();
+      await Otp.create({
+        email,
+        otp,
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+        type: "register",
+      });
+      await sendOtpEmail(email, otp, "register");
+      res.status(201).json({
+        message: "Registration successful. OTP sent to email for verification",
+      });
+    } catch (error: any) {
+      console.error("Register error:", {
+        message: error.message,
+        stack: error.stack,
+        email,
+      });
+      res.status(500).json({ error: "Failed to register" });
+    }
+  }
+);
+
+app.post(
+  "/api/auth/verify-otp",
+  validateEmail,
+  async (req: Request, res: Response): Promise<void> => {
+    const { email, otp } = req.body;
+    console.log("Verify OTP request:", { email });
+    if (!email || !otp) {
+      console.error("Verify OTP error: Missing required fields", {
+        body: req.body,
+      });
+      res.status(400).json({ error: "Email and OTP are required" });
+      return;
+    }
+    try {
+      const otpRecord = await Otp.findOne({ email, otp, type: "register" });
+      if (!otpRecord || otpRecord.expiresAt < new Date()) {
+        console.error("Verify OTP error: Invalid or expired OTP", { email });
+        res.status(400).json({ error: "Invalid or expired OTP" });
+        return;
+      }
+      const user = await User.findOne({ email });
+      if (!user) {
+        console.error("Verify OTP error: User not found", { email });
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      user.isVerified = true;
+      await user.save();
+      await Otp.deleteOne({ email, otp });
+      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET!, {
+        expiresIn: "1d",
+      });
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+        path: "/",
+      });
+      console.log("OTP verification successful: User verified and logged in", {
+        userId: user._id,
+        email,
+      });
+      res.json({
+        message: "Email verified successfully",
+        user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin },
+      });
+    } catch (error: any) {
+      console.error("Verify OTP error:", {
+        message: error.message,
+        stack: error.stack,
+        email,
+      });
+      res.status(500).json({ error: "Failed to verify OTP" });
+    }
+  }
+);
+
 app.post(
   "/api/auth/login",
   validateEmail,
@@ -327,6 +467,11 @@ app.post(
       if (!user) {
         console.error("Login error: Invalid credentials", { email });
         res.status(401).json({ error: "Invalid credentials" });
+        return;
+      }
+      if (!user.isVerified) {
+        console.error("Login error: User not verified", { email });
+        res.status(401).json({ error: "Please verify your email first" });
         return;
       }
       const isMatch = await bcrypt.compare(password, user.password);
@@ -352,7 +497,7 @@ app.post(
       });
       res.json({
         message: "Login successful",
-        user: { id: user._id, name: user.name, email: user.email },
+        user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin },
       });
     } catch (error: any) {
       console.error("Login error:", {
@@ -371,7 +516,7 @@ app.post(
   async (req: Request, res: Response): Promise<void> => {
     const { email } = req.body;
     console.log("Forgot password request:", { email });
-    if (!email || email !== process.env.USER_EMAIL) {
+    if (!email) {
       console.error("Forgot password error: Invalid email", { body: req.body });
       res.status(400).json({ error: "Invalid email" });
       return;
@@ -416,11 +561,6 @@ app.post(
       res
         .status(400)
         .json({ error: "Email, OTP, and new password are required" });
-      return;
-    }
-    if (email !== process.env.USER_EMAIL) {
-      console.error("Reset password error: Invalid email", { email });
-      res.status(400).json({ error: "Invalid email" });
       return;
     }
     if (newPassword.length < 6) {
@@ -490,13 +630,43 @@ app.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const user = (req as any).user;
-      res.json({ id: user._id, name: user.name, email: user.email });
+      res.json({ id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin });
     } catch (error: any) {
       console.error("Fetch user error:", {
         message: error.message,
         stack: error.stack,
       });
       res.status(500).json({ error: "Failed to fetch user" });
+    }
+  }
+);
+
+app.get(
+  "/api/auth/is-admin",
+  authenticateToken,
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const user = (req as any).user;
+      if (!user.isAdmin) {
+        console.log("IsAdmin check: User is not admin", {
+          userId: user._id,
+          email: user.email,
+        });
+        res.status(403).json({ error: "Forbidden: Admin access required" });
+        return;
+      }
+      console.log("IsAdmin check: User is admin", {
+        userId: user._id,
+        email: user.email,
+      });
+      res.json({ isAdmin: true });
+    } catch (error: any) {
+      console.error("IsAdmin error:", {
+        message: error.message,
+        stack: error.stack,
+        userId: (req as any).user?._id,
+      });
+      res.status(500).json({ error: "Failed to check admin status" });
     }
   }
 );
@@ -530,6 +700,7 @@ const sendBookingConfirmation = async (
       service: "gmail",
       auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
     });
+
     const price = seat.price || 200;
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -609,9 +780,7 @@ const sendBookingConfirmation = async (
       `,
     };
     await transporter.sendMail(mailOptions);
-    console.log(
-      `Booking confirmation email sent to ${email} for seat ${seatId}`
-    );
+    console.log(`Booking confirmation email sent to ${email} for seat ${seatId}`);
   } catch (error: any) {
     console.error("Email sending error:", {
       message: error.message,
@@ -620,9 +789,7 @@ const sendBookingConfirmation = async (
       email,
       bookingDate,
     });
-    throw new Error(
-      `Failed to send booking confirmation email: ${error.message}`
-    );
+    throw new Error(`Failed to send booking confirmation email: ${error.message}`);
   }
 };
 
@@ -670,6 +837,8 @@ const initializeSeats = async (
     console.error("Failed to initialize seats:", {
       message: error.message,
       stack: error.stack,
+      eventId,
+      totalSeats,
     });
     throw new Error(`Failed to initialize seats: ${error.message}`);
   }
@@ -679,6 +848,7 @@ const initializeSeats = async (
 const initializeDefaultUser = async (): Promise<void> => {
   try {
     const email = process.env.USER_EMAIL!;
+    const adminEmail = process.env.ADMIN_EMAIL!;
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
       const hashedPassword = await bcrypt.hash(process.env.USER_PASSWORD!, 10);
@@ -687,11 +857,33 @@ const initializeDefaultUser = async (): Promise<void> => {
         email,
         password: hashedPassword,
         isVerified: true,
+        isAdmin: email === adminEmail,
       });
       await user.save();
       console.log(`Default user created: ${email}`);
     } else {
       console.log(`Default user already exists: ${email}`);
+    }
+
+    // Ensure admin user exists
+    const existingAdmin = await User.findOne({ email: adminEmail });
+    if (!existingAdmin) {
+      const hashedAdminPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD!, 10);
+      const adminUser = new User({
+        name: "Admin",
+        email: adminEmail,
+        password: hashedAdminPassword,
+        isVerified: true,
+        isAdmin: true,
+      });
+      await adminUser.save();
+      console.log(`Admin user created: ${adminEmail}`);
+    } else if (!existingAdmin.isAdmin) {
+      existingAdmin.isAdmin = true;
+      await existingAdmin.save();
+      console.log(`Updated user to admin: ${adminEmail}`);
+    } else {
+      console.log(`Admin user already exists: ${adminEmail}`);
     }
   } catch (error: any) {
     console.error("Failed to initialize default user:", {
@@ -705,6 +897,8 @@ const initializeDefaultUser = async (): Promise<void> => {
 // Routes
 app.post(
   "/api/seats/initialize",
+  authenticateToken,
+  restrictToAdmin,
   async (req: Request, res: Response): Promise<void> => {
     const { eventId, totalSeats } = req.body;
     console.log("Initialize seats request:", { eventId, totalSeats });
@@ -737,6 +931,8 @@ app.post(
       console.error("Initialize seats error:", {
         message: error.message,
         stack: error.stack,
+        eventId,
+        totalSeats,
       });
       res.status(500).json({ error: "Failed to initialize seats" });
     }
@@ -747,11 +943,12 @@ app.get("/api/events", async (req: Request, res: Response): Promise<void> => {
   try {
     const today = new Date().toISOString().split("T")[0];
     const events = await Event.find({
-      date: { $gte: today, $ne: today }, // Exclude events for today
+      date: { $gte: today, $ne: today },
     })
       .sort({ date: 1 })
       .select("-password");
     res.json(events);
+    console.log("Get events successful");
   } catch (error: any) {
     console.error("Get events error:", {
       message: error.message,
@@ -770,23 +967,26 @@ app.get(
       const today = new Date().toISOString().split("T")[0];
       const events = await Event.find({
         createdAt: { $gte: sevenDaysAgo },
-        date: { $gte: today, $ne: today }, // Exclude events for today
+        date: { $gte: today, $ne: today },
       })
         .sort({ createdAt: -1 })
         .select("-password");
       res.json(events);
+      console.log("Get recent events successful");
     } catch (error: any) {
       console.error("Get recent events error:", {
         message: error.message,
         stack: error.stack,
       });
-      res.status(500).json({ error: "Failed to fetch recent events" });
+      res.status(500).json({ error: "Failed to retrieve recent events" });
     }
   }
 );
 
 app.post(
   "/api/events",
+  authenticateToken,
+  restrictToAdmin,
   validateDateFormat,
   async (req: Request, res: Response): Promise<void> => {
     const { name, date, time, description, venue, password, totalSeats } =
@@ -798,15 +998,7 @@ app.post(
       venue,
       totalSeats,
     });
-    if (
-      !name ||
-      !date ||
-      !time ||
-      !description ||
-      !venue ||
-      !password ||
-      !totalSeats
-    ) {
+    if (!name || !date || !time || !description || !venue || !password || !totalSeats) {
       console.error("Create event error: Missing required fields", {
         body: req.body,
       });
@@ -834,9 +1026,7 @@ app.post(
         console.error("Create event error: Event already exists for date", {
           date,
         });
-        res
-          .status(400)
-          .json({ error: "An event already exists for this date" });
+        res.status(400).json({ error: "An event already exists for this date" });
         return;
       }
       const today = new Date().toISOString().split("T")[0];
@@ -844,9 +1034,7 @@ app.post(
         console.error("Create event error: Cannot create event for today", {
           date,
         });
-        res
-          .status(400)
-          .json({ error: "Cannot create event for the current date" });
+        res.status(400).json({ error: "Cannot create event for the current date" });
         return;
       }
       const session = await mongoose.startSession();
@@ -864,12 +1052,10 @@ app.post(
         await event.save({ session });
         await initializeSeats(event._id.toString(), totalSeats, session);
         await session.commitTransaction();
-        res
-          .status(201)
-          .json({
-            message: "Event created successfully",
-            event: { ...event.toObject(), password: undefined },
-          });
+        res.status(201).json({
+          message: "Event created successfully",
+          event: { ...event.toObject(), password: undefined },
+        });
       } catch (error) {
         await session.abortTransaction();
         throw error;
@@ -889,6 +1075,8 @@ app.post(
 
 app.delete(
   "/api/events/:id",
+  authenticateToken,
+  restrictToAdmin,
   async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { password } = req.body;
@@ -906,15 +1094,15 @@ app.delete(
       return;
     }
     try {
+      if (password !== process.env.ADMIN_PASSWORD) {
+        console.error("Delete event error: Invalid password");
+        res.status(401).json({ error: "Invalid password" });
+        return;
+      }
       const event = await Event.findById(id);
       if (!event) {
         console.error("Delete event error: Event not found", { id });
         res.status(404).json({ error: "Event not found" });
-        return;
-      }
-      if (password !== event.password) {
-        console.error("Delete event error: Invalid password");
-        res.status(401).json({ error: "Invalid password" });
         return;
       }
       const seatsWithBookings = await Seat.find({
@@ -925,9 +1113,7 @@ app.delete(
         console.error("Delete event error: Cannot delete event with bookings", {
           id,
         });
-        res
-          .status(400)
-          .json({ error: "Cannot delete event with existing bookings" });
+        res.status(400).json({ error: "Cannot delete event with existing bookings" });
         return;
       }
       const session = await mongoose.startSession();
@@ -973,9 +1159,7 @@ app.get(
         console.error("Get seats error: Cannot fetch seats for today", {
           date,
         });
-        res
-          .status(400)
-          .json({ error: "Cannot book seats for the current date" });
+        res.status(400).json({ error: "Cannot book seats for the current date" });
         return;
       }
       const event = await Event.findOne({ date: date.toString() });
@@ -1027,16 +1211,13 @@ app.post(
       bookingDate,
       userId: user._id,
     });
-
     if (!seatId || !name || !email || !phone || !bookingDate) {
       console.error("Booking error: Missing required fields", {
         body: req.body,
       });
-      res
-        .status(400)
-        .json({
-          error: "seatId, name, email, phone, and bookingDate are required",
-        });
+      res.status(400).json({
+        error: "seatId, name, email, phone, and bookingDate are required",
+      });
       return;
     }
     const today = new Date().toISOString().split("T")[0];
@@ -1087,13 +1268,13 @@ app.post(
       console.error("Book seat error:", {
         message: error.message,
         stack: error.stack,
-        requestBody: req.body,
+        body: req.body,
         userId: user._id,
       });
       res
         .status(
           error.message.includes("already booked") ||
-            error.message.includes("not found")
+          error.message.includes("not found")
             ? 400
             : 500
         )
@@ -1126,9 +1307,7 @@ app.get(
       const today = new Date().toISOString().split("T")[0];
       if (event.date === today) {
         console.error("Get event error: Event is today", { id, date: today });
-        res
-          .status(400)
-          .json({ error: "Cannot access event scheduled for today" });
+        res.status(400).json({ error: "Cannot access event scheduled for today" });
         return;
       }
       res.json(event);
@@ -1179,9 +1358,7 @@ app.get(
       console.error("Get seats by IDs error: Invalid seatId format", {
         seatIds: seatIdArray,
       });
-      res
-        .status(400)
-        .json({ error: `Invalid seatId format in: ${seatIdArray.join(", ")}` });
+      res.status(400).json({ error: `Invalid seatId format in: ${seatIdArray.join(", ")}` });
       return;
     }
     try {
@@ -1190,9 +1367,7 @@ app.get(
         console.error("Get seats by IDs error: Cannot fetch seats for today", {
           date,
         });
-        res
-          .status(400)
-          .json({ error: "Cannot fetch seats for the current date" });
+        res.status(400).json({ error: "Cannot fetch seats for the current date" });
         return;
       }
       const event = await Event.findOne({ date: date.toString() });
@@ -1210,13 +1385,9 @@ app.get(
           seatIds: seatIdArray,
           date,
         });
-        res
-          .status(404)
-          .json({
-            error: `Not all seats found for seatIds: ${seatIdArray.join(
-              ", "
-            )} and date: ${date}`,
-          });
+        res.status(404).json({
+          error: `Not all seats found for seatIds: ${seatIdArray.join(", ")} and date: ${date}`,
+        });
         return;
       }
       const seatsWithStatus = seats.map((seat) => {
@@ -1249,7 +1420,7 @@ mongoose
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
-  .catch((error) => {
-    console.error("MongoDB connection error:", error);
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
     process.exit(1);
   });

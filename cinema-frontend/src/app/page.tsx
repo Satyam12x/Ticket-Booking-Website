@@ -28,7 +28,7 @@ export default function HomePage() {
   }
 
   if (!user) {
-    return null; 
+    return null;
   }
 
   return <BookingLayout />;

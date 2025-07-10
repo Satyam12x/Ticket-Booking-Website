@@ -7,13 +7,21 @@ interface User {
   id: string;
   name: string;
   email: string;
+  isAdmin: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-  bookSeat: (seatId: string, name: string, email: string, phone: string, bookingDate: string) => Promise<void>;
+  logout: () => Promise<void>;
+  bookSeat: (
+    seatId: string,
+    name: string,
+    email: string,
+    phone: string,
+    bookingDate: string
+  ) => Promise<void>;
+  checkAdmin: () => Promise<boolean>;
   isLoading: boolean;
 }
 
@@ -24,20 +32,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
+  const fetchUser = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/auth/me", {
+        withCredentials: true,
+      });
+      console.log("Fetch user response:", {
+        userId: res.data.id,
+        email: res.data.email,
+        isAdmin: res.data.isAdmin,
+      });
+      setUser(res.data);
+    } catch (error: any) {
+      console.error("Fetch user error:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/api/auth/me", {
-          withCredentials: true,
-        });
-        setUser(res.data);
-      } catch (error) {
-        console.error(`Fetch user error: ${error}`);
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchUser();
   }, []);
 
@@ -48,38 +66,96 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         { email, password },
         { withCredentials: true }
       );
-      console.log("Login response:", res.data);
+      console.log("Login successful:", {
+        userId: res.data.user.id,
+        email: res.data.user.email,
+        isAdmin: res.data.user.isAdmin,
+      });
       setUser(res.data.user);
       router.push("/");
-    } catch (error) {
-      console.error(`Login error: ${error}`);
-      throw new Error("Login failed");
+    } catch (error: any) {
+      console.error("Login error:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      throw new Error(error.response?.data?.error || "Login failed");
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-    router.push("/login");
+  const logout = async () => {
+    try {
+      await axios.post(
+        "http://localhost:5000/api/auth/logout",
+        {},
+        { withCredentials: true }
+      );
+      console.log("Logout successful");
+      setUser(null);
+      router.push("/login");
+    } catch (error: any) {
+      console.error("Logout error:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      setUser(null);
+      router.push("/login");
+    }
   };
 
-  const bookSeat = async (seatId: string, name: string, email: string, phone: string, bookingDate: string) => {
+  const bookSeat = async (
+    seatId: string,
+    name: string,
+    email: string,
+    phone: string,
+    bookingDate: string
+  ) => {
     try {
       const res = await axios.post(
         "http://localhost:5000/api/seats/book",
         { seatId, name, email, phone, bookingDate },
         { withCredentials: true }
       );
-      console.log("Booking successful:", res.data);
-      router.push("/confirmation"); 
-    } catch (error) {
-      console.error(`Booking error: ${error}`);
-      throw new Error("Failed to book seat");
+      console.log("Booking successful:", {
+        seatId,
+        bookingDate,
+        email,
+      });
+      router.push("/confirmation");
+    } catch (error: any) {
+      console.error("Booking error:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      throw new Error(error.response?.data?.error || "Failed to book seat");
+    }
+  };
+
+  const checkAdmin = async (): Promise<boolean> => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/auth/is-admin", {
+        withCredentials: true,
+      });
+      console.log("Check admin response:", {
+        isAdmin: res.data.isAdmin,
+      });
+      return res.data.isAdmin;
+    } catch (error: any) {
+      console.error("Check admin error:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      return false;
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, bookSeat, isLoading }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, bookSeat, checkAdmin, isLoading }}
+    >
       {children}
     </AuthContext.Provider>
   );
