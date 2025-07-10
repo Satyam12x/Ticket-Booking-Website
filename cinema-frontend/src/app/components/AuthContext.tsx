@@ -31,8 +31,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           withCredentials: true,
         });
         setUser(res.data);
-      } catch (error: any) {
-        console.error("Fetch user error:", error.response?.data || error.message);
+      } catch (error) {
+        console.error(`Fetch user error: ${error}`);
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -51,9 +51,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log("Login response:", res.data);
       setUser(res.data.user);
       router.push("/");
-    } catch (error: any) {
-      console.error("Login error:", error.response?.data || error.message);
-      throw new Error(error.response?.data?.error || "Login failed");
+    } catch (error) {
+      console.error(`Login error: ${error}`);
+      throw new Error("Login failed");
     }
   };
 
@@ -72,9 +72,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       );
       console.log("Booking successful:", res.data);
       router.push("/confirmation"); // Adjust to your desired route
-    } catch (error: any) {
-      console.error("Booking error:", error.response?.data || error.message);
-      throw new Error(error.response?.data?.error || "Failed to book seat");
+    } catch (error) {
+      console.error(`Booking error: ${error}`);
+      throw new Error("Failed to book seat");
     }
   };
 

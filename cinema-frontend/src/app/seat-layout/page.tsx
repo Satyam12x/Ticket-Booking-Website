@@ -6,21 +6,21 @@ import BookingModal from "../components/BookingModal";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import axios from "axios";
+// import axios from "axios";
 import { MdChair } from "react-icons/md";
 import Loader from "../components/loader";
 
 interface Event {
   _id: string;
-  name: string;
+  name?: string;
   date: string;
-  time: string;
-  venue: string;
-  description: string;
-  totalSeats: number;
+  time?: string;
+  venue?: string;
+  description?: string;
+  totalSeats?: number;
 }
 
-interface SeatData {
+interface SeatDetails {
   _id: string;
   seatId: string;
   row: string;
@@ -34,13 +34,17 @@ export default function SeatLayout() {
   const searchParams = useSearchParams();
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<string>("");
-  const [seats, setSeats] = useState<SeatData[]>([]);
+  const [seats, setSeats] = useState<SeatDetails[]>([]);
   const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
   const eventIdFromQuery = searchParams.get("eventId");
+  const from = searchParams.get("from"); // Get 'from' query parameter
+
+  // Determine back button destination
+  const backDestination = from === "admin" ? "admin" : "/";
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -61,11 +65,11 @@ export default function SeatLayout() {
             (e: Event) => e._id === initialEventId
           );
           if (event) {
-            await fetchSeats(event.date);
+            await fetchSeats(event.date); // Use event.date instead of event._id
           }
         }
-      } catch (error: any) {
-        setError(`Failed to fetch events: ${error.message}`);
+      } catch (error) {
+        setError(`Failed to fetch events: ${error}`);
       } finally {
         setIsLoading(false);
       }
@@ -86,14 +90,15 @@ export default function SeatLayout() {
       const data = await response.json();
       setSeats(data);
       setError("");
-    } catch (error: any) {
-      setError(`Failed to fetch seats: ${error.message}`);
+    } catch (error) {
+      setError("Failed to fetch seats");
+      console.error("Fetch seats error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSeatClick = (seat: SeatData) => {
+  const handleSeatClick = (seat: SeatDetails) => {
     if (seat.status === "available") {
       setSelectedSeat(seat.seatId);
       setIsBookingModalOpen(true);
@@ -113,8 +118,8 @@ export default function SeatLayout() {
   const columns = Array.from({ length: 10 }, (_, i) => i + 1);
   const rows = selectedEventDetails
     ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        .slice(0, Math.ceil((selectedEventDetails.totalSeats || 10) / 10))
         .split("")
-        .slice(0, Math.ceil(selectedEventDetails.totalSeats / 10))
     : [];
 
   return (
@@ -127,13 +132,17 @@ export default function SeatLayout() {
         >
           <header className="seat-header">
             <Link
-              href="/"
+              href={backDestination}
               className="back-btn"
-              aria-label="Go back to booking page"
+              aria-label={`Go back to ${
+                from === "admin" ? "admin dashboard" : "booking page"
+              }`}
             >
               <FaChevronLeft size={18} />
             </Link>
-            <h2 className="seat-title">CHOOSE YOUR PREFERRED SEATS WITH EASE</h2>
+            <h2 className="seat-title">
+              CHOOSE YOUR PREFERRED SEATS WITH EASE
+            </h2>
             <p className="seat-subtitle">
               Enjoy a seamless booking experience tailored to your comfort
             </p>
@@ -163,7 +172,7 @@ export default function SeatLayout() {
                       .slice(
                         0,
                         row === rows[rows.length - 1]
-                          ? selectedEventDetails!.totalSeats % 10 || 10
+                          ? (selectedEventDetails?.totalSeats || 10) % 10 || 10
                           : 10
                       )
                       .map((col) => {

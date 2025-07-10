@@ -40,9 +40,9 @@ export default function DeleteEventModal({
       });
       onDelete(password);
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       setError(
-        error.response?.data?.error || "Failed to delete event. Please try again."
+        `Failed to delete event. Please try again. ${error}`
       );
     } finally {
       setIsSubmitting(false);

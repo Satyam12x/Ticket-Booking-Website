@@ -43,7 +43,7 @@ function BookingLayout() {
           setSelectedEvent(fetchedEvents[0]._id);
         }
       } catch (error) {
-        setError("Failed to fetch events");
+        setError(`Failed to fetch events ${error}`);
       } finally {
         setIsLoading(false);
       }
@@ -61,8 +61,8 @@ function BookingLayout() {
         throw new Error("Failed to logout");
       }
       logout();
-    } catch (error: any) {
-      console.error("Logout error:", error.message);
+    } catch (error) {
+      console.error(`Logout error: ${error}`);
     }
   };
 

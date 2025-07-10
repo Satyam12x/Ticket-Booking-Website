@@ -18,7 +18,7 @@ interface BookingModalProps {
 export default function BookingModal({
   seatId,
   price,
-  quantity,
+  // quantity,
   onClose,
   bookingDate,
   onBookingSuccess,

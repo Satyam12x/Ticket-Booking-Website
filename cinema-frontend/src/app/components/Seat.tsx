@@ -18,19 +18,31 @@ interface SeatProps {
   isSelected: boolean;
 }
 
-export default function Seat({ seat, onClick, isColumnSix, isSelected }: SeatProps) {
+export default function Seat({
+  seat,
+  onClick,
+  isColumnSix,
+  isSelected,
+}: SeatProps) {
   return (
     <button
       onClick={seat.status === "available" ? onClick : undefined}
       onKeyDown={(e) => {
-        if (seat.status === "available" && (e.key === "Enter" || e.key === " ")) {
+        if (
+          seat.status === "available" &&
+          (e.key === "Enter" || e.key === " ")
+        ) {
           e.preventDefault();
           onClick();
         }
       }}
-      className={`seat ${seat.status === "available" ? "seat-available" : "seat-booked"} ${isSelected ? "seat-selected" : ""} ${isColumnSix ? "ml-gap" : ""}`}
+      className={`seat ${
+        seat.status === "available" ? "seat-available" : "seat-booked"
+      } ${isSelected ? "seat-selected" : ""} ${isColumnSix ? "ml-gap" : ""}`}
       disabled={seat.status !== "available"}
-      aria-label={`Seat ${seat.seatId} is ${seat.status}${isSelected ? ", selected" : ""}`}
+      aria-label={`Seat ${seat.seatId} is ${seat.status}${
+        isSelected ? ", selected" : ""
+      }`}
       tabIndex={seat.status === "available" ? 0 : -1}
     >
       <MdChair className="chair-icon" />
@@ -42,7 +54,7 @@ export default function Seat({ seat, onClick, isColumnSix, isSelected }: SeatPro
           </>
         ) : (
           `Price: ₹${seat.price}`
-         )}
+        )}
       </div>
     </button>
   );
