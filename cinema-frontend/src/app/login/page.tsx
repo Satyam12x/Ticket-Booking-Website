@@ -1,15 +1,24 @@
 "use client";
-import React, { useState } from 'react';
-import { useAuth } from '../components/AuthContext';
-import Link from 'next/link';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../components/AuthContext";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FaUserAlt } from "react-icons/fa";
-import '../components/Login.css';
+import "../components/Login.css";
 
 const LoginPage: React.FC = () => {
-  const { login } = useAuth();
+  const { user, login, isLoading } = useAuth();
+  const router = useRouter();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.push(user.isAdmin ? "/admin" : "/");
+    }
+  }, [user, isLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,8 +26,10 @@ const LoginPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       await login(formData.email, formData.password);
-    } catch (error) {
-      setError(`Invalid email or password: ${error}`);
+      // Redirect based on isAdmin after successful login
+      router.push(user?.isAdmin ? "/admin" : "/");
+    } catch (error: any) {
+      setError(`Invalid email or password: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -80,18 +91,14 @@ const LoginPage: React.FC = () => {
           <button
             type="submit"
             className="signin-btn"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isLoading}
             aria-label="Sign In"
           >
             {isSubmitting ? "Signing in..." : "Sign In"}
           </button>
 
           <Link href="/register" className="register-btn">
-            <button
-              type="button"
-              className="signin-btn"
-              aria-label="Register"
-            >
+            <button type="button" className="signin-btn" aria-label="Register">
               Register
             </button>
           </Link>

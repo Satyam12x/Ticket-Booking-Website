@@ -1,5 +1,11 @@
 "use client";
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
@@ -15,11 +21,12 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   bookSeat: (
-    seatId: string,
+    seatIds: string[],
     name: string,
     email: string,
     phone: string,
-    bookingDate: string
+    bookingDate: string,
+    eventId: string
   ) => Promise<void>;
   checkAdmin: () => Promise<boolean>;
   isLoading: boolean;
@@ -72,7 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAdmin: res.data.user.isAdmin,
       });
       setUser(res.data.user);
-      router.push("/");
+      router.push(res.data.user.isAdmin ? "/admin" : "/");
     } catch (error: any) {
       console.error("Login error:", {
         message: error.message,
@@ -105,22 +112,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const bookSeat = async (
-    seatId: string,
+    seatIds: string[],
     name: string,
     email: string,
     phone: string,
-    bookingDate: string
+    bookingDate: string,
+    eventId: string
   ) => {
     try {
       const res = await axios.post(
         "http://localhost:5000/api/seats/book",
-        { seatId, name, email, phone, bookingDate },
+        { seatIds, name, email, phone, bookingDate, eventId },
         { withCredentials: true }
       );
       console.log("Booking successful:", {
-        seatId,
+        seatIds,
         bookingDate,
         email,
+        eventId,
       });
       router.push("/confirmation");
     } catch (error: any) {
@@ -129,7 +138,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         status: error.response?.status,
         data: error.response?.data,
       });
-      throw new Error(error.response?.data?.error || "Failed to book seat");
+      throw new Error(error.response?.data?.error || "Failed to book seats");
     }
   };
 

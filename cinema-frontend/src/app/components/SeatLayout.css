@@ -310,7 +310,6 @@
 .tooltip {
     opacity: 0;
     visibility: hidden;
-    display: none;
     background: linear-gradient(135deg, #1f2a44 0%, #3b4a6b 100%);
     color: #ffffff;
     padding: 5px;
