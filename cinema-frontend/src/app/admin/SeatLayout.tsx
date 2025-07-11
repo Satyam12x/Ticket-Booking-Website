@@ -2,7 +2,7 @@
 import "./SeatLayout.css";
 import { FaChevronLeft } from "react-icons/fa";
 import Seat from "../components/Seat";
-import BookingModal from "../components/BookingModal";
+import BookingModal from "./BookingModal";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";

@@ -1,0 +1,586 @@
+/* Admin Dashboard Styling */
+.admin-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: "Arial", sans-serif;
+  background-color: #f4f6f8;
+  min-height: 100vh;
+}
+
+.admin-title {
+  font-size: 2.5rem;
+  color: #1a3c5e;
+  text-align: center;
+  margin-bottom: 30px;
+  font-weight: 700;
+  transition: color 0.3s;
+}
+
+.admin-title:hover {
+  color: #2563eb;
+}
+
+.admin-error-message {
+  color: #d32f2f;
+  background-color: #ffebee;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.admin-error-message:hover {
+  transform: scale(1.02);
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 768px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-form-container {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s;
+}
+
+.admin-form-container:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.admin-section-title {
+  font-size: 1.8rem;
+  color: #1a3c5e;
+  margin-bottom: 20px;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.admin-section-title:hover {
+  color: #2563eb;
+}
+
+.admin-event-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.admin-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-form-label {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 5px;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.admin-form-label:hover {
+  color: #2563eb;
+}
+
+.admin-form-input {
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+}
+
+.admin-form-input:hover {
+  border-color: #2563eb;
+  box-shadow: 0 0 5px rgba(37, 99, 235, 0.2);
+}
+
+.admin-form-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
+  transform: scale(1.01);
+}
+
+.admin-form-input.admin-input-error {
+  border-color: #d32f2f;
+  box-shadow: 0 0 5px rgba(211, 47, 47, 0.3);
+}
+
+.admin-error-text {
+  color: #d32f2f;
+  font-size: 0.9rem;
+  margin-top: 5px;
+  transition: opacity 0.3s;
+}
+
+.admin-error-text:hover {
+  opacity: 0.8;
+}
+
+.admin-form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.admin-submit-button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+}
+
+.admin-submit-button:hover:not(.admin-button-disabled) {
+  background-color: #1e40af;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.admin-submit-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+}
+
+.admin-submit-button.admin-button-disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.admin-button-loading {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.admin-spinner {
+  border: 2px solid #fff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.admin-event-list-container {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s;
+}
+
+.admin-event-list-container:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.admin-event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.admin-no-data {
+  text-align: center;
+  color: #666;
+  font-size: 1rem;
+  padding: 20px;
+}
+
+.admin-event-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.admin-event-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.admin-event-image {
+  width: 100px;
+  height: 100px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 5px;
+  margin-right: 15px;
+  transition: transform 0.3s;
+}
+
+.admin-event-image:hover {
+  transform: scale(1.05);
+}
+
+.admin-event-details {
+  flex: 1;
+  max-width: 100%;
+}
+
+.admin-event-name {
+  font-size: 1.2rem;
+  color: #1a3c5e;
+  font-weight: 600;
+  margin: 0;
+  transition: color 0.3s;
+}
+
+.admin-event-name:hover {
+  color: #2563eb;
+}
+
+.admin-event-info,
+.admin-event-venue,
+.admin-event-seats,
+.admin-event-description {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 5px 0 0;
+}
+
+.admin-event-description {
+  max-height: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.admin-event-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.admin-action-button {
+  padding: 8px 15px;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+}
+
+.admin-action-button:hover:not(.admin-button-disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.admin-action-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+}
+
+.admin-book-button {
+  background-color: #10b981;
+  color: #fff;
+}
+
+.admin-book-button:hover:not(.admin-button-disabled) {
+  background-color: #059669;
+}
+
+.admin-end-button {
+  background-color: #f59e0b;
+  color: #fff;
+}
+
+.admin-end-button:hover:not(.admin-button-disabled) {
+  background-color: #d97706;
+}
+
+.admin-delete-button {
+  background-color: #ef4444;
+  color: #fff;
+}
+
+.admin-delete-button:hover:not(.admin-button-disabled) {
+  background-color: #dc2626;
+}
+
+.admin-button-disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.admin-previous-events {
+  margin-top: 40px;
+}
+
+.admin-past-event-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s;
+}
+
+.admin-past-event-card:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.admin-past-event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.admin-event-status {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 5px 0 0;
+}
+
+.admin-table-container {
+  max-height: 300px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #2563eb #e5e7eb;
+}
+
+.admin-table-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-table-container::-webkit-scrollbar-track {
+  background: #e5e7eb;
+}
+
+.admin-table-container::-webkit-scrollbar-thumb {
+  background: #2563eb;
+  border-radius: 4px;
+}
+
+.admin-booking-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.admin-booking-table th,
+.admin-booking-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-booking-table th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #1a3c5e;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.admin-booking-table tr:hover {
+  background-color: #f1f5f9;
+}
+
+.admin-no-bookings {
+  text-align: center;
+  color: #666;
+  padding: 20px;
+}
+
+.admin-view-more-container {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.admin-view-more-button {
+  padding: 8px 15px;
+  font-size: 0.9rem;
+  background-color: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+}
+
+.admin-view-more-button:hover {
+  background-color: #1e40af;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.admin-view-more-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+}
+
+.admin-loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f4f6f8;
+}
+
+.admin-loader {
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #2563eb;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+/* Modal Styling */
+.admin-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.admin-modal-content {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 90%;
+  transition: transform 0.3s;
+}
+
+.admin-modal-content:hover {
+  transform: scale(1.02);
+}
+
+.admin-modal-title {
+  font-size: 1.5rem;
+  color: #1a3c5e;
+  margin-bottom: 10px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.admin-modal-text {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.admin-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.admin-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.admin-cancel-button {
+  background-color: #6b7280;
+  color: #fff;
+}
+
+.admin-cancel-button:hover:not(.admin-button-disabled) {
+  background-color: #4b5563;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.admin-cancel-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.3);
+}
+
+/* Focus styles for accessibility */
+.admin-form-input:focus,
+.admin-action-button:focus,
+.admin-submit-button:focus,
+.admin-view-more-button:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .admin-container {
+    padding: 10px;
+  }
+
+  .admin-title {
+    font-size: 2rem;
+  }
+
+  .admin-section-title {
+    font-size: 1.5rem;
+  }
+
+  .admin-event-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-event-image {
+    width: 100%;
+    height: 150px;
+    margin-bottom: 10px;
+  }
+
+  .admin-event-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .admin-action-button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .admin-table-container {
+    max-height: 200px;
+  }
+
+  .admin-modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+}

@@ -18,8 +18,12 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/login");
+    if (!authLoading) {
+      if (!user) {
+        router.push("/login");
+      } else if (user.isAdmin) {
+        router.push("/admin");
+      }
     }
   }, [user, authLoading, router]);
 

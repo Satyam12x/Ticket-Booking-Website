@@ -2,9 +2,11 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import ProtectedRoute from "../components/ProtectedRoute";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../components/AuthContext";
+import ProtectedRoute from "../components/ProtectedRoute";
 import DeleteEventModal from "../components/DeleteEventModal";
+import "./Admin.css";
 
 interface Event {
   _id: string;
@@ -25,6 +27,7 @@ interface Booking {
 }
 
 function Admin() {
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
   const [previousEvents, setPreviousEvents] = useState<Event[]>([]);
@@ -32,12 +35,18 @@ function Admin() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [actionLoading, setActionLoading] = useState<{ [key: string]: boolean }>({});
+  const [actionLoading, setActionLoading] = useState<{
+    [key: string]: boolean;
+  }>({});
+  const [visibleBookings, setVisibleBookings] = useState<{
+    [key: string]: boolean;
+  }>({});
   const [formData, setFormData] = useState({
     name: "",
     date: "",
     time: "",
-    venue: "Mukesh Bhati Acting School, E1/74, Milan Road, near YMCA University, Sector-11, Faridabad",
+    venue:
+      "Mukesh Bhati Acting School, E1/74, Milan Road, near YMCA University, Sector-11, Faridabad",
     description: "",
     password: "",
     totalSeats: "",
@@ -54,13 +63,21 @@ function Admin() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      await Promise.all([fetchEvents(), fetchPreviousEvents()]);
-      setIsLoading(false);
-    };
-    fetchData();
-  }, []);
+    if (!authLoading) {
+      if (!user) {
+        router.push("/login");
+      } else if (!user.isAdmin) {
+        router.push("/");
+      } else {
+        const fetchData = async () => {
+          setIsLoading(true);
+          await Promise.all([fetchEvents(), fetchPreviousEvents()]);
+          setIsLoading(false);
+        };
+        fetchData();
+      }
+    }
+  }, [user, authLoading, router]);
 
   const fetchEvents = async () => {
     try {
@@ -103,9 +120,12 @@ function Admin() {
 
   const fetchPreviousEvents = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/events/past", {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        "http://localhost:5000/api/events/past",
+        {
+          withCredentials: true,
+        }
+      );
       const prevEvents = response.data;
       setPreviousEvents(prevEvents);
       const bookingsData: { [key: string]: Booking[] } = {};
@@ -125,7 +145,10 @@ function Admin() {
             });
             bookingsData[event._id] = [];
           } else {
-            console.error(`Fetch bookings error for event ${event._id}:`, bookingErr);
+            console.error(
+              `Fetch bookings error for event ${event._id}:`,
+              bookingErr
+            );
             bookingsData[event._id] = [];
           }
         }
@@ -134,7 +157,8 @@ function Admin() {
       setError("");
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        const errorMessage = err.response?.data?.error || "Failed to fetch previous events";
+        const errorMessage =
+          err.response?.data?.error || "Failed to fetch previous events";
         setError(errorMessage);
         console.error("Fetch previous events error:", {
           message: err.message,
@@ -365,7 +389,11 @@ function Admin() {
   };
 
   const handleEndRegistration = async (eventId: string) => {
-    if (!confirm("Are you sure you want to end registration for this event? A booking details document will be emailed.")) {
+    if (
+      !confirm(
+        "Are you sure you want to end registration for this event? A booking details document will be emailed."
+      )
+    ) {
       return;
     }
     setActionLoading((prev) => ({ ...prev, [eventId]: true }));
@@ -376,15 +404,20 @@ function Admin() {
         { withCredentials: true }
       );
       console.log("End registration response:", response.data);
-      setEvents(events.map((event) =>
-        event._id === eventId ? { ...event, registrationClosed: true } : event
-      ));
+      setEvents(
+        events.map((event) =>
+          event._id === eventId ? { ...event, registrationClosed: true } : event
+        )
+      );
       setError("");
-      toast.success("Registration closed successfully. Booking details emailed.");
+      toast.success(
+        "Registration closed successfully. Booking details emailed."
+      );
       fetchPreviousEvents();
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        const errorMessage = err.response?.data?.error || "Failed to end registration";
+        const errorMessage =
+          err.response?.data?.error || "Failed to end registration";
         setError(errorMessage);
         console.error("End registration error:", {
           message: err.message,
@@ -408,58 +441,87 @@ function Admin() {
   const handleDeleteEvent = async (eventId: string, password: string) => {
     setActionLoading((prev) => ({ ...prev, [eventId]: true }));
     try {
-      await axios.delete(`http://localhost:5000/api/events/${eventId}`, {
-        data: { password },
-        withCredentials: true,
+      console.log("Sending DELETE request for event:", {
+        eventId,
+        passwordLength: password.length,
       });
+      const response = await axios.delete(
+        `http://localhost:5000/api/events/${eventId}`,
+        {
+          data: { password },
+          withCredentials: true,
+        }
+      );
+      console.log("Delete event response:", response.data);
       setEvents(events.filter((event) => event._id !== eventId));
-      setPreviousEvents(previousEvents.filter((event) => event._id !== eventId));
+      setPreviousEvents(
+        previousEvents.filter((event) => event._id !== eventId)
+      );
       setBookings((prev) => {
         const newBookings = { ...prev };
         delete newBookings[eventId];
         return newBookings;
       });
       setError("");
-      toast.success("Event deleted successfully");
       setSelectedEventId(null);
     } catch (err: unknown) {
+      let errorMessage = "Failed to delete event";
       if (axios.isAxiosError(err)) {
-        const errorMessage = err.response?.data?.error || "Failed to delete event";
-        setError(errorMessage);
         console.error("Delete event error:", {
           message: err.message,
           status: err.response?.status,
           data: err.response?.data,
         });
-        toast.error(errorMessage);
+        if (err.response?.status === 403) {
+          errorMessage = "Access denied: Admin privileges required";
+          router.push("/login?error=admin-required");
+        } else if (err.response?.status === 400) {
+          errorMessage = err.response?.data?.error || "Invalid password";
+        } else {
+          errorMessage =
+            err.response?.data?.error || "Server error. Please try again.";
+        }
       } else {
-        setError("Failed to delete event");
-        console.error("Delete event error:", err);
-        toast.error("Failed to delete event");
+        console.error("Unexpected delete event error:", err);
       }
+      setError(errorMessage);
+      throw new Error(errorMessage); // Propagate error to DeleteEventModal
     } finally {
       setActionLoading((prev) => ({ ...prev, [eventId]: false }));
     }
   };
 
-  if (isLoading) {
+  const toggleBookings = (eventId: string) => {
+    setVisibleBookings((prev) => ({
+      ...prev,
+      [eventId]: !prev[eventId],
+    }));
+  };
+
+  if (isLoading || authLoading) {
     return (
-      <div className="loading-container">
-        <div className="loader"></div>
+      <div className="admin-loading-container">
+        <div className="admin-loader"></div>
       </div>
     );
   }
 
   return (
-    <div className="container">
-      <h1 className="dashboard-title">Admin Dashboard</h1>
-      {error && <p className="error-message">{error}</p>}
-      <div className="grid-container">
-        <div className="event-form-container">
-          <h2 className="section-title">Create Event</h2>
-          <form onSubmit={handleSubmit} className="event-form" aria-label="Create Event Form">
-            <div className="form-group">
-              <label htmlFor="name" className="form-label">Event Name</label>
+    <div className="admin-container">
+      <h1 className="admin-title">Admin Dashboard</h1>
+      {error && <p className="admin-error-message">{error}</p>}
+      <div className="admin-grid">
+        <div className="admin-form-container">
+          <h2 className="admin-section-title">Create Event</h2>
+          <form
+            onSubmit={handleSubmit}
+            className="admin-event-form"
+            aria-label="Create Event Form"
+          >
+            <div className="admin-form-group">
+              <label htmlFor="name" className="admin-form-label">
+                Event Name
+              </label>
               <input
                 type="text"
                 id="name"
@@ -467,42 +529,66 @@ function Admin() {
                 value={formData.name}
                 onChange={handleInputChange}
                 placeholder="Enter event name"
-                className={`form-input ${formErrors.name ? "input-error" : ""}`}
+                className={`admin-form-input ${
+                  formErrors.name ? "admin-input-error" : ""
+                }`}
                 aria-invalid={!!formErrors.name}
                 aria-describedby={formErrors.name ? "name-error" : undefined}
               />
-              {formErrors.name && <p id="name-error" className="error-text">{formErrors.name}</p>}
+              {formErrors.name && (
+                <p id="name-error" className="admin-error-text">
+                  {formErrors.name}
+                </p>
+              )}
             </div>
-            <div className="form-group">
-              <label htmlFor="date" className="form-label">Date</label>
+            <div className="admin-form-group">
+              <label htmlFor="date" className="admin-form-label">
+                Date
+              </label>
               <input
                 type="date"
                 id="date"
                 name="date"
                 value={formData.date}
                 onChange={handleInputChange}
-                className={`form-input ${formErrors.date ? "input-error" : ""}`}
+                className={`admin-form-input ${
+                  formErrors.date ? "admin-input-error" : ""
+                }`}
                 aria-invalid={!!formErrors.date}
                 aria-describedby={formErrors.date ? "date-error" : undefined}
               />
-              {formErrors.date && <p id="date-error" className="error-text">{formErrors.date}</p>}
+              {formErrors.date && (
+                <p id="date-error" className="admin-error-text">
+                  {formErrors.date}
+                </p>
+              )}
             </div>
-            <div className="form-group">
-              <label htmlFor="time" className="form-label">Time</label>
+            <div className="admin-form-group">
+              <label htmlFor="time" className="admin-form-label">
+                Time
+              </label>
               <input
                 type="time"
                 id="time"
                 name="time"
                 value={formData.time}
                 onChange={handleInputChange}
-                className={`form-input ${formErrors.time ? "input-error" : ""}`}
+                className={`admin-form-input ${
+                  formErrors.time ? "admin-input-error" : ""
+                }`}
                 aria-invalid={!!formErrors.time}
                 aria-describedby={formErrors.time ? "time-error" : undefined}
               />
-              {formErrors.time && <p id="time-error" className="error-text">{formErrors.time}</p>}
+              {formErrors.time && (
+                <p id="time-error" className="admin-error-text">
+                  {formErrors.time}
+                </p>
+              )}
             </div>
-            <div className="form-group">
-              <label htmlFor="venue" className="form-label">Venue</label>
+            <div className="admin-form-group">
+              <label htmlFor="venue" className="admin-form-label">
+                Venue
+              </label>
               <input
                 type="text"
                 id="venue"
@@ -510,29 +596,47 @@ function Admin() {
                 value={formData.venue}
                 onChange={handleInputChange}
                 placeholder="Enter venue"
-                className={`form-input ${formErrors.venue ? "input-error" : ""}`}
+                className={`admin-form-input ${
+                  formErrors.venue ? "admin-input-error" : ""
+                }`}
                 aria-invalid={!!formErrors.venue}
                 aria-describedby={formErrors.venue ? "venue-error" : undefined}
               />
-              {formErrors.venue && <p id="venue-error" className="error-text">{formErrors.venue}</p>}
+              {formErrors.venue && (
+                <p id="venue-error" className="admin-error-text">
+                  {formErrors.venue}
+                </p>
+              )}
             </div>
-            <div className="form-group">
-              <label htmlFor="description" className="form-label">Description</label>
+            <div className="admin-form-group">
+              <label htmlFor="description" className="admin-form-label">
+                Description
+              </label>
               <textarea
                 id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
                 placeholder="Enter event description"
-                className={`form-input ${formErrors.description ? "input-error" : ""}`}
+                className={`admin-form-input ${
+                  formErrors.description ? "admin-input-error" : ""
+                }`}
                 rows={4}
                 aria-invalid={!!formErrors.description}
-                aria-describedby={formErrors.description ? "description-error" : undefined}
+                aria-describedby={
+                  formErrors.description ? "description-error" : undefined
+                }
               ></textarea>
-              {formErrors.description && <p id="description-error" className="error-text">{formErrors.description}</p>}
+              {formErrors.description && (
+                <p id="description-error" className="admin-error-text">
+                  {formErrors.description}
+                </p>
+              )}
             </div>
-            <div className="form-group">
-              <label htmlFor="totalSeats" className="form-label">Total Seats</label>
+            <div className="admin-form-group">
+              <label htmlFor="totalSeats" className="admin-form-label">
+                Total Seats
+              </label>
               <input
                 type="number"
                 id="totalSeats"
@@ -540,15 +644,25 @@ function Admin() {
                 value={formData.totalSeats}
                 onChange={handleInputChange}
                 placeholder="Enter total seats"
-                className={`form-input ${formErrors.totalSeats ? "input-error" : ""}`}
+                className={`admin-form-input ${
+                  formErrors.totalSeats ? "admin-input-error" : ""
+                }`}
                 min="1"
                 aria-invalid={!!formErrors.totalSeats}
-                aria-describedby={formErrors.totalSeats ? "totalSeats-error" : undefined}
+                aria-describedby={
+                  formErrors.totalSeats ? "totalSeats-error" : undefined
+                }
               />
-              {formErrors.totalSeats && <p id="totalSeats-error" className="error-text">{formErrors.totalSeats}</p>}
+              {formErrors.totalSeats && (
+                <p id="totalSeats-error" className="admin-error-text">
+                  {formErrors.totalSeats}
+                </p>
+              )}
             </div>
-            <div className="form-group">
-              <label htmlFor="password" className="form-label">Password</label>
+            <div className="admin-form-group">
+              <label htmlFor="password" className="admin-form-label">
+                Password
+              </label>
               <input
                 type="password"
                 id="password"
@@ -556,22 +670,38 @@ function Admin() {
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="Enter admin password"
-                className={`form-input ${formErrors.password ? "input-error" : ""}`}
+                className={`admin-form-input ${
+                  formErrors.password ? "admin-input-error" : ""
+                }`}
                 aria-invalid={!!formErrors.password}
-                aria-describedby={formErrors.password ? "password-error" : undefined}
+                aria-describedby={
+                  formErrors.password ? "password-error" : undefined
+                }
               />
-              {formErrors.password && <p id="password-error" className="error-text">{formErrors.password}</p>}
+              {formErrors.password && (
+                <p id="password-error" className="admin-error-text">
+                  {formErrors.password}
+                </p>
+              )}
             </div>
-            <div className="form-actions">
+            <div className="admin-form-actions">
               <button
                 type="submit"
-                className={`submit-button ${isSubmitting || Object.values(formErrors).some((e) => e) ? "button-disabled" : ""}`}
-                disabled={isSubmitting || Object.values(formErrors).some((e) => e)}
-                aria-disabled={isSubmitting || Object.values(formErrors).some((e) => e)}
+                className={`admin-submit-button ${
+                  isSubmitting || Object.values(formErrors).some((e) => e)
+                    ? "admin-button-disabled"
+                    : ""
+                }`}
+                disabled={
+                  isSubmitting || Object.values(formErrors).some((e) => e)
+                }
+                aria-disabled={
+                  isSubmitting || Object.values(formErrors).some((e) => e)
+                }
               >
                 {isSubmitting ? (
-                  <span className="button-loading">
-                    <span className="spinner"></span>
+                  <span className="admin-button-loading">
+                    <span className="admin-spinner"></span>
                     Creating...
                   </span>
                 ) : (
@@ -581,24 +711,24 @@ function Admin() {
             </div>
           </form>
         </div>
-        <div className="event-list-container">
-          <h2 className="section-title">Scheduled Events</h2>
-          <div className="event-list">
+        <div className="admin-event-list-container">
+          <h2 className="admin-section-title">Scheduled Events</h2>
+          <div className="admin-event-list">
             {events.length === 0 ? (
-              <p className="no-data">No events scheduled</p>
+              <p className="admin-no-data">No events scheduled</p>
             ) : (
               events.map((event) => (
-                <div key={event._id} className="event-card">
+                <div key={event._id} className="admin-event-card">
                   <div
-                    className="event-image"
+                    className="admin-event-image"
                     style={{
-                      backgroundImage: `url("https://via.placeholder.com/150")`,
+                      backgroundImage: `url("https://static.vecteezy.com/system/resources/previews/046/929/694/non_2x/movie-poster-template-retro-cinema-background-with-an-open-clapper-board-film-reel-and-movie-tickets-illustration-in-flat-style-free-vector.jpg")`,
                     }}
                     aria-label={`Event image for ${event.name}`}
                   ></div>
-                  <div className="event-details">
-                    <p className="event-name">{event.name}</p>
-                    <p className="event-info">
+                  <div className="admin-event-details">
+                    <p className="admin-event-name">{event.name}</p>
+                    <p className="admin-event-info">
                       {new Date(event.date).toLocaleDateString("en-US", {
                         weekday: "short",
                         month: "short",
@@ -607,10 +737,19 @@ function Admin() {
                       {" · "}
                       {event.time}
                     </p>
+                    <p className="admin-event-venue">
+                      <strong>Venue:</strong> {event.venue}
+                    </p>
+                    <p className="admin-event-seats">
+                      <strong>Total Seats:</strong> {event.totalSeats}
+                    </p>
+                    <p className="admin-event-description">
+                      <strong>Description:</strong> {event.description}
+                    </p>
                   </div>
-                  <div className="event-actions">
+                  <div className="admin-event-actions">
                     <button
-                      className="action-button book-button"
+                      className="admin-action-button admin-book-button"
                       onClick={() => handleBookTickets(event._id)}
                       aria-label={`Book tickets for ${event.name}`}
                     >
@@ -618,15 +757,19 @@ function Admin() {
                     </button>
                     {!event.registrationClosed && (
                       <button
-                        className={`action-button end-button ${actionLoading[event._id] ? "button-disabled" : ""}`}
+                        className={`admin-action-button admin-end-button ${
+                          actionLoading[event._id]
+                            ? "admin-button-disabled"
+                            : ""
+                        }`}
                         onClick={() => handleEndRegistration(event._id)}
                         disabled={actionLoading[event._id]}
                         aria-label={`End registration for ${event.name}`}
                         aria-disabled={actionLoading[event._id]}
                       >
                         {actionLoading[event._id] ? (
-                          <span className="button-loading">
-                            <span className="spinner"></span>
+                          <span className="admin-button-loading">
+                            <span className="admin-spinner"></span>
                             Ending...
                           </span>
                         ) : (
@@ -635,7 +778,9 @@ function Admin() {
                       </button>
                     )}
                     <button
-                      className={`action-button delete-button ${actionLoading[event._id] ? "button-disabled" : ""}`}
+                      className={`admin-action-button admin-delete-button ${
+                        actionLoading[event._id] ? "admin-button-disabled" : ""
+                      }`}
                       onClick={() => setSelectedEventId(event._id)}
                       disabled={actionLoading[event._id]}
                       aria-label={`Delete event ${event.name}`}
@@ -650,17 +795,17 @@ function Admin() {
           </div>
         </div>
       </div>
-      <div className="event-list-container previous-events">
-        <h2 className="section-title">Previous Events</h2>
+      <div className="admin-event-list-container admin-previous-events">
+        <h2 className="admin-section-title">Previous Events</h2>
         {previousEvents.length === 0 ? (
-          <p className="no-data">No previous events</p>
+          <p className="admin-no-data">No previous events</p>
         ) : (
           previousEvents.map((event) => (
-            <div key={event._id} className="past-event-card">
-              <div className="past-event-header">
+            <div key={event._id} className="admin-past-event-card">
+              <div className="admin-past-event-header">
                 <div>
-                  <p className="event-name">{event.name}</p>
-                  <p className="event-info">
+                  <p className="admin-event-name">{event.name}</p>
+                  <p className="admin-event-info">
                     {new Date(event.date).toLocaleDateString("en-US", {
                       weekday: "short",
                       month: "short",
@@ -669,18 +814,31 @@ function Admin() {
                     {" · "}
                     {event.time}
                   </p>
-                  <p className="event-status">Status: {event.registrationClosed ? "Closed" : "Past"}</p>
+                  <p className="admin-event-venue">
+                    <strong>Venue:</strong> {event.venue}
+                  </p>
+                  <p className="admin-event-seats">
+                    <strong>Total Seats:</strong> {event.totalSeats}
+                  </p>
+                  <p className="admin-event-description">
+                    <strong>Description:</strong> {event.description}
+                  </p>
+                  <p className="admin-event-status">
+                    Status: {event.registrationClosed ? "Closed" : "Past"}
+                  </p>
                 </div>
                 <button
-                  className={`action-button delete-button ${actionLoading[event._id] ? "button-disabled" : ""}`}
+                  className={`admin-action-button admin-delete-button ${
+                    actionLoading[event._id] ? "admin-button-disabled" : ""
+                  }`}
                   onClick={() => setSelectedEventId(event._id)}
                   disabled={actionLoading[event._id]}
                   aria-label={`Delete past event ${event.name}`}
                   aria-disabled={actionLoading[event._id]}
                 >
                   {actionLoading[event._id] ? (
-                    <span className="button-loading">
-                      <span className="spinner"></span>
+                    <span className="admin-button-loading">
+                      <span className="admin-spinner"></span>
                       Deleting...
                     </span>
                   ) : (
@@ -688,8 +846,8 @@ function Admin() {
                   )}
                 </button>
               </div>
-              <div className="table-container">
-                <table className="booking-table">
+              <div className="admin-table-container">
+                <table className="admin-booking-table">
                   <thead>
                     <tr>
                       <th>Seat ID</th>
@@ -700,23 +858,40 @@ function Admin() {
                   </thead>
                   <tbody>
                     {bookings[event._id]?.length ? (
-                      bookings[event._id].map((booking, index) => (
-                        <tr key={index}>
-                          <td>{booking.seatId}</td>
-                          <td>{booking.name}</td>
-                          <td>{booking.email}</td>
-                          <td>{booking.phone}</td>
-                        </tr>
-                      ))
+                      bookings[event._id]
+                        .slice(0, visibleBookings[event._id] ? undefined : 10)
+                        .map((booking, index) => (
+                          <tr key={index}>
+                            <td>{booking.seatId}</td>
+                            <td>{booking.name}</td>
+                            <td>{booking.email}</td>
+                            <td>{booking.phone}</td>
+                          </tr>
+                        ))
                     ) : (
                       <tr>
-                        <td colSpan={4} className="no-bookings">
+                        <td colSpan={4} className="admin-no-bookings">
                           No bookings for this event
                         </td>
                       </tr>
                     )}
                   </tbody>
                 </table>
+                {bookings[event._id]?.length > 10 && (
+                  <div className="admin-view-more-container">
+                    <button
+                      className="admin-view-more-button"
+                      onClick={() => toggleBookings(event._id)}
+                      aria-label={
+                        visibleBookings[event._id]
+                          ? `Show fewer bookings for ${event.name}`
+                          : `Show more bookings for ${event.name}`
+                      }
+                    >
+                      {visibleBookings[event._id] ? "Show Less" : "View More"}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))
